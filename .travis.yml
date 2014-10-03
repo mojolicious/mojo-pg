@@ -1,0 +1,19 @@
+language: perl
+perl:
+  - "5.20"
+  - "5.18"
+  - "5.16"
+  - "5.14"
+  - "5.12"
+  - "5.10"
+addons:
+  postgresql: "9.3"
+env:
+  - "HARNESS_OPTIONS=j9 TEST_POD=1 TEST_DSN=dbi:Pg:dbname=mojo_pg_test" TEST_USERNAME=postgres
+install:
+  - "cpanm -n Test::Pod Test::Pod::Coverage"
+  - "cpanm -n --installdeps ."
+before_script:
+  - psql -c 'create database mojo_pg_test;' -U postgres
+notifications:
+  email: false
