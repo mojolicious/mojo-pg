@@ -11,7 +11,7 @@ has max_connections => 5;
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
 has [qw(password username)] => '';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub db {
   my $self = shift;
