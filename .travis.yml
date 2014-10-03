@@ -9,7 +9,7 @@ perl:
 addons:
   postgresql: "9.3"
 env:
-  - "HARNESS_OPTIONS=j9 TEST_POD=1 TEST_DSN=dbi:Pg:dbname=mojo_pg_test" TEST_USERNAME=postgres
+  - "HARNESS_OPTIONS=j9 TEST_POD=1 TEST_DSN=dbi:Pg:dbname=mojo_pg_test TEST_USERNAME=postgres"
 install:
   - "cpanm -n Test::Pod Test::Pod::Coverage"
   - "cpanm -n --installdeps ."
