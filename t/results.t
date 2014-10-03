@@ -4,12 +4,12 @@ BEGIN { $ENV{MOJO_REACTOR} = 'Mojo::Reactor::Poll' }
 
 use Test::More;
 
-plan skip_all => 'set TEST_DSN to enable this test' unless $ENV{TEST_DSN};
+plan skip_all => 'set TEST_ONLINE to enable this test'
+  unless $ENV{TEST_ONLINE};
 
 use Mojo::Pg;
 
-my $pg
-  = Mojo::Pg->new($ENV{TEST_DSN}, $ENV{TEST_USERNAME}, $ENV{TEST_PASSWORD});
+my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my $db = $pg->db->do(
   'create table if not exists db_test (
      id serial primary key,

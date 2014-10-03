@@ -1,5 +1,7 @@
 
 0.02  2014-10-04
+  - Added support for PostgreSQL connection strings.
+  - Added from_string method to Mojo::Pg.
 
 0.01  2014-10-03
   - First release.

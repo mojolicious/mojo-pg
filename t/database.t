@@ -4,7 +4,8 @@ BEGIN { $ENV{MOJO_REACTOR} = 'Mojo::Reactor::Poll' }
 
 use Test::More;
 
-plan skip_all => 'set TEST_DSN to enable this test' unless $ENV{TEST_DSN};
+plan skip_all => 'set TEST_ONLINE to enable this test'
+  unless $ENV{TEST_ONLINE};
 
 use Mojo::IOLoop;
 use Mojo::Pg;
@@ -17,21 +18,45 @@ is $pg->password, '',                   'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 
-# Arguments
-$pg = Mojo::Pg->new('dbi:Pg:dbname=test2;host=127.0.0.1');
-is $pg->dsn,      'dbi:Pg:dbname=test2;host=127.0.0.1', 'right data source';
-is $pg->username, '',                                   'no username';
-is $pg->password, '',                                   'no password';
+# Minimal connection string
+$pg = Mojo::Pg->new('postgresql:///test1');
+is $pg->dsn,      'dbi:Pg:dbname=test1', 'right data source';
+is $pg->username, '',                    'no username';
+is $pg->password, '',                    'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
-$pg = Mojo::Pg->new('dbi:Pg:dbname=test2', 'tester', 'testing',
-  {PrintError => 1});
-is $pg->dsn,      'dbi:Pg:dbname=test2', 'right data source';
-is $pg->username, 'tester',              'right username';
-is $pg->password, 'testing',             'right password';
-is_deeply $pg->options, {PrintError => 1}, 'right options';
 
-$pg = Mojo::Pg->new($ENV{TEST_DSN}, $ENV{TEST_USERNAME}, $ENV{TEST_PASSWORD});
+# Simple connection string with host and port
+$pg = Mojo::Pg->new('postgresql://127.0.0.1:8080/test2');
+is $pg->dsn, 'dbi:Pg:dbname=test2;host=127.0.0.1;port=8080',
+  'right data source';
+is $pg->username, '', 'no username';
+is $pg->password, '', 'no password';
+is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
+  'right options';
+
+# Connection string username but without host
+$pg = Mojo::Pg->new('postgresql://postgres@/test3');
+is $pg->dsn,      'dbi:Pg:dbname=test3', 'right data source';
+is $pg->username, 'postgres',            'right username';
+is $pg->password, '',                    'no password';
+is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
+  'right options';
+
+# Connection string with unix domain socket and options
+$pg = Mojo::Pg->new(
+  'postgresql://x1:y2@%2ftmp%2fpg.sock/test4?PrintError=1&RaiseError=0');
+is $pg->dsn,      'dbi:Pg:dbname=test4;host=/tmp/pg.sock', 'right data source';
+is $pg->username, 'x1',                                    'right username';
+is $pg->password, 'y2',                                    'right password';
+is_deeply $pg->options, {AutoCommit => 1, PrintError => 1, RaiseError => 0},
+  'right options';
+
+# Invalid connection string
+eval { Mojo::Pg->new('http://localhost:3000/test') };
+like $@, qr/Invalid PostgreSQL connection string/, 'right error';
+
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 ok $pg->db->ping, 'connected';
 
 # Blocking select
