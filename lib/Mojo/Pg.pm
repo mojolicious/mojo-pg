@@ -104,8 +104,9 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes PostgreSQL a lot of
-fun to use with the L<Mojolicious> real-time web framework.
+L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that embraces SQL and makes
+PostgreSQL a lot of fun to use with the L<Mojolicious> real-time web
+framework.
 
 Database handles and statement handles are cached automatically. While all I/O
 operations are performed blocking, you can wait for long running queries
@@ -201,6 +202,9 @@ Parse configuration from connection string.
 
 Construct a new L<Mojo::Pg> object and parse connection string with
 L</"from_string"> if necessary.
+
+  # Customize configuration further
+  my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
 
 =head1 AUTHOR
 
