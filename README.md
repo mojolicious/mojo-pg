@@ -11,8 +11,7 @@ use Mojo::Pg;
 use 5.20.0;
 use experimental 'signatures';
 
-my $uri = 'postgresql://<user>:<pass>@<server>/<database>';
-helper pg => sub { state $pg = Mojo::Pg->new($uri) };
+helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
 # Prepare a table during startup
 app->pg->db->do(

@@ -169,12 +169,24 @@ handle.
 
 =head2 from_string
 
-  $pg = $pg->from_string('postgresql://sri@/db1');
-  $pg = $pg->from_string('postgresql://sri:s3cret@localhost/db2');
-  $pg = $pg->from_string('postgresql://sri@%2ftmp%2fpg.sock/db3');
-  $pg = $pg->from_string('postgresql://sri@/db4?PrintError=1');
+  $pg = $pg->from_string('postgresql://postgres@/test');
 
 Parse configuration from connection string.
+
+  # Just a database
+  $pg->from_string('postgresql:///db1');
+
+  # Username and database
+  $pg->from_string('postgresql://sri@/db2');
+
+  # Username, password, host and database
+  $pg->from_string('postgresql://sri:s3cret@localhost/db3');
+
+  # Username, domain socket and database
+  $pg->from_string('postgresql://sri@%2ftmp%2fpg.sock/db4');
+
+  # Username, database and additional options
+  $pg->from_string('postgresql://sri@/db5?PrintError=1&RaiseError=0');
 
 =head2 new
 
