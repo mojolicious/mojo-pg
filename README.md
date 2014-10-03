@@ -8,6 +8,8 @@
 ```perl
 use Mojolicious::Lite;
 use Mojo::Pg;
+use 5.20.0;
+use experimental 'signatures';
 
 helper pg =>
   sub { state $pg = Mojo::Pg->new('dbi:Pg:dbname=test', 'postgres') };
@@ -20,8 +22,7 @@ app->pg->db->do(
    )'
 );
 
-get '/' => sub {
-  my $c = shift;
+get '/' => sub ($c) {
 
   my $db = $c->pg->db;
   my $ip = $c->tx->remote_address;
@@ -30,8 +31,7 @@ get '/' => sub {
   $db->query('insert into visitors values (now(), ?)', $ip);
 
   # Retrieve information about previous visitors non-blocking
-  $db->query('select * from visitors limit 50' => sub {
-    my ($db, $err, $results) = @_;
+  $db->query('select * from visitors limit 50' => sub ($db, $err, $results) {
 
     return $c->reply->exception($err) if $err;
 
