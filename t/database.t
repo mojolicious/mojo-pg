@@ -26,7 +26,7 @@ is $pg->password, '',                    'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 
-# Simple connection string with host and port
+# Connection string with host and port
 $pg = Mojo::Pg->new('postgresql://127.0.0.1:8080/test2');
 is $pg->dsn, 'dbi:Pg:dbname=test2;host=127.0.0.1;port=8080',
   'right data source';
@@ -50,6 +50,14 @@ is $pg->dsn,      'dbi:Pg:dbname=test4;host=/tmp/pg.sock', 'right data source';
 is $pg->username, 'x1',                                    'right username';
 is $pg->password, 'y2',                                    'right password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 1, RaiseError => 0},
+  'right options';
+
+# Connection string with lots of zeros
+$pg = Mojo::Pg->new('postgresql://0:0@/0?RaiseError=0');
+is $pg->dsn,      'dbi:Pg:dbname=0', 'right data source';
+is $pg->username, '0',               'right username';
+is $pg->password, '0',               'right password';
+is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 0},
   'right options';
 
 # Invalid connection string

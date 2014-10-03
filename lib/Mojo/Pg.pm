@@ -39,9 +39,9 @@ sub from_string {
   if (my $port = $url->port) { $dsn .= ";port=$port" }
 
   # Username and password
-  if (($url->userinfo // '') =~ /^([^:]+)?(?::([^:]+))?$/) {
-    $self->username($1) if $1;
-    $self->password($2) if $2;
+  if (($url->userinfo // '') =~ /^([^:]+)(?::([^:]+))?$/) {
+    $self->username($1);
+    $self->password($2) if defined $2;
   }
 
   # Options
