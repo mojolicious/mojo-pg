@@ -1,9 +1,9 @@
 
 # Mojo::Pg [![Build Status](https://travis-ci.org/kraih/mojo-pg.svg?branch=master)](https://travis-ci.org/kraih/mojo-pg)
 
-  A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that
-  embraces SQL and makes [PostgreSQL](http://www.postgresql.org) a lot of fun
-  to use with the [Mojolicious](http://mojolicio.us) real-time web framework.
+  A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes
+  [PostgreSQL](http://www.postgresql.org) a lot of fun to use with the
+  [Mojolicious](http://mojolicio.us) real-time web framework.
 
 ```perl
 use Mojolicious::Lite;

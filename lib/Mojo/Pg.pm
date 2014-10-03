@@ -104,9 +104,9 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that embraces SQL and makes
-PostgreSQL a lot of fun to use with the L<Mojolicious> real-time web
-framework.
+L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
+L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
+L<Mojolicious|http://mojolicio.us> real-time web framework.
 
 Database handles and statement handles are cached automatically. While all I/O
 operations are performed blocking, you can wait for long running queries
