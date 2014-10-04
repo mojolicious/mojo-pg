@@ -266,7 +266,9 @@ Check database connection.
   my $results = $db->query('select * from foo where bar = ?', 'baz');
 
 Execute a statement and return a L<Mojo::Pg::Results> object with the results.
-You can also append a callback to perform operation non-blocking.
+The statement handle will be automatically cached again when that object is
+destroyed, so future queries can reuse it for better performance. You can also
+append a callback to perform operation non-blocking.
 
   $db->query('select * from foo' => sub {
     my ($db, $err, $results) = @_;
