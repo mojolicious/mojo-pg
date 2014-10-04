@@ -251,7 +251,8 @@ Check if database handle is listening of notifications.
 
   $db = $db->listen('foo');
 
-Start listening for notifications.
+Start listening for notifications when the L<Mojo::IOLoop> event loop is
+running.
 
 =head2 ping
 
