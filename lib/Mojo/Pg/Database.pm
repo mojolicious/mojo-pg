@@ -136,12 +136,9 @@ sub _watch {
 
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
+      my $err = defined $result ? undef : $dbh->errstr;
 
-      my ($err, $results)
-        = defined $result
-        ? (undef, Mojo::Pg::Results->new(db => $self, sth => $sth))
-        : ($dbh->errstr, undef);
-      $self->$cb($err, $results);
+      $self->$cb($err, Mojo::Pg::Results->new(db => $self, sth => $sth));
       $self->_next;
       $self->_unwatch unless $self->backlog || $self->is_listening;
     }
@@ -263,7 +260,7 @@ Check database connection.
 =head2 query
 
   my $results = $db->query('select * from foo');
-  my $results = $db->query('select * from foo where bar = ?', 'baz');
+  my $results = $db->query('insert into foo values (?, ?, ?)', @values);
 
 Execute a statement and return a L<Mojo::Pg::Results> object with the results.
 The statement handle will be automatically cached again when that object is

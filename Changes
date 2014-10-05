@@ -1,5 +1,7 @@
 
-0.03  2014-10-04
+0.03  2014-10-06
+  - Improved non-blocking queries to be able to introspect the statement
+    handle.
 
 0.02  2014-10-03
   - Added support for PostgreSQL connection strings.

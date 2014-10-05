@@ -187,6 +187,6 @@ $pg->db->query(
 );
 Mojo::IOLoop->start;
 like $fail, qr/does_not_exist/, 'right error';
-is $result, undef, 'no result';
+is $result->sth->errstr, $fail, 'same error';
 
 done_testing();
