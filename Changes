@@ -1,4 +1,6 @@
 
+0.04  2014-10-07
+
 0.03  2014-10-06
   - Improved non-blocking queries to be able to introspect the statement
     handle.
