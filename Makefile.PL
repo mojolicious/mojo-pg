@@ -8,7 +8,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME         => 'Mojo::Pg',
   VERSION_FROM => 'lib/Mojo/Pg.pm',
-  ABSTRACT     => 'Non-blocking PostgreSQL client',
+  ABSTRACT     => 'Mojolicious ♥ PostgreSQL',
   AUTHOR       => 'Sebastian Riedel <sri@cpan.org>',
   LICENSE      => 'artistic_2',
   META_MERGE   => {

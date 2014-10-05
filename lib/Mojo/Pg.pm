@@ -79,14 +79,14 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Create a table
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
-  $pg->db->do('create table names (name varchar(255))');
+  $pg->db->do('create table if not exists names (name varchar(255))');
 
   # Insert a few rows
   my $db = $pg->db;
   $db->query('insert into names values (?)', 'Sara');
   $db->query('insert into names values (?)', 'Daniel');
 
-  # Select all rows
+  # Select all rows blocking
   say for $db->query('select * from names')
     ->hashes->map(sub { $_->{name} })->each;
 
@@ -108,11 +108,12 @@ L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicio.us> real-time web framework.
 
-Database and statement handles are cached automatically. While all I/O
-operations are performed blocking, you can wait for long running queries
-asynchronously, allowing the L<Mojo::IOLoop> event loop to perform other tasks
-in the meantime. Since database connections usually have a very low latency,
-this often results in very good performance.
+Database and statement handles are cached automatically, so they can be reused
+transparently to increase performance. While all I/O operations are performed
+blocking, you can wait for long running queries asynchronously, allowing the
+L<Mojo::IOLoop> event loop to perform other tasks in the meantime. Since
+database connections usually have a very low latency, this often results in
+very good performance.
 
 All cached database handles will be reset automatically if a new process has
 been forked, this allows multiple processes to share the same L<Mojo::Pg>
