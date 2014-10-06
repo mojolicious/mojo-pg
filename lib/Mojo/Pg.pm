@@ -186,8 +186,8 @@ following new ones.
 
   my $db = $pg->db;
 
-Get L<Mojo::Pg::Database> object for a cached or newly created database
-handle. The database handle will be automatically cached again when that
+Get L<Mojo::Pg::Database> object for a cached or newly established database
+connection. The database handle will be automatically cached again when that
 object is destroyed, so you can handle connection timeouts gracefully by
 holding on to it only for short amounts of time.
 
