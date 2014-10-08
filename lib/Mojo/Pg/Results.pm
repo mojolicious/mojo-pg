@@ -71,7 +71,7 @@ the following new ones.
 
   my $array = $results->array;
 
-Fetch one row and return it as an array reference.
+Fetch next row and return it as an array reference.
 
 =head2 arrays
 
@@ -90,7 +90,7 @@ Return column names as an array reference.
 
   my $hash = $results->hash;
 
-Fetch one row and return it as a hash reference.
+Fetch next row and return it as a hash reference.
 
 =head2 hashes
 
