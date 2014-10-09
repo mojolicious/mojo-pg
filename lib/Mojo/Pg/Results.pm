@@ -73,12 +73,20 @@ the following new ones.
 
 Fetch next row from the statement handle and return it as an array reference.
 
+  # Process one row at a time
+  while (my $next = $results->array) {
+    say $next->[3];
+  }
+
 =head2 arrays
 
   my $collection = $results->arrays;
 
 Fetch all rows from the statement handle and return them as a
 L<Mojo::Collection> object containing array references.
+
+  # Process all rows at once
+  say $results->arrays->reduce(sub { $a->[3] + $b->[3] });
 
 =head2 columns
 
@@ -92,12 +100,20 @@ Return column names as an array reference.
 
 Fetch next row from the statement handle and return it as a hash reference.
 
+  # Process one row at a time
+  while (my $next = $results->hash) {
+    say $next->{money};
+  }
+
 =head2 hashes
 
   my $collection = $results->hashes;
 
 Fetch all rows from the statement handle and return them as a
 L<Mojo::Collection> object containing hash references.
+
+  # Process all rows at once
+  say $results->hashes->reduce(sub { $a->{money} + $b->{money} });
 
 =head2 rows
 
