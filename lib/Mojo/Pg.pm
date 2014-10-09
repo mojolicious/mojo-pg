@@ -87,8 +87,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->query('insert into names values (?)', 'Daniel');
 
   # Select all rows blocking
-  say for $db->query('select * from names')
-    ->hashes->map(sub { $_->{name} })->each;
+  $db->query('select * from names')->hashes->pluck('name')->join("\n")->say;
 
   # Select all rows non-blocking
   Mojo::IOLoop->delay(
@@ -98,7 +97,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     },
     sub {
       my ($delay, $err, $results) = @_;
-      say for $results->hashes->map(sub { $_->{name} })->each;
+      $results->hashes->pluck('name')->join("\n")->say;
     }
   )->wait;
 
