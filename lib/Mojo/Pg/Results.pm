@@ -71,14 +71,14 @@ the following new ones.
 
   my $array = $results->array;
 
-Fetch next row and return it as an array reference.
+Fetch next row from the statement handle and return it as an array reference.
 
 =head2 arrays
 
   my $collection = $results->arrays;
 
-Fetch all rows and return them as a L<Mojo::Collection> object containing
-array references.
+Fetch all rows from the statement handle and return them as a
+L<Mojo::Collection> object containing array references.
 
 =head2 columns
 
@@ -90,14 +90,14 @@ Return column names as an array reference.
 
   my $hash = $results->hash;
 
-Fetch next row and return it as a hash reference.
+Fetch next row from the statement handle and return it as a hash reference.
 
 =head2 hashes
 
   my $collection = $results->hashes;
 
-Fetch all rows and return them as a L<Mojo::Collection> object containing hash
-references.
+Fetch all rows from the statement handle and return them as a
+L<Mojo::Collection> object containing hash references.
 
 =head2 rows
 
@@ -109,7 +109,8 @@ Number of rows.
 
   my $text = $results->text;
 
-Fetch all rows and turn them into a table with L<Mojo::Util/"tablify">.
+Fetch all rows from the statement handle and turn them into a table with
+L<Mojo::Util/"tablify">.
 
 =head1 SEE ALSO
 

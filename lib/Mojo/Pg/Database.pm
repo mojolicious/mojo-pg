@@ -242,7 +242,7 @@ Execute a statement and discard its result.
 
   my $bool = $db->is_listening;
 
-Check if database handle is listening of notifications.
+Check if database handle is listening for notifications.
 
 =head2 listen
 
@@ -262,10 +262,10 @@ Check database connection.
   my $results = $db->query('select * from foo');
   my $results = $db->query('insert into foo values (?, ?, ?)', @values);
 
-Execute a statement and return a L<Mojo::Pg::Results> object with the results.
-The statement handle will be automatically cached again when that object is
-destroyed, so future queries can reuse it to increase performance. You can
-also append a callback to perform operation non-blocking.
+Execute a blocking statement and return a L<Mojo::Pg::Results> object with the
+results. The statement handle will be automatically cached again when that
+object is destroyed, so future queries can reuse it to increase performance.
+You can also append a callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
