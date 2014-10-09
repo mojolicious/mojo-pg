@@ -41,7 +41,7 @@ Mojo::Pg::Results - Results
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Results> is a container for statement handles used by
+L<Mojo::Pg::Results> is a container for L<DBD::Pg> statement handles used by
 L<Mojo::Pg::Database>.
 
 =head1 ATTRIBUTES
@@ -60,7 +60,7 @@ L<Mojo::Pg::Database> object these results belong to.
   my $sth  = $results->sth;
   $results = $results->sth($sth);
 
-Statement handle results are fetched from.
+L<DBD::Pg> statement handle results are fetched from.
 
 =head1 METHODS
 
@@ -71,7 +71,7 @@ the following new ones.
 
   my $array = $results->array;
 
-Fetch next row from the statement handle and return it as an array reference.
+Fetch next row from L</"sth"> and return it as an array reference.
 
   # Process one row at a time
   while (my $next = $results->array) {
@@ -82,8 +82,8 @@ Fetch next row from the statement handle and return it as an array reference.
 
   my $collection = $results->arrays;
 
-Fetch all rows from the statement handle and return them as a
-L<Mojo::Collection> object containing array references.
+Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
+containing array references.
 
   # Process all rows at once
   say $results->arrays->reduce(sub { $a->[3] + $b->[3] });
@@ -98,7 +98,7 @@ Return column names as an array reference.
 
   my $hash = $results->hash;
 
-Fetch next row from the statement handle and return it as a hash reference.
+Fetch next row from L</"sth"> and return it as a hash reference.
 
   # Process one row at a time
   while (my $next = $results->hash) {
@@ -109,8 +109,8 @@ Fetch next row from the statement handle and return it as a hash reference.
 
   my $collection = $results->hashes;
 
-Fetch all rows from the statement handle and return them as a
-L<Mojo::Collection> object containing hash references.
+Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
+containing hash references.
 
   # Process all rows at once
   say $results->hashes->reduce(sub { $a->{money} + $b->{money} });
@@ -125,7 +125,7 @@ Number of rows.
 
   my $text = $results->text;
 
-Fetch all rows from the statement handle and turn them into a table with
+Fetch all rows from L</"sth"> and turn them into a table with
 L<Mojo::Util/"tablify">.
 
 =head1 SEE ALSO
