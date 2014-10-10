@@ -129,14 +129,14 @@ Migration files are just a collection of sql blocks, with one or more
 statements, separated by comments of the form C<-- VERSION UP/DOWN>.
 
   -- 1 up
-  create table if not exists foo (bar varchar(255));
+  create table foo (bar varchar(255));
   insert into foo values ('I ♥ Mojolicious!');
   -- 1 down
-  drop table if exists foo;
+  drop table foo;
   -- 2 up (...you can comment freely here...)
-  create table if not exists baz (yada varchar(255));
+  create table baz (yada varchar(255));
   -- 2 down
-  drop table if exists baz;
+  drop table baz;
 
 The current version, which is tied to the L</"name">, gets stored in an
 automatically created table with the name C<mojo_migrations>.
@@ -181,10 +181,10 @@ a class with L<Mojo::Loader>, defaults to using the caller class.
   __DATA__
   @@ migrations
   -- 1 up
-  create table if not exists foo (bar varchar(255));
+  create table foo (bar varchar(255));
   insert into foo values ('I ♥ Mojolicious!');
   -- 1 down
-  drop table if exists foo;
+  drop table foo;
 
 =head2 from_file
 

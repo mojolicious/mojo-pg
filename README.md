@@ -38,9 +38,9 @@ __DATA__
 
 @@ migrations
 -- 1 up
-create table if not exists visitors (at timestamp, ip varchar(255));
+create table visitors (at timestamp, ip varchar(255));
 -- 1 down
-drop table if exists visitors;
+drop table visitors;
 ```
 
 ## Installation
