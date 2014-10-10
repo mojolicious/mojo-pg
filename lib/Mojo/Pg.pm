@@ -4,10 +4,17 @@ use Mojo::Base -base;
 use Carp 'croak';
 use DBI;
 use Mojo::Pg::Database;
+use Mojo::Pg::Migrations;
 use Mojo::URL;
+use Scalar::Util 'weaken';
 
 has dsn             => 'dbi:Pg:dbname=test';
 has max_connections => 5;
+has migrations      => sub {
+  my $migrations = Mojo::Pg::Migrations->new(pg => shift);
+  weaken $migrations->{pg};
+  return $migrations;
+};
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
 has [qw(password username)] => '';
 
@@ -61,8 +68,9 @@ sub _dequeue {
 
 sub _enqueue {
   my ($self, $dbh) = @_;
-  push @{$self->{queue}}, $dbh if $dbh->{Active};
-  shift @{$self->{queue}} while @{$self->{queue}} > $self->max_connections;
+  my $queue = $self->{queue} ||= [];
+  push @$queue, $dbh if $dbh->{Active};
+  shift @$queue while @$queue > $self->max_connections;
 }
 
 1;
@@ -153,6 +161,13 @@ Data Source Name, defaults to C<dbi:Pg:dbname=test>.
 
 Maximum number of idle database handles to cache for future use, defaults to
 C<5>.
+
+=head2 migrations
+
+  my $migrations = $pg->migrations;
+  $pg            = $pg->migrations(Mojo::Pg::Migrations->new);
+
+L<Mojo::Pg::Migrations> object.
 
 =head2 options
 

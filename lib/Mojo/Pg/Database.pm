@@ -23,6 +23,7 @@ sub commit { shift->dbh->commit }
 sub disconnect {
   my $self = shift;
   $self->_unwatch;
+  delete $self->{queue};
   $self->dbh->disconnect;
 }
 
@@ -34,9 +35,9 @@ sub listen {
   my ($self, $name) = @_;
 
   my $dbh = $self->dbh;
+  local $dbh->{AutoCommit} = 1;
   $dbh->do('listen ' . $dbh->quote_identifier($name))
     unless $self->{listen}{$name}++;
-  $dbh->commit unless $dbh->{AutoCommit};
   $self->_watch;
 
   return $self;
@@ -66,9 +67,9 @@ sub unlisten {
   my ($self, $name) = @_;
 
   my $dbh = $self->dbh;
+  local $dbh->{AutoCommit} = 1;
   $dbh->do('unlisten' . $dbh->quote_identifier($name));
   $name eq '*' ? delete($self->{listen}) : delete($self->{listen}{$name});
-  $dbh->commit unless $dbh->{AutoCommit};
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
   return $self;
