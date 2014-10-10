@@ -13,13 +13,8 @@ use experimental 'signatures';
 
 helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
-# Prepare a table during startup
-app->pg->db->do(
-  'create table if not exists visitors (
-     at timestamp,
-     ip varchar(255)
-   )'
-);
+# Synchronize database schema during startup
+app->pg->migrations->from_data->migrate;
 
 get '/' => sub ($c) {
 
@@ -39,6 +34,13 @@ get '/' => sub ($c) {
 };
 
 app->start;
+__DATA__
+
+@@ migrations
+-- 1 up
+create table if not exists visitors (at timestamp, ip varchar(255));
+-- 1 down
+drop table if exists visitors;
 ```
 
 ## Installation
