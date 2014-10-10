@@ -147,8 +147,8 @@ Currently active version.
   $migrations = $migrations->from_class;
   $migrations = $migrations->from_class('main');
 
-Extract migrations from a file in the DATA section of a class, defaults to
-using the caller class.
+Extract migrations from a file indentified by L</"name"> in the DATA section
+of a class with L<Mojo::Loader>, defaults to using the caller class.
 
 =head2 from_file
 
