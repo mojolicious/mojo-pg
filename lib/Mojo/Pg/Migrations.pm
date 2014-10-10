@@ -31,7 +31,7 @@ sub from_string {
   return $self;
 }
 
-sub latest { (sort keys %{shift->{migrations}{up}})[-1] }
+sub latest { (sort keys %{shift->{migrations}{up}})[-1] || 0 }
 
 sub migrate {
   my ($self, $target) = @_;
@@ -199,7 +199,12 @@ Latest version available.
   $migrations = $migrations->migrate;
   $migrations = $migrations->migrate(3);
 
-Migrate to a different version, defaults to L</"latest">.
+Migrate from L</"active"> to a different version, up or down, defaults to
+using L</"latest">. All version numbers need to be positive, with version C<0>
+representing an empty database.
+
+  # Reset database
+  $migrations->migrate(0)->migrate;
 
 =head1 SEE ALSO
 
