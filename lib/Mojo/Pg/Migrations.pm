@@ -124,7 +124,7 @@ statements, separated by comments of the form C<-- VERSION UP/DOWN>.
   -- 2 down
   drop table if exists baz;
 
-The current version, which is tied to C</"name">, gets stored in an
+The current version, which is tied to the L</"name">, gets stored in an
 automatically created table with the name C<mojo_migrations>.
 
 =head1 ATTRIBUTES
