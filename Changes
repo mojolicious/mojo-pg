@@ -1,4 +1,6 @@
 
+0.05  2014-10-11
+
 0.04  2014-10-10
   - Added support for migrations.
   - Added Mojo::Pg::Migrations.
