@@ -167,7 +167,10 @@ C<5>.
   my $migrations = $pg->migrations;
   $pg            = $pg->migrations(Mojo::Pg::Migrations->new);
 
-L<Mojo::Pg::Migrations> object.
+L<Mojo::Pg::Migrations> object we can use to perform database migrations.
+
+  # Load migrations from file and migrate to latest version
+  $pg->migrations->from_file('/Users/sri/migrations.sql')->migrate;
 
 =head2 options
 

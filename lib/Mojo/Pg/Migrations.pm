@@ -112,6 +112,20 @@ Mojo::Pg::Migrations - Migrations
 =head1 DESCRIPTION
 
 L<Mojo::Pg::Migrations> performs database migrations for L<Mojo::Pg>.
+Migration files are just a collection of sql blocks, with one or more
+statements, separated by comments of the form C<-- VERSION UP/DOWN>.
+
+  -- 1 up
+  create table if not exists foo (bar varchar(255));
+  -- 1 down
+  drop table if exists foo;
+  -- 2 up (...you can comment freely here...)
+  create table if not exists baz (yada varchar(255));
+  -- 2 down
+  drop table if exists baz;
+
+The current version, which is tied to C</"name">, gets stored in an
+automatically created table with the name C<mojo_migrations>.
 
 =head1 ATTRIBUTES
 
@@ -147,8 +161,15 @@ Currently active version.
   $migrations = $migrations->from_class;
   $migrations = $migrations->from_class('main');
 
-Extract migrations from a file indentified by L</"name"> in the DATA section
-of a class with L<Mojo::Loader>, defaults to using the caller class.
+Extract migrations from a file identified by L</"name"> in the DATA section of
+a class with L<Mojo::Loader>, defaults to using the caller class.
+
+  __DATA__
+  @@ migrations
+  -- 1 up
+  create table if not exists foo (bar varchar(255));
+  -- 1 down
+  drop table if exists foo;
 
 =head2 from_file
 
