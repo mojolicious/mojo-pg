@@ -39,13 +39,19 @@ sub migrate {
   my ($self, $target) = @_;
   $target //= $self->latest;
 
-  # Already the right version
-  my $db = $self->pg->db;
-  return $self if (my $active = $self->_active($db)) == $target;
-
   # Unknown version
   my $up = $self->{migrations}{up};
   croak "Version $target has no migration" if $target != 0 && !$up->{$target};
+
+  # Already the right version (make sure migrations table exists)
+  my $db = $self->pg->db;
+  return $self if $self->_active($db) == $target;
+
+  # Lock migrations table and check version again
+  local @{$db->dbh}{qw(AutoCommit RaiseError)} = (1, 0);
+  $db->begin->do('lock table mojo_migrations in exclusive mode');
+  $db->commit and return $self
+    if (my $active = $self->_active($db)) == $target;
 
   # Up
   my $sql;
@@ -64,13 +70,11 @@ sub migrate {
 
   warn "-- Migrating ($active -> $target)\n$sql\n" if DEBUG;
 
-  local @{$db->dbh}{qw(RaiseError AutoCommit)} = (0, 1);
   $sql .= ';update mojo_migrations set version = ? where name = ?;';
-  my $results = $db->begin->query($sql, $target, $self->name);
+  my $results = $db->query($sql, $target, $self->name);
   if ($results->sth->err) {
     my $err = $results->sth->errstr;
-    $db->rollback;
-    croak $err;
+    $db->rollback and croak $err;
   }
   $db->commit;
 
@@ -90,7 +94,7 @@ sub _active {
   local @$dbh{qw(AutoCommit RaiseError)} = (1, 1);
   $db->query(
     'create table if not exists mojo_migrations (
-       name    varchar(255),
+       name    varchar(255) unique,
        version varchar(255)
      )'
   ) if $results->sth->err;

@@ -18,7 +18,7 @@ sub backlog { scalar @{shift->{waiting} || []} }
 
 sub begin { shift->_dbh(begin_work => @_) }
 
-sub commit { shift->dbh->commit }
+sub commit { shift->_dbh(commit => @_) }
 
 sub disconnect {
   my $self = shift;
@@ -61,7 +61,7 @@ sub query {
   $self->$_ for qw(_next _watch);
 }
 
-sub rollback { shift->dbh->rollback }
+sub rollback { shift->_dbh(rollback => @_) }
 
 sub unlisten {
   my ($self, $name) = @_;
@@ -225,7 +225,7 @@ Begin transaction.
 
 =head2 commit
 
-  $db->commit;
+  $db = $db->commit;
 
 Commit transaction.
 
@@ -278,7 +278,7 @@ performance. You can also append a callback to perform operation non-blocking.
 
 =head2 rollback
 
-  $db->rollback;
+  $db = $db->rollback;
 
 Rollback transaction.
 
