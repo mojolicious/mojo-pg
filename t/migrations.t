@@ -16,7 +16,7 @@ my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 # Defaults
 is $pg->migrations->latest, 0, 'latest version is 0';
 is $pg->migrations->active, 0, 'active version is 0';
-is $pg->migrations->from_class(__PACKAGE__)->latest, 0, 'latest version is 0';
+is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
 
 # Different syntax variations
 $pg->migrations->from_string(<<EOF);

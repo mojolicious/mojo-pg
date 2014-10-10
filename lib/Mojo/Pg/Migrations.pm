@@ -12,7 +12,7 @@ has 'pg';
 
 sub active { $_[0]->_active($_[0]->pg->db) }
 
-sub from_class {
+sub from_data {
   my ($self, $class) = @_;
   $class //= caller;
   return $self->from_string(Mojo::Loader->new->data($class, $self->name));
@@ -92,9 +92,9 @@ sub _active {
     'create table if not exists mojo_migrations (
        name    varchar(255),
        version varchar(255)
-     );'
+     )'
   ) if $results->sth->err;
-  $db->query('insert into mojo_migrations values (?, ?);', $name, 0);
+  $db->query('insert into mojo_migrations values (?, ?)', $name, 0);
 
   return 0;
 }
@@ -112,6 +112,15 @@ Mojo::Pg::Migrations - Migrations
   use Mojo::Pg::Migrations;
 
   my $migrations = Mojo::Pg::Migrations->new(pg => $pg);
+  $migrations->from_data->migrate;
+
+  __DATA__
+  @@ migrations
+  -- 1 up
+  create table foo (bar varchar(255));
+  insert into foo values ('I ♥ Mojolicious!');
+  -- 1 down
+  drop table foo;
 
 =head1 DESCRIPTION
 
@@ -121,6 +130,7 @@ statements, separated by comments of the form C<-- VERSION UP/DOWN>.
 
   -- 1 up
   create table if not exists foo (bar varchar(255));
+  insert into foo values ('I ♥ Mojolicious!');
   -- 1 down
   drop table if exists foo;
   -- 2 up (...you can comment freely here...)
@@ -160,10 +170,10 @@ the following new ones.
 
 Currently active version.
 
-=head2 from_class
+=head2 from_data
 
-  $migrations = $migrations->from_class;
-  $migrations = $migrations->from_class('main');
+  $migrations = $migrations->from_data;
+  $migrations = $migrations->from_data('main');
 
 Extract migrations from a file identified by L</"name"> in the DATA section of
 a class with L<Mojo::Loader>, defaults to using the caller class.
@@ -172,6 +182,7 @@ a class with L<Mojo::Loader>, defaults to using the caller class.
   @@ migrations
   -- 1 up
   create table if not exists foo (bar varchar(255));
+  insert into foo values ('I ♥ Mojolicious!');
   -- 1 down
   drop table if exists foo;
 

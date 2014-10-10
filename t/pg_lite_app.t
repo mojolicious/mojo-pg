@@ -13,7 +13,7 @@ use Test::Mojo;
 
 helper pg => sub { state $pg = Mojo::Pg->new($ENV{TEST_ONLINE}) };
 
-app->pg->migrations->name('app_test')->from_class->migrate;
+app->pg->migrations->name('app_test')->from_data->migrate;
 
 get '/blocking' => sub {
   my $c = shift;
