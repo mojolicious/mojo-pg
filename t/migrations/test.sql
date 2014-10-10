@@ -6,4 +6,5 @@ drop table if exists migration_test_three;
 insert into migration_test_three values ('just');
 insert into migration_test_three values ('works');
 -- 3 up
+-- 4 up
 does_not_exist;

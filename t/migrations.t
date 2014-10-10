@@ -73,11 +73,12 @@ is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
 my $pg2 = Mojo::Pg->new($ENV{TEST_ONLINE});
 $pg2->migrations->name('migrations_test')
   ->from_file(catfile($FindBin::Bin, 'migrations', 'test.sql'));
-is $pg2->migrations->latest, 3, 'latest version is 3';
+is $pg2->migrations->latest, 4, 'latest version is 4';
 is $pg2->migrations->active, 0, 'active version is 0';
 eval { $pg2->migrations->migrate };
 like $@, qr/does_not_exist/, 'right error';
-is $pg2->migrations->migrate(2)->active, 2, 'active version is 2';
+is $pg2->migrations->migrate(3)->active, 3, 'active version is 3';
+is $pg2->migrations->migrate(2)->active, 2, 'active version is 3';
 is $pg->migrations->active, 0, 'active version is still 0';
 is $pg->migrations->migrate->active, 4, 'active version is 4';
 is_deeply [$pg2->db->query('select * from migration_test_three')->hashes->each

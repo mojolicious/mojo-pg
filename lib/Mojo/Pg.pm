@@ -109,6 +109,17 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     }
   )->wait;
 
+  # Load migrations from the DATA section and switch to latest version
+  $pg->migrations->from_data->migrate;
+
+  __DATA__
+  @@ migrations
+  -- 1 up
+  create table messages (message varchar(255));
+  insert into messages values ('I ♥ Mojolicious!');
+  -- 1 down
+  drop table messages;
+
 =head1 DESCRIPTION
 
 L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
