@@ -5,6 +5,8 @@ use Carp 'croak';
 use Mojo::Loader;
 use Mojo::Util 'slurp';
 
+use constant DEBUG => $ENV{MOJO_MIGRATION_DEBUG} || 0;
+
 has name => 'migrations';
 has 'pg';
 
@@ -59,6 +61,8 @@ sub migrate {
       map { $down->{$_} }
       grep { $_ > $target && $_ <= $active } reverse sort keys %$down;
   }
+
+  warn "-- Migrating ($active -> $target)\n$sql\n" if DEBUG;
 
   local @{$db->dbh}{qw(RaiseError AutoCommit)} = (0, 1);
   $sql .= ';update mojo_migrations set version = ? where name = ?;';
@@ -205,6 +209,13 @@ representing an empty database.
 
   # Reset database
   $migrations->migrate(0)->migrate;
+
+=head1 DEBUGGING
+
+You can set the C<MOJO_MIGRATION_DEBUG> environment variable to get some
+advanced diagnostics information printed to C<STDERR>.
+
+  MOJO_MIGRATION_DEBUG=1
 
 =head1 SEE ALSO
 
