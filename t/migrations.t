@@ -97,8 +97,8 @@ done_testing();
 __DATA__
 @@ test1
 -- 7 up
-create table foo (bar int));
+create table migration_test_four (test int));
 
 @@ test2
 -- 2 up
-create table baz (yada int);
+create table migration_test_five (test int);

@@ -40,7 +40,7 @@ sub migrate {
   $target //= $self->latest;
 
   # Unknown version
-  my $up = $self->{migrations}{up};
+  my ($up, $down) = @{$self->{migrations}}{qw(up down)};
   croak "Version $target has no migration" if $target != 0 && !$up->{$target};
 
   # Already the right version (make sure migrations table exists)
@@ -62,7 +62,6 @@ sub migrate {
 
   # Down
   else {
-    my $down = $self->{migrations}{down};
     $sql = join '',
       map { $down->{$_} }
       grep { $_ > $target && $_ <= $active } reverse sort keys %$down;
@@ -72,20 +71,17 @@ sub migrate {
 
   $sql .= ';update mojo_migrations set version = ? where name = ?;';
   my $results = $db->query($sql, $target, $self->name);
-  if ($results->sth->err) {
-    my $err = $results->sth->errstr;
-    $db->rollback and croak $err;
-  }
-  $db->commit;
+  $db->commit and return $self unless $results->sth->err;
 
-  return $self;
+  my $err = $results->sth->errstr;
+  $db->rollback and croak $err;
 }
 
 sub _active {
   my ($self, $db) = @_;
 
-  my $name = $self->name;
   my $dbh  = $db->dbh;
+  my $name = $self->name;
   local @$dbh{qw(AutoCommit RaiseError)} = (1, 0);
   my $results
     = $db->query('select version from mojo_migrations where name = ?', $name);
@@ -116,15 +112,7 @@ Mojo::Pg::Migrations - Migrations
   use Mojo::Pg::Migrations;
 
   my $migrations = Mojo::Pg::Migrations->new(pg => $pg);
-  $migrations->from_data->migrate;
-
-  __DATA__
-  @@ migrations
-  -- 1 up
-  create table foo (bar varchar(255));
-  insert into foo values ('I ♥ Mojolicious!');
-  -- 1 down
-  drop table foo;
+  $migrations->from_file('/Users/sri/migrations.sql')->migrate;
 
 =head1 DESCRIPTION
 
@@ -133,14 +121,14 @@ Migration files are just a collection of sql blocks, with one or more
 statements, separated by comments of the form C<-- VERSION UP/DOWN>.
 
   -- 1 up
-  create table foo (bar varchar(255));
-  insert into foo values ('I ♥ Mojolicious!');
+  create table messages (message varchar(255));
+  insert into messages values ('I ♥ Mojolicious!');
   -- 1 down
-  drop table foo;
+  drop table messages;
   -- 2 up (...you can comment freely here...)
-  create table baz (yada varchar(255));
+  create table stuff (whatever int);
   -- 2 down
-  drop table baz;
+  drop table stuff;
 
 Migrations are performed in transactions, if one statement fails the whole
 migration will fail. The current version, which is tied to the L</"name">,
@@ -188,10 +176,10 @@ L<Mojo::Loader>, defaults to using the caller class and L</"name">.
   __DATA__
   @@ migrations
   -- 1 up
-  create table foo (bar varchar(255));
-  insert into foo values ('I ♥ Mojolicious!');
+  create table messages (message varchar(255));
+  insert into messages values ('I ♥ Mojolicious!');
   -- 1 down
-  drop table foo;
+  drop table messages;
 
 =head2 from_file
 
@@ -203,7 +191,7 @@ Extract migrations from a file.
 
   $migrations = $migrations->from_string(
     '-- 1 up
-     create table foo (bar varchar(255));
+     create table foo (bar int);
      -- 1 down
      drop table foo;'
   );
