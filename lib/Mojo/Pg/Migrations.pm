@@ -13,9 +13,9 @@ has 'pg';
 sub active { $_[0]->_active($_[0]->pg->db) }
 
 sub from_data {
-  my ($self, $class) = @_;
-  $class //= caller;
-  return $self->from_string(Mojo::Loader->new->data($class, $self->name));
+  my ($self, $class, $name) = @_;
+  return $self->from_string(
+    Mojo::Loader->new->data($class //= caller, $name // $self->name));
 }
 
 sub from_file { shift->from_string(slurp pop) }
@@ -142,8 +142,10 @@ statements, separated by comments of the form C<-- VERSION UP/DOWN>.
   -- 2 down
   drop table baz;
 
-The current version, which is tied to the L</"name">, gets stored in an
-automatically created table with the name C<mojo_migrations>.
+Migrations are performed in transactions, if one statement fails the whole
+migration will fail. The current version, which is tied to the L</"name">,
+gets stored in an automatically created table with the name
+C<mojo_migrations>.
 
 =head1 ATTRIBUTES
 
@@ -178,9 +180,10 @@ Currently active version.
 
   $migrations = $migrations->from_data;
   $migrations = $migrations->from_data('main');
+  $migrations = $migrations->from_data('main', 'file_name');
 
-Extract migrations from a file identified by L</"name"> in the DATA section of
-a class with L<Mojo::Loader>, defaults to using the caller class.
+Extract migrations from a file in the DATA section of a class with
+L<Mojo::Loader>, defaults to using the caller class and L</"name">.
 
   __DATA__
   @@ migrations

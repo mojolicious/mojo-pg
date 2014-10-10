@@ -14,9 +14,16 @@ use Mojo::Pg;
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 
 # Defaults
-is $pg->migrations->latest, 0, 'latest version is 0';
-is $pg->migrations->active, 0, 'active version is 0';
+is $pg->migrations->name,   'migrations', 'right name';
+is $pg->migrations->latest, 0,            'latest version is 0';
+is $pg->migrations->active, 0,            'active version is 0';
+
+# Migrations from DATA section
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
+is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
+  'latest version is 2';
+is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
+  ->latest, 7, 'latest version is 7';
 
 # Different syntax variations
 $pg->migrations->from_string(<<EOF);
@@ -85,3 +92,12 @@ like $@, qr/Version 23 has no migration/, 'right error';
 $pg->db->do('drop table mojo_migrations');
 
 done_testing();
+
+__DATA__
+@@ test1
+-- 7 up
+create table foo (bar int));
+
+@@ test2
+-- 2 up
+create table baz (yada int);
