@@ -96,8 +96,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Select one row at a time
   my $results = $db->query('select * from names');
-  for my $row ($results->hash) {
-    say $row->{name};
+  while (my $next = $results->hash) {
+    say $next->{name};
   }
 
   # Select all rows blocking
