@@ -13,7 +13,7 @@ use experimental 'signatures';
 
 helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
-# Synchronize database schema from the DATA section during startup
+# Use migrations to create a table during startup
 app->pg->migrations->from_data->migrate;
 
 get '/' => sub ($c) {
