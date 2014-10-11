@@ -23,6 +23,6 @@ WriteMakefile(
     },
     no_index => {directory => ['t']}
   },
-  PREREQ_PM => {Mojolicious => '5.48', 'DBD::Pg' => 0},
+  PREREQ_PM => {Mojolicious => '5.49', 'DBD::Pg' => 0},
   test      => {TESTS       => 't/*.t t/*/*.t'}
 );

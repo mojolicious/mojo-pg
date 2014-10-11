@@ -1,5 +1,7 @@
 
 0.05  2014-10-11
+  - Updated Mojolicious requirement to 5.49 to ensure migrations in the DATA
+    section are not served as static files.
 
 0.04  2014-10-10
   - Added support for migrations.

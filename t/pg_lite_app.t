@@ -33,6 +33,9 @@ get '/non-blocking' => sub {
 
 my $t = Test::Mojo->new;
 
+# Make sure migrations are not served as static files
+$t->get_ok('/app_test')->status_is(404);
+
 # Blocking select
 $t->get_ok('/blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 
