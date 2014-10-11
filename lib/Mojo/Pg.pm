@@ -94,6 +94,12 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->query('insert into names values (?)', 'Sara');
   $db->query('insert into names values (?)', 'Daniel');
 
+  # Select one row at a time
+  my $results = $db->query('select * from names');
+  for my $row ($results->hash) {
+    say $row->{name};
+  }
+
   # Select all rows blocking
   $db->query('select * from names')->hashes->pluck('name')->join("\n")->say;
 
