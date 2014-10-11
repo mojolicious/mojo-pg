@@ -4,6 +4,7 @@
 0.04  2014-10-10
   - Added support for migrations.
   - Added Mojo::Pg::Migrations.
+  - Added migrations attribute to Mojo::Pg.
 
 0.03  2014-10-06
   - Improved non-blocking queries to be able to introspect the statement
