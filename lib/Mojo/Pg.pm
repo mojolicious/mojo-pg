@@ -109,7 +109,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     }
   )->wait;
 
-  # Load migrations from the DATA section and switch to latest version
+  # Load migrations from the DATA section and migrate to latest version
   $pg->migrations->from_data->migrate;
 
   __DATA__
