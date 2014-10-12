@@ -117,8 +117,8 @@ Mojo::Pg::Migrations - Migrations
 =head1 DESCRIPTION
 
 L<Mojo::Pg::Migrations> is used by L<Mojo::Pg> to allow database schemas to
-evolve very easily over time. Migration files are just a collection of sql
-blocks, with one or more statements, separated by comments of the form
+evolve easily over time. A migration file is just a collection of sql blocks,
+with one or more statements, separated by comments of the form
 C<-- VERSION UP/DOWN>.
 
   -- 1 up
@@ -132,8 +132,9 @@ C<-- VERSION UP/DOWN>.
   drop table stuff;
 
 The idea is to let you migrate from any version, to any version, up and down.
-Migrations are very safe, because they are performed in transactions. If one
-statement fails, the whole migration will fail. Every set of migrations has a
+Migrations are very safe, because they are performed in transactions and only
+one can be performed at a time. If a single statement fails, the whole
+migration will fail and get rolled back. Every set of migrations has a
 L</"name">, which is stored together with the currently active version in an
 automatically created table named C<mojo_migrations>.
 
