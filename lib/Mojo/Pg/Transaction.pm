@@ -11,7 +11,7 @@ sub DESTROY {
 sub commit {
   my $self = shift;
   $self->dbh->commit;
-  $self->{rollback} = undef;
+  delete $self->{rollback};
   return $self;
 }
 

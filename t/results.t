@@ -40,16 +40,27 @@ is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
     ->do("insert into results_test (name) values ('tx1')");
   $tx->commit;
 };
+is_deeply [
+  $db->query('select * from results_test where name = ?', 'tx1')->hashes->each
+], [{id => 3, name => 'tx1'}, {id => 4, name => 'tx1'}], 'right structure';
 {
   my $tx = $db->begin;
   $db->do("insert into results_test (name) values ('tx2')")
     ->do("insert into results_test (name) values ('tx2')");
-}
-is_deeply [
-  $db->query('select * from results_test where name = ?', 'tx1')->hashes->each
-], [{id => 3, name => 'tx1'}, {id => 4, name => 'tx1'}], 'right structure';
+};
 is_deeply [
   $db->query('select * from results_test where name = ?', 'tx2')->hashes->each
+], [], 'no results';
+eval {
+  my $tx = $db->begin;
+  $db->do("insert into results_test (name) values ('tx3')")
+    ->do("insert into results_test (name) values ('tx3')")
+    ->do('does_not_exist');
+  $tx->commit;
+};
+like $@, qr/does_not_exist/, 'right error';
+is_deeply [
+  $db->query('select * from results_test where name = ?', 'tx3')->hashes->each
 ], [], 'no results';
 
 $db->do('drop table results_test');
