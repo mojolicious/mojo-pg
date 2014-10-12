@@ -29,7 +29,7 @@ Mojo::Pg::Transaction - Transaction
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Transaction> is a cope guard for L<DBD::Pg> transactions used by
+L<Mojo::Pg::Transaction> is a scope guard for L<DBD::Pg> transactions used by
 L<Mojo::Pg::Database>.
 
 =head1 ATTRIBUTES

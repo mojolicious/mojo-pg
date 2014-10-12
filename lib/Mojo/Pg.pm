@@ -1,5 +1,5 @@
 package Mojo::Pg;
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::EventEmitter';
 
 use Carp 'croak';
 use DBI;
@@ -63,7 +63,9 @@ sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 sub _dequeue {
   my $self = shift;
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
-  return DBI->connect(map { $self->$_ } qw(dsn username password options));
+  my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
+  $self->emit(connection => $dbh);
+  return $dbh;
 }
 
 sub _enqueue {
@@ -149,6 +151,20 @@ object safely.
 Note that this whole distribution is EXPERIMENTAL and will change without
 warning!
 
+=head1 EVENTS
+
+L<Mojo::Pg> inherits all events from L<Mojo::EventEmitter> and can emit the
+following new ones.
+
+=head2 connection
+
+  $pg->on(connection => sub {
+    my ($pg, $dbh) = @_;
+    ...
+  });
+
+Emitted when a new database connection has been established.
+
 =head1 ATTRIBUTES
 
 L<Mojo::Pg> implements the following attributes.
@@ -203,7 +219,7 @@ Database username, defaults to an empty string.
 
 =head1 METHODS
 
-L<Mojo::Pg> inherits all methods from L<Mojo::Base> and implements the
+L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the
 following new ones.
 
 =head2 db

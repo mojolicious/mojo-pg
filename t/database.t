@@ -125,6 +125,7 @@ is $pg->db->dbh, $dbh, 'same database handle';
 $pg->db->disconnect;
 isnt $pg->db->dbh, $dbh, 'different database handles';
 
+
 # Statement cache
 $db = $pg->db;
 is $db->max_statements, 10, 'right default';
@@ -138,10 +139,23 @@ isnt $db->query('select 3 as three')->sth, $sth, 'different statement handles';
 
 # Fork safety
 $dbh = $pg->db->dbh;
+my ($connections, $current) = @_;
+$pg->on(
+  connection => sub {
+    my ($pg, $dbh) = @_;
+    $connections++;
+    $current = $dbh;
+  }
+);
+is $pg->db->dbh, $dbh, 'same database handle';
+ok !$connections, 'no new connections';
 {
   local $$ = -23;
-  isnt $pg->db->dbh, $dbh, 'different database handles';
+  isnt $pg->db->dbh, $dbh,     'different database handles';
+  is $pg->db->dbh,   $current, 'same database handle';
+  is $connections, 1, 'one new connection';
 };
+$pg->unsubscribe('connection');
 
 # Notifications
 $db = $pg->db;
