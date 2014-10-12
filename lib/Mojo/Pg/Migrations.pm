@@ -51,8 +51,7 @@ sub migrate {
   local @{$db->dbh}{qw(AutoCommit RaiseError)} = (1, 1);
   my $tx = $db->begin;
   $db->do('lock table mojo_migrations in exclusive mode');
-  $tx->commit and return $self
-    if (my $active = $self->_active($db)) == $target;
+  return $self if (my $active = $self->_active($db)) == $target;
 
   # Up
   my $sql;
@@ -71,8 +70,7 @@ sub migrate {
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
 
   $sql .= ';update mojo_migrations set version = ? where name = ?;';
-  $db->query($sql, $target, $self->name);
-  $tx->commit and return $self;
+  $db->query($sql, $target, $self->name) and $tx->commit and return $self;
 }
 
 sub _active {

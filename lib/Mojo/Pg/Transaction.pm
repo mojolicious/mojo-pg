@@ -10,8 +10,7 @@ sub DESTROY {
 
 sub commit {
   my $self = shift;
-  $self->dbh->commit;
-  delete $self->{rollback};
+  $self->dbh->commit if delete $self->{rollback};
   return $self;
 }
 
