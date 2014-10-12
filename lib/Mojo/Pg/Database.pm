@@ -43,6 +43,11 @@ sub listen {
   return $self;
 }
 
+sub notify {
+  my ($self, $name, $payload) = @_;
+  $self->query('select pg_notify(?, ?)', $name, $payload) and return $self;
+}
+
 sub ping { shift->dbh->ping }
 
 sub query {
@@ -253,6 +258,13 @@ Check if L</"dbh"> is listening for notifications.
 
 Start listening for notifications when the L<Mojo::IOLoop> event loop is
 running.
+
+=head2 notify
+
+  $db = $db->notify('foo');
+  $db = $db->notify('foo', 'bar');
+
+Send notification with optional payload.
 
 =head2 ping
 

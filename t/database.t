@@ -146,24 +146,32 @@ $dbh = $pg->db->dbh;
 # Notifications
 $db = $pg->db;
 ok !$db->is_listening, 'not listening';
-$db->listen('foo');
-ok $db->is_listening, 'listening';
-Mojo::IOLoop->timer(
-  0 => sub { $pg->db->query('select pg_notify(?, ?)', 'foo', 'bar') });
-my @notification;
-$db->once(
-  notification => sub {
-    my ($db, $name, $pid, $payload) = @_;
-    @notification = ($name, $pid, $payload);
-    Mojo::IOLoop->stop;
+ok $db->listen('foo')->is_listening, 'listening';
+my @notifications;
+Mojo::IOLoop->delay(
+  sub {
+    my $delay = shift;
+    $db->once(notification => $delay->begin);
+    Mojo::IOLoop->next_tick(sub { $pg->db->notify('foo', 'bar') });
+  },
+  sub {
+    my ($delay, $name, $pid, $payload) = @_;
+    push @notifications, [$name, $pid, $payload];
+    $db->once(notification => $delay->begin);
+    Mojo::IOLoop->next_tick(sub { $pg->db->notify('foo') });
+  },
+  sub {
+    my ($delay, $name, $pid, $payload) = @_;
+    push @notifications, [$name, $pid, $payload];
   }
-);
-Mojo::IOLoop->start;
-$db->unlisten('foo');
-ok !$db->is_listening, 'not listening';
-is $notification[0], 'foo', 'right channel name';
-ok $notification[1], 'has process id';
-is $notification[2], 'bar', 'right payload';
+)->wait;
+ok !$db->unlisten('foo')->is_listening, 'not listening';
+is $notifications[0][0], 'foo', 'right channel name';
+ok $notifications[0][1], 'has process id';
+is $notifications[0][2], 'bar', 'right payload';
+is $notifications[1][0], 'foo', 'right channel name';
+ok $notifications[1][1], 'has process id';
+is $notifications[1][2], '',    'no payload';
 
 # Stop listening for all notifications
 ok !$db->is_listening, 'not listening';
