@@ -8,11 +8,7 @@ sub DESTROY {
   if ($self->{rollback} && (my $dbh = $self->dbh)) { $dbh->rollback }
 }
 
-sub commit {
-  my $self = shift;
-  $self->dbh->commit if delete $self->{rollback};
-  return $self;
-}
+sub commit { $_[0]->dbh->commit if delete $_[0]->{rollback} }
 
 sub new { shift->SUPER::new(@_, rollback => 1) }
 
@@ -54,7 +50,7 @@ implements the following new ones.
 
 =head2 commit
 
-  $tx = $tx->commit;
+  $tx->commit;
 
 Commit transaction.
 

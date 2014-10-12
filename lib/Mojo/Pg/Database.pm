@@ -53,7 +53,8 @@ sub listen {
 
 sub notify {
   my ($self, $name, $payload) = @_;
-  $self->query('select pg_notify(?, ?)', $name, $payload) and return $self;
+  $self->query('select pg_notify(?, ?)', $name, $payload);
+  return $self;
 }
 
 sub ping { shift->dbh->ping }

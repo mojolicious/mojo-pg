@@ -70,7 +70,9 @@ sub migrate {
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
 
   $sql .= ';update mojo_migrations set version = ? where name = ?;';
-  $db->query($sql, $target, $self->name) and $tx->commit and return $self;
+  $db->query($sql, $target, $self->name) and $tx->commit;
+
+  return $self;
 }
 
 sub _active {
