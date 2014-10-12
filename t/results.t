@@ -34,10 +34,17 @@ is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
   'right text';
 
 # Transactions
-$db->begin->do("insert into results_test (name) values ('tx1')")
-  ->do("insert into results_test (name) values ('tx1')")->commit;
-$db->begin->do("insert into results_test (name) values ('tx2')")
-  ->do("insert into results_test (name) values ('tx2')")->rollback;
+{
+  my $tx = $db->begin;
+  $db->do("insert into results_test (name) values ('tx1')")
+    ->do("insert into results_test (name) values ('tx1')");
+  $tx->commit;
+};
+{
+  my $tx = $db->begin;
+  $db->do("insert into results_test (name) values ('tx2')")
+    ->do("insert into results_test (name) values ('tx2')");
+}
 is_deeply [
   $db->query('select * from results_test where name = ?', 'tx1')->hashes->each
 ], [{id => 3, name => 'tx1'}, {id => 4, name => 'tx1'}], 'right structure';
