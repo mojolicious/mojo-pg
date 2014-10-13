@@ -18,7 +18,7 @@ has migrations      => sub {
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
 has [qw(password username)] => '';
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub db {
   my $self = shift;
