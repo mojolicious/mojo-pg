@@ -1,5 +1,7 @@
 
 0.08  2014-10-14
+  - Changed a few default values in Mojo::Pg to allow more DBD::Pg environment
+    variables to work correctly.
 
 0.07  2014-10-13
   - Removed commit and rollback methods from Mojo::Pg::Database.

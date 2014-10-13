@@ -12,17 +12,17 @@ use Mojo::Pg;
 
 # Defaults
 my $pg = Mojo::Pg->new;
-is $pg->dsn,      'dbi:Pg:dbname=test', 'right data source';
-is $pg->username, '',                   'no username';
-is $pg->password, '',                   'no password';
+is $pg->dsn,      'dbi:Pg:', 'right data source';
+is $pg->username, undef,     'no username';
+is $pg->password, undef,     'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 
 # Minimal connection string
 $pg = Mojo::Pg->new('postgresql:///test1');
 is $pg->dsn,      'dbi:Pg:dbname=test1', 'right data source';
-is $pg->username, '',                    'no username';
-is $pg->password, '',                    'no password';
+is $pg->username, undef,                 'no username';
+is $pg->password, undef,                 'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 
@@ -30,8 +30,8 @@ is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
 $pg = Mojo::Pg->new('postgresql://127.0.0.1:8080/test2');
 is $pg->dsn, 'dbi:Pg:dbname=test2;host=127.0.0.1;port=8080',
   'right data source';
-is $pg->username, '', 'no username';
-is $pg->password, '', 'no password';
+is $pg->username, undef, 'no username';
+is $pg->password, undef, 'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 
@@ -39,7 +39,7 @@ is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
 $pg = Mojo::Pg->new('postgresql://postgres@/test3');
 is $pg->dsn,      'dbi:Pg:dbname=test3', 'right data source';
 is $pg->username, 'postgres',            'right username';
-is $pg->password, '',                    'no password';
+is $pg->password, undef,                 'no password';
 is_deeply $pg->options, {AutoCommit => 1, PrintError => 0, RaiseError => 1},
   'right options';
 

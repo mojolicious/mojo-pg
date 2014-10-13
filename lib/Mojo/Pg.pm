@@ -8,7 +8,7 @@ use Mojo::Pg::Migrations;
 use Mojo::URL;
 use Scalar::Util 'weaken';
 
-has dsn             => 'dbi:Pg:dbname=test';
+has dsn             => 'dbi:Pg:';
 has max_connections => 5;
 has migrations      => sub {
   my $migrations = Mojo::Pg::Migrations->new(pg => shift);
@@ -16,7 +16,7 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
-has [qw(password username)] => '';
+has [qw(password username)] => undef;
 
 our $VERSION = '0.08';
 
@@ -174,7 +174,7 @@ L<Mojo::Pg> implements the following attributes.
   my $dsn = $pg->dsn;
   $pg     = $pg->dsn('dbi:Pg:dbname=foo');
 
-Data Source Name, defaults to C<dbi:Pg:dbname=test>.
+Data Source Name, defaults to C<dbi:Pg:>.
 
 =head2 max_connections
 
@@ -208,14 +208,14 @@ C<RaiseError> and deactivating C<PrintError>.
   my $password = $pg->password;
   $pg          = $pg->password('s3cret');
 
-Database password, defaults to an empty string.
+Database password.
 
 =head2 username
 
   my $username = $pg->username;
   $pg          = $pg->username('sri');
 
-Database username, defaults to an empty string.
+Database username.
 
 =head1 METHODS
 
