@@ -52,9 +52,11 @@ sub from_string {
     $self->password($2) if defined $2;
   }
 
-  # Options
+  # Service
   my $hash = $url->query->to_hash;
   if (my $service = delete $hash->{service}) { $dsn .= "service=$service" }
+
+  # Options
   @{$self->options}{keys %$hash} = values %$hash;
 
   return $self->dsn($dsn);

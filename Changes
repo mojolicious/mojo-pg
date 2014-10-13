@@ -2,7 +2,7 @@
 0.08  2014-10-13
   - Changed default data source name in Mojo::Pg to allow more DBD::Pg
     environment variables to work correctly.
-  - Improved Mojo::Pg to allow service names on connection strings.
+  - Improved Mojo::Pg to allow service names in connection strings.
 
 0.07  2014-10-13
   - Removed commit and rollback methods from Mojo::Pg::Database.
