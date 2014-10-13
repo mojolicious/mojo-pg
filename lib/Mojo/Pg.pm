@@ -16,7 +16,7 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
-has [qw(password username)] => undef;
+has [qw(password username)];
 
 our $VERSION = '0.08';
 
