@@ -229,7 +229,7 @@ Number of waiting non-blocking queries.
 
 Begin transaction and return L<Mojo::Pg::Transaction> object, which will
 automatically roll back the transaction unless
-L<Mojo::Pg::Transaction/"commit"> bas been called before it is destroyed.
+L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   my $tx = $db->begin;
   $db->query('insert into names values (?)', 'Baerbel');
