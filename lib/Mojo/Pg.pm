@@ -16,7 +16,7 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
-has [qw(password username)];
+has [qw(password username)] => '';
 
 our $VERSION = '0.08';
 
@@ -39,7 +39,8 @@ sub from_string {
     unless $url->protocol eq 'postgresql';
 
   # Database
-  my $dsn = 'dbi:Pg:dbname=' . $url->path->parts->[0];
+  my $db = $url->path->parts->[0];
+  my $dsn = defined $db ? "dbi:Pg:dbname=$db" : 'dbi:Pg:';
 
   # Host and port
   if (my $host = $url->host) { $dsn .= ";host=$host" }
@@ -53,6 +54,7 @@ sub from_string {
 
   # Options
   my $hash = $url->query->to_hash;
+  if (my $service = delete $hash->{service}) { $dsn .= "service=$service" }
   @{$self->options}{keys %$hash} = values %$hash;
 
   return $self->dsn($dsn);
@@ -174,7 +176,7 @@ L<Mojo::Pg> implements the following attributes.
   my $dsn = $pg->dsn;
   $pg     = $pg->dsn('dbi:Pg:dbname=foo');
 
-Data Source Name, defaults to C<dbi:Pg:>.
+Data source name, defaults to C<dbi:Pg:>.
 
 =head2 max_connections
 
@@ -208,14 +210,14 @@ C<RaiseError> and deactivating C<PrintError>.
   my $password = $pg->password;
   $pg          = $pg->password('s3cret');
 
-Database password.
+Database password, defaults to an empty string.
 
 =head2 username
 
   my $username = $pg->username;
   $pg          = $pg->username('sri');
 
-Database username.
+Database username, defaults to an empty string.
 
 =head1 METHODS
 
@@ -240,6 +242,9 @@ Parse configuration from connection string.
   # Just a database
   $pg->from_string('postgresql:///db1');
 
+  # Just a service
+  $pg->from_string('postgresql://?service=foo');
+
   # Username and database
   $pg->from_string('postgresql://sri@/db2');
 
@@ -251,6 +256,9 @@ Parse configuration from connection string.
 
   # Username, database and additional options
   $pg->from_string('postgresql://sri@/db5?PrintError=1&RaiseError=0');
+
+  # Service and additional options
+  $pg->from_string('postgresql://?service=foo&PrintError=1&RaiseError=0');
 
 =head2 new
 
