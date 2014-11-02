@@ -1,5 +1,6 @@
 
-0.09  2014-10-15
+0.09  2014-11-02
+  - Updated Mojolicious requirement to 5.57.
 
 0.08  2014-10-13
   - Changed default data source name in Mojo::Pg to allow more DBD::Pg

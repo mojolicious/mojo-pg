@@ -38,7 +38,7 @@ Mojo::Pg::Results - Results
   use Mojo::Pg::Results;
 
   my $results = Mojo::Pg::Results->new(db => $db, sth => $sth);
-  $results->hashes->pluck('foo')->shuffle->join("\n")->say;
+  $results->hashes->map(sub { $_->{foo} })->shuffle->join("\n")->say;
 
 =head1 DESCRIPTION
 

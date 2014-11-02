@@ -107,7 +107,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   }
 
   # Select all rows blocking
-  $db->query('select * from names')->hashes->pluck('name')->join("\n")->say;
+  $db->query('select * from names')->hashes
+    ->map(sub { $_->{name} })->join("\n")->say;
 
   # Select all rows non-blocking
   Mojo::IOLoop->delay(
@@ -117,7 +118,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     },
     sub {
       my ($delay, $err, $results) = @_;
-      $results->hashes->pluck('name')->join("\n")->say;
+      $results->hashes->map(sub { $_->{name} })->join("\n")->say;
     }
   )->wait;
 

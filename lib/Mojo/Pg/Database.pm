@@ -165,7 +165,8 @@ Mojo::Pg::Database - Database
   use Mojo::Pg::Database;
 
   my $db = Mojo::Pg::Database->new(pg => $pg, dbh => $dbh);
-  $db->query('select * from foo')->hashes->pluck('bar')->join("\n")->say;
+  $db->query('select * from foo')->hashes
+    ->map(sub { $_->{bar} })->join("\n")->say;
 
 =head1 DESCRIPTION
 
