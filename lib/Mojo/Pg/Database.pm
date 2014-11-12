@@ -67,6 +67,7 @@ sub query {
   unless ($cb) {
     my $sth = $self->_dequeue(0, $query);
     $sth->execute(@_);
+    $self->_notifications;
     return Mojo::Pg::Results->new(db => $self, sth => $sth);
   }
 
@@ -116,6 +117,13 @@ sub _next {
   $sth->execute(@{$next->{args}});
 }
 
+sub _notifications {
+  my $self = shift;
+  while (my $notify = $self->dbh->pg_notifies) {
+    $self->emit(notification => @$notify);
+  }
+}
+
 sub _unwatch {
   my $self = shift;
   return unless delete $self->{watching};
@@ -133,11 +141,7 @@ sub _watch {
     $self->{handle} => sub {
       my $reactor = shift;
 
-      # Notifications
-      while (my $notify = $dbh->pg_notifies) {
-        $self->emit(notification => @$notify);
-      }
-
+      $self->_notifications;
       return unless (my $waiting = $self->{waiting}) && $dbh->pg_ready;
       my ($sth, $cb) = @{shift @$waiting}{qw(sth cb)};
 
