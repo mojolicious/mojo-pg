@@ -32,7 +32,7 @@ Mojo::Pg::Transaction - Transaction
 
   use Mojo::Pg::Transaction;
 
-  my $tx = Mojo::Pg::Transaction->new(dbh => $dbh);
+  my $tx = Mojo::Pg::Transaction->new(db => $db);
   $tx->commit;
 
 =head1 DESCRIPTION
