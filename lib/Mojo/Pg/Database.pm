@@ -34,6 +34,7 @@ sub disconnect {
 sub do {
   my $self = shift;
   $self->dbh->do(@_);
+  $self->_notifications;
   return $self;
 }
 

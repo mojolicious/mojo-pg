@@ -187,6 +187,12 @@ Mojo::IOLoop->delay(
   sub {
     my ($delay, $name, $pid, $payload) = @_;
     push @notifications, [$name, $pid, $payload];
+    $db2->once(notification => $delay->begin);
+    Mojo::IOLoop->next_tick(sub { $db2->do("notify foo, 'baz'") });
+  },
+  sub {
+    my ($delay, $name, $pid, $payload) = @_;
+    push @notifications, [$name, $pid, $payload];
   }
 )->wait;
 ok !$db->unlisten('foo')->is_listening, 'not listening';
@@ -199,6 +205,10 @@ is $notifications[1][2], 'bar', 'right payload';
 is $notifications[2][0], 'foo', 'right channel name';
 ok $notifications[2][1], 'has process id';
 is $notifications[2][2], '',    'no payload';
+is $notifications[3][0], 'foo', 'right channel name';
+ok $notifications[3][1], 'has process id';
+is $notifications[3][2], 'baz', 'no payload';
+is $notifications[4], undef, 'no more notifications';
 
 # Stop listening for all notifications
 ok !$db->is_listening, 'not listening';
