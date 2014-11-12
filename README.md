@@ -29,7 +29,7 @@ get '/' => sub ($c) {
 
     return $c->reply->exception($err) if $err;
 
-    $c->render(json => [$results->hashes->each]);
+    $c->render(json => $results->hashes->to_array);
   });
 };
 

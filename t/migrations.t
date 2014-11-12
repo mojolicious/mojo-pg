@@ -81,8 +81,8 @@ is $pg2->migrations->migrate(3)->active, 3, 'active version is 3';
 is $pg2->migrations->migrate(2)->active, 2, 'active version is 3';
 is $pg->migrations->active, 0, 'active version is still 0';
 is $pg->migrations->migrate->active, 4, 'active version is 4';
-is_deeply [$pg2->db->query('select * from migration_test_three')->hashes->each
-], [{baz => 'just'}, {baz => 'works'}], 'right structure';
+is_deeply $pg2->db->query('select * from migration_test_three')
+  ->hashes->to_array, [{baz => 'just'}, {baz => 'works'}], 'right structure';
 is $pg->migrations->migrate(0)->active,  0, 'active version is 0';
 is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 
