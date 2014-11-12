@@ -100,6 +100,14 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->query('insert into names values (?)', 'Sara');
   $db->query('insert into names values (?)', 'Daniel');
 
+  # Insert more rows in a transaction
+  {
+    my $tx = $db->begin;
+    $db->query('insert into names values (?)', 'Baerbel');
+    $db->query('insert into names values (?)', 'Wolfgang');
+    $tx->commit;
+  };
+
   # Select one row at a time
   my $results = $db->query('select * from names');
   while (my $next = $results->hash) {

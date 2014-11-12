@@ -1,5 +1,7 @@
 
 0.10  2014-11-12
+  - Removed dbh attribute from Mojo::Pg::Transaction.
+  - Added db attribute to Mojo::Pg::Transaction.
   - Fixed bug where notifications did not get delivered immediately to the
     process that sent them.
 

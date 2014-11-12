@@ -1,16 +1,24 @@
 package Mojo::Pg::Transaction;
 use Mojo::Base -base;
 
-has 'dbh';
+has 'db';
 
 sub DESTROY {
   my $self = shift;
-  if ($self->{rollback} && (my $dbh = $self->dbh)) { $dbh->rollback }
+  if ($self->{rollback} && (my $dbh = $self->{dbh})) { $dbh->rollback }
 }
 
-sub commit { $_[0]->dbh->commit if delete $_[0]->{rollback} }
+sub commit {
+  my $self = shift;
+  $self->{dbh}->commit if delete $self->{rollback};
+  if (my $db = $self->db) { $db->_notifications }
+}
 
-sub new { shift->SUPER::new(@_, rollback => 1) }
+sub new {
+  my $self = shift->SUPER::new(@_, rollback => 1);
+  $self->{dbh} = $self->db->dbh;
+  return $self;
+}
 
 1;
 
@@ -36,12 +44,12 @@ L<Mojo::Pg::Database>.
 
 L<Mojo::Pg::Transaction> implements the following attributes.
 
-=head2 dbh
+=head2 db
 
-  my $dbh = $tx->dbh;
-  $tx     = $tx->dbh($dbh);
+  my $db = $tx->db;
+  $tx    = $tx->db(Mojo::Pg::Database->new);
 
-L<DBD::Pg> database handle this transaction belongs to.
+L<Mojo::Pg::Database> object this transaction belongs to.
 
 =head1 METHODS
 
