@@ -1,5 +1,7 @@
 
 0.11  2014-11-13
+  - Added pid method to Mojo::Pg::Database.
+  - Added close event to Mojo::Pg::Database.
 
 0.10  2014-11-12
   - Removed dbh attribute from Mojo::Pg::Transaction.

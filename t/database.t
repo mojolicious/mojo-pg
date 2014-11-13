@@ -233,6 +233,17 @@ ok $db->listen('foo')->listen('bar')->unlisten('bar')->is_listening,
   'listening';
 ok !$db->unlisten('*')->is_listening, 'not listening';
 
+# Connection close while listening for notifications
+{
+  ok $db->listen('foo')->is_listening, 'listening';
+  my $close = 0;
+  $db->on(close => sub { $close++ });
+  local $db->dbh->{Warn} = 0;
+  $pg->db->query('select pg_terminate_backend(?)', $db->pid);
+  Mojo::IOLoop->start;
+  is $close, 1, 'close event has been emitted once';
+};
+
 # Blocking error
 eval { $pg->db->query('does_not_exist') };
 like $@, qr/does_not_exist/, 'right error';

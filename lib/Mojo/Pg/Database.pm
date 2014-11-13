@@ -60,6 +60,8 @@ sub notify {
   return $self;
 }
 
+sub pid { shift->dbh->{pg_pid} }
+
 sub ping { shift->dbh->ping }
 
 sub query {
@@ -144,7 +146,7 @@ sub _watch {
     $self->{handle} => sub {
       my $reactor = shift;
 
-      $self->_notifications;
+      $self->emit('close')->_unwatch unless eval { $self->_notifications; 1 };
       return unless (my $waiting = $self->{waiting}) && $dbh->pg_ready;
       my ($sth, $cb) = @{shift @$waiting}{qw(sth cb)};
 
@@ -184,6 +186,16 @@ L<Mojo::Pg>.
 
 L<Mojo::Pg::Database> inherits all events from L<Mojo::EventEmitter> and can
 emit the following new ones.
+
+=head2 close
+
+  $db->on(close => sub {
+    my $db = shift;
+    ...
+  });
+
+Emitted when the database connection gets closed while waiting for
+notifications or non-blocking operations.
 
 =head2 notification
 
@@ -275,6 +287,12 @@ running.
   $db = $db->notify('foo', 'bar');
 
 Send notification with optional payload.
+
+=head2 pid
+
+  my $pid = $db->pid;
+
+Return the process id of the backend server process.
 
 =head2 ping
 

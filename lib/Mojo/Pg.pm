@@ -130,6 +130,13 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     }
   )->wait;
 
+  # Listen for notifications non-blocking
+  $db->listen('foo')->on(notification => sub {
+    my ($db, $name, $pid, $payload) = @_;
+    say "$name: $payload";
+  });
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
 =head1 DESCRIPTION
 
 L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
