@@ -146,7 +146,8 @@ sub _watch {
     $self->{handle} => sub {
       my $reactor = shift;
 
-      $self->emit('close')->_unwatch unless eval { $self->_notifications; 1 };
+      $self->emit('close')->_unwatch
+        if !eval { $self->_notifications; 1 } && $self->is_listening;
       return unless (my $waiting = $self->{waiting}) && $dbh->pg_ready;
       my ($sth, $cb) = @{shift @$waiting}{qw(sth cb)};
 
@@ -195,7 +196,7 @@ emit the following new ones.
   });
 
 Emitted when the database connection gets closed while waiting for
-notifications or non-blocking operations.
+notifications.
 
 =head2 notification
 
@@ -253,7 +254,7 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   my $tx = $db->begin;
   $db->query('insert into names values (?)', 'Baerbel');
-  $db->query('insert into names values (?)', 'Wolfgangl');
+  $db->query('insert into names values (?)', 'Wolfgang');
   $tx->commit;
 
 =head2 disconnect
