@@ -131,10 +131,12 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   )->wait;
 
   # Listen for notifications non-blocking
-  $db->listen('foo')->on(notification => sub {
+  $db->on(notification => sub {
     my ($db, $name, $pid, $payload) = @_;
     say "$name: $payload";
+    $db->notify('bar', $payload) if $name eq 'foo';
   });
+  $db->listen('foo');
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
 =head1 DESCRIPTION
