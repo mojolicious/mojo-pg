@@ -47,7 +47,7 @@ drop table visitors;
 
   All you need is a oneliner, it takes less than a minute.
 
-    $ curl -L cpanmin.us | perl - -n Mojo::Pg
+    $ curl -L https://cpanmin.us | perl - -n Mojo::Pg
 
   And if you already have `cpanm` installed with a secure toolchain.
 
