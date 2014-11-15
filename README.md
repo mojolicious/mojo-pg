@@ -51,6 +51,6 @@ drop table visitors;
 
   And if you already have `cpanm` installed with a secure toolchain.
 
-    $ cpanm --mirror https://cpan.metacpan.org --mirror-only --verify -n Mojo::Pg
+    $ cpanm --mirror https://cpan.metacpan.org --mirror-only -n Mojo::Pg
 
   We recommend the use of a [Perlbrew](http://perlbrew.pl) environment.
