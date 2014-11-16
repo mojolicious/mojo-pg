@@ -47,10 +47,6 @@ drop table visitors;
 
   All you need is a oneliner, it takes less than a minute.
 
-    $ curl -L https://cpanmin.us | perl - -n Mojo::Pg
-
-  And if you already have `cpanm` installed with a secure toolchain.
-
-    $ cpanm --mirror https://cpan.metacpan.org --mirror-only -n Mojo::Pg
+    $ curl -L https://cpanmin.us | perl - --mirror https://cpan.metacpan.org --mirror-only -n Mojo::Pg
 
   We recommend the use of a [Perlbrew](http://perlbrew.pl) environment.
