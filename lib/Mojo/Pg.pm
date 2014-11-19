@@ -18,7 +18,7 @@ has migrations      => sub {
 has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
 has [qw(password username)] => '';
 
-our $VERSION = '0.12';
+our $VERSION = '1.0';
 
 sub db {
   my $self = shift;
@@ -169,9 +169,6 @@ concurrently, you have to use multiple connections.
 All cached database handles will be reset automatically if a new process has
 been forked, this allows multiple processes to share the same L<Mojo::Pg>
 object safely.
-
-Note that this whole distribution is EXPERIMENTAL and will change without
-warning!
 
 =head1 EVENTS
 
