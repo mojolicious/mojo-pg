@@ -154,13 +154,9 @@ L<Mojolicious|http://mojolicio.us> real-time web framework.
   get '/' => sub {
     my $c = shift;
 
-    my $db = $c->pg->db->query('select now() as time' => sub {
-      my ($db, $err, $results) = @_;
-
-      return $c->reply->exception($err) if $err;
-
-      $c->render(json => $results->hash);
-    });
+    my $db      = $c->pg->db;
+    my $results = $db->query('select now() as time');
+    $c->render(json => $results->hash);
   };
 
   app->start;
