@@ -145,6 +145,10 @@ L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicio.us> real-time web framework.
 
+Database and statement handles are cached automatically, so they can be reused
+transparently, to increase performance and to allow for connection timeouts to
+be handled gracefully.
+
   use Mojolicious::Lite;
   use Mojo::Pg;
 
@@ -159,12 +163,10 @@ L<Mojolicious|http://mojolicio.us> real-time web framework.
 
   app->start;
 
-Database and statement handles are cached automatically, so they can be reused
-transparently to increase performance. While all I/O operations are performed
-blocking, you can wait for long running queries asynchronously, allowing the
-L<Mojo::IOLoop> event loop to perform other tasks in the meantime. Since
-database connections usually have a very low latency, this often results in
-very good performance.
+While all I/O operations are performed blocking, you can wait for long running
+queries asynchronously, allowing the L<Mojo::IOLoop> event loop to perform
+other tasks in the meantime. Since database connections usually have a very
+low latency, this often results in very good performance.
 
 Every database connection can only handle one active query at a time, this
 includes asynchronous ones. So if you start more than one, they will be put on
