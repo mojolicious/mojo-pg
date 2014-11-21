@@ -152,11 +152,9 @@ L<Mojolicious|http://mojolicio.us> real-time web framework.
     sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@localhost/db') };
 
   get '/' => sub {
-    my $c = shift;
-
-    my $db      = $c->pg->db;
-    my $results = $db->query('select now() as time');
-    $c->render(json => $results->hash);
+    my $c  = shift;
+    my $db = $c->pg->db;
+    $c->render(json => $db->query('select now() as time')->hash);
   };
 
   app->start;
