@@ -15,7 +15,9 @@ has migrations      => sub {
   weaken $migrations->{pg};
   return $migrations;
 };
-has options => sub { {AutoCommit => 1, PrintError => 0, RaiseError => 1} };
+has options => sub {
+  {AutoCommit => 1, PrintError => 0, RaiseError => 1, pg_server_prepare => 0};
+};
 has [qw(password username)] => '';
 
 our $VERSION = '1.02';
@@ -236,7 +238,7 @@ easily.
   $pg         = $pg->options({AutoCommit => 1});
 
 Options for database handles, defaults to activating C<AutoCommit> as well as
-C<RaiseError> and deactivating C<PrintError>.
+C<RaiseError> and deactivating C<PrintError> as well as C<pg_server_prepare>.
 
 =head2 password
 
