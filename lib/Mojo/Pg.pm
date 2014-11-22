@@ -290,7 +290,7 @@ Parse configuration from connection string.
   $pg->from_string('postgresql://sri@%2ftmp%2fpg.sock/db4');
 
   # Username, database and additional options
-  $pg->from_string('postgresql://sri@/db5?PrintError=1&RaiseError=0');
+  $pg->from_string('postgresql://sri@/db5?PrintError=1&pg_server_prepare=1');
 
   # Service and additional options
   $pg->from_string('postgresql://?service=foo&PrintError=1&RaiseError=0');
