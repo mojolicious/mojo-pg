@@ -146,8 +146,8 @@ L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicio.us> real-time web framework.
 
 Database and statement handles are cached automatically, so they can be reused
-transparently, to increase performance and to allow for connection timeouts to
-be handled gracefully.
+transparently to increase performance. And you can handle connection timeouts
+gracefully by holding on to them only for short amounts of time.
 
   use Mojolicious::Lite;
   use Mojo::Pg;
