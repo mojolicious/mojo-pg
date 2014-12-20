@@ -17,6 +17,7 @@ my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 is $pg->migrations->name,   'migrations', 'right name';
 is $pg->migrations->latest, 0,            'latest version is 0';
 is $pg->migrations->active, 0,            'active version is 0';
+is $pg->migrations->migrate->active, 0, 'active version is 0';
 
 # Migrations from DATA section
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
@@ -26,7 +27,7 @@ is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
   ->latest, 7, 'latest version is 7';
 
 # Different syntax variations
-$pg->migrations->from_string(<<EOF);
+$pg->migrations->name('migrations_test')->from_string(<<EOF);
 -- 1 up
 create table if not exists migration_test_one (foo varchar(255));
 
@@ -71,7 +72,7 @@ is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
 
 # Bad and concurrent migrations
 my $pg2 = Mojo::Pg->new($ENV{TEST_ONLINE});
-$pg2->migrations->name('migrations_test')
+$pg2->migrations->name('migrations_test2')
   ->from_file(catfile($FindBin::Bin, 'migrations', 'test.sql'));
 is $pg2->migrations->latest, 4, 'latest version is 4';
 is $pg2->migrations->active, 0, 'active version is 0';
