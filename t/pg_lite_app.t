@@ -9,6 +9,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test'
 
 use Mojo::Pg;
 use Mojolicious::Lite;
+use Scalar::Util 'refaddr';
 use Test::Mojo;
 
 helper pg => sub { state $pg = Mojo::Pg->new($ENV{TEST_ONLINE}) };
@@ -26,6 +27,7 @@ get '/non-blocking' => sub {
   $c->pg->db->query(
     'select * from app_test' => sub {
       my ($db, $err, $results) = @_;
+      $c->res->headers->header('X-Addr' => refaddr $db->dbh);
       $c->render(text => $results->hash->{stuff});
     }
   );
@@ -39,9 +41,11 @@ $t->get_ok('/app_test')->status_is(404);
 # Blocking select
 $t->get_ok('/blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 
-# Non-blocking select (twice to allow connection reuse)
+# Non-blocking select (with connection reuse)
 $t->get_ok('/non-blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
+my $addr = $t->tx->res->headers->header('X-Addr');
 $t->get_ok('/non-blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
+is $t->tx->res->headers->header('X-Addr'), $addr, 'same connection';
 $t->app->pg->migrations->migrate(0);
 
 done_testing();

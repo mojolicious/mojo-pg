@@ -13,9 +13,8 @@ has max_statements => 10;
 
 sub DESTROY {
   my $self = shift;
-  return unless my $dbh = $self->dbh;
-  return unless my $pg  = $self->pg;
-  $pg->_enqueue($dbh, $self->{handle});
+  return unless my $pg = $self->pg;
+  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, $self->{handle}) }
 }
 
 sub backlog { scalar @{shift->{waiting} || []} }
