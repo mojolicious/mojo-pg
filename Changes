@@ -1,4 +1,6 @@
 
+1.04  2014-12-22
+
 1.03  2014-12-21
   - Fixed bug where Perl would close the DBD::Pg file descriptor after it had
     been used with the event loop.
