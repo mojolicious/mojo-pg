@@ -69,7 +69,7 @@ sub migrate {
 
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
 
-  $sql .= ';update mojo_migrations set version = ? where name = ?;';
+  $sql .= ';update mojo_migrations set version = $1 where name = $2;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
   return $self;
@@ -82,7 +82,7 @@ sub _active {
   my $name = $self->name;
   local @$dbh{qw(AutoCommit RaiseError)} = (1, 0);
   my $results
-    = $db->query('select version from mojo_migrations where name = ?', $name);
+    = $db->query('select version from mojo_migrations where name = $1', $name);
   if (my $next = $results->array) { return $next->[0] }
 
   local @$dbh{qw(AutoCommit RaiseError)} = (1, 1);
@@ -92,7 +92,7 @@ sub _active {
        version varchar(255)
      )'
   ) if $results->sth->err;
-  $db->query('insert into mojo_migrations values (?, ?)', $name, 0);
+  $db->query('insert into mojo_migrations values ($1, $2)', $name, 0);
 
   return 0;
 }

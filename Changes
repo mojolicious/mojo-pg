@@ -1,5 +1,6 @@
 
 1.04  2014-12-22
+  - Improved all methods not to use question marks in queries.
 
 1.03  2014-12-21
   - Fixed bug where Perl would close the DBD::Pg file descriptor after it had

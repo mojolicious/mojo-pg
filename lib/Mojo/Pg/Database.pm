@@ -57,7 +57,7 @@ sub listen {
 
 sub notify {
   my ($self, $name, $payload) = @_;
-  $self->query('select pg_notify(?, ?)', $name, $payload);
+  $self->query('select pg_notify($1, $2)', $name, $payload);
   return $self;
 }
 
