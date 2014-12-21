@@ -31,15 +31,19 @@ get '/non-blocking' => sub {
   );
 };
 
+# Make sure database connections are idle for a bit
 my $t = Test::Mojo->new;
+$t->ua->max_connections(0);
 
 # Make sure migrations are not served as static files
 $t->get_ok('/app_test')->status_is(404);
 
-# Blocking select
+# Blocking select (twice to allow connection reuse)
+$t->get_ok('/blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 $t->get_ok('/blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 
-# Non-blocking select
+# Non-blocking select (twice to allow connection reuse)
+$t->get_ok('/non-blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 $t->get_ok('/non-blocking')->status_is(200)->content_is('I ♥ Mojolicious!');
 $t->app->pg->migrations->migrate(0);
 

@@ -13,6 +13,7 @@ has max_statements => 10;
 
 sub DESTROY {
   my $self = shift;
+  return if $self->{async};
   if ((my $dbh = $self->dbh) && (my $pg = $self->pg)) { $pg->_enqueue($dbh) }
 }
 
@@ -77,6 +78,7 @@ sub query {
   }
 
   # Non-blocking
+  $self->{async} = 1;
   push @{$self->{waiting}}, {args => [@_], cb => $cb, query => $query};
   $self->$_ for qw(_next _watch);
 }
