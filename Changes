@@ -1,7 +1,7 @@
 
 1.03  2014-12-21
-  - Added workaround for DBD::Pg losing connections that have been used for
-    asynchronous queries.
+  - Fixed bug where Perl would close the DBD::Pg file descriptor after it had
+    been used with the event loop.
 
 1.02  2014-11-22
   - Improved performance for many different queries significantly by
