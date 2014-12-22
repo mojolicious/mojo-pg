@@ -20,7 +20,7 @@ has options => sub {
 };
 has [qw(password username)] => '';
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 sub db {
   my $self = shift;
