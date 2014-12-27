@@ -38,7 +38,7 @@ __DATA__
 
 @@ migrations
 -- 1 up
-create table visitors (at timestamp with time zone, ip varchar(255));
+create table visitors (at timestamp with time zone, ip text);
 -- 1 down
 drop table visitors;
 ```

@@ -57,7 +57,7 @@ done_testing();
 __DATA__
 @@ app_test
 -- 1 up
-create table if not exists app_test (stuff varchar(255));
+create table if not exists app_test (stuff text);
 
 -- 2 up
 insert into app_test values ('I ♥ Mojolicious!');

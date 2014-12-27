@@ -96,7 +96,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Create a table
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
-  $pg->db->do('create table if not exists names (name varchar(255))');
+  $pg->db->do('create table if not exists names (name text)');
 
   # Insert a few rows
   my $db = $pg->db;

@@ -56,19 +56,17 @@ sub migrate {
   # Up
   my $sql;
   if ($active < $target) {
-    $sql = join '',
-      map { $up->{$_} } grep { $_ <= $target && $_ > $active } sort keys %$up;
+    my @up = grep { $_ <= $target && $_ > $active } sort keys %$up;
+    $sql = join '', map { $up->{$_} } @up;
   }
 
   # Down
   else {
-    $sql = join '',
-      map { $down->{$_} }
-      grep { $_ > $target && $_ <= $active } reverse sort keys %$down;
+    my @down = grep { $_ > $target && $_ <= $active } reverse sort keys %$down;
+    $sql = join '', map { $down->{$_} } @down;
   }
 
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
-
   $sql .= ';update mojo_migrations set version = $1 where name = $2;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
@@ -88,8 +86,8 @@ sub _active {
   local @$dbh{qw(AutoCommit RaiseError)} = (1, 1);
   $db->query(
     'create table if not exists mojo_migrations (
-       name    varchar(255) unique,
-       version varchar(255)
+       name    text unique not null,
+       version bigint not null check (version >= 0)
      )'
   ) if $results->sth->err;
   $db->query('insert into mojo_migrations values ($1, $2)', $name, 0);
@@ -120,7 +118,7 @@ with one or more statements, separated by comments of the form
 C<-- VERSION UP/DOWN>.
 
   -- 1 up
-  create table messages (message varchar(255));
+  create table messages (message text);
   insert into messages values ('I ♥ Mojolicious!');
   -- 1 down
   drop table messages;
@@ -177,7 +175,7 @@ L<Mojo::Loader>, defaults to using the caller class and L</"name">.
   __DATA__
   @@ migrations
   -- 1 up
-  create table messages (message varchar(255));
+  create table messages (message text);
   insert into messages values ('I ♥ Mojolicious!');
   -- 1 down
   drop table messages;

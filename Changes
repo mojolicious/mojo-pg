@@ -1,5 +1,7 @@
 
-1.05  2014-12-25
+1.05  2014-12-27
+  - Improved Mojo::Pg::Migrations to create a mojo_migrations table with
+    stricter constraints.
 
 1.04  2014-12-22
   - Improved all methods not to use question marks in queries.
