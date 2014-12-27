@@ -11,7 +11,11 @@ use Mojo::Pg;
 
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my $db = $pg->db->do(
-  'create table if not exists results_test (id serial primary key,name text)');
+  'create table if not exists results_test (
+     id   serial primary key,
+     name text
+   )'
+);
 $db->query('insert into results_test (name) values (?)', $_) for qw(foo bar);
 
 # Result methods
