@@ -1,4 +1,6 @@
 
+1.06  2014-12-28
+
 1.05  2014-12-27
   - Improved Mojo::Pg::Migrations to create a mojo_migrations table with
     stricter constraints.
