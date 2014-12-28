@@ -4,12 +4,7 @@ use Mojo::Base -base;
 use Mojo::Collection;
 use Mojo::Util 'tablify';
 
-has [qw(db sth)];
-
-sub DESTROY {
-  my $self = shift;
-  if ((my $db = $self->db) && (my $sth = $self->sth)) { $db->_enqueue($sth) }
-}
+has 'sth';
 
 sub array { shift->sth->fetchrow_arrayref }
 
@@ -37,7 +32,7 @@ Mojo::Pg::Results - Results
 
   use Mojo::Pg::Results;
 
-  my $results = Mojo::Pg::Results->new(db => $db, sth => $sth);
+  my $results = Mojo::Pg::Results->new(sth => $sth);
   $results->hashes->map(sub { $_->{foo} })->shuffle->join("\n")->say;
 
 =head1 DESCRIPTION
@@ -48,13 +43,6 @@ L<Mojo::Pg::Database>.
 =head1 ATTRIBUTES
 
 L<Mojo::Pg::Results> implements the following attributes.
-
-=head2 db
-
-  my $db   = $results->db;
-  $results = $results->db(Mojo::Pg::Database->new);
-
-L<Mojo::Pg::Database> object these results belong to.
 
 =head2 sth
 

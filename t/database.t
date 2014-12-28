@@ -140,17 +140,13 @@ is $pg->db->dbh, $dbh, 'same database handle';
 $pg->db->disconnect;
 isnt $pg->db->dbh, $dbh, 'different database handles';
 
-
-# Statement cache
+# Dollar only
 $db = $pg->db;
-is $db->max_statements, 10, 'right default';
-my $sth = $db->max_statements(2)->query('select 3 as three')->sth;
-is $db->query('select 3 as three')->sth,   $sth, 'same statement handle';
-isnt $db->query('select 4 as four')->sth,  $sth, 'different statement handles';
-is $db->query('select 3 as three')->sth,   $sth, 'same statement handle';
-isnt $db->query('select 5 as five')->sth,  $sth, 'different statement handles';
-isnt $db->query('select 6 as six')->sth,   $sth, 'different statement handles';
-isnt $db->query('select 3 as three')->sth, $sth, 'different statement handles';
+is $db->dollar_only->query('select $1 as test', 23)->hash->{test}, 23,
+  'right result';
+eval { $db->dollar_only->query('select ? as test', 23) };
+like $@, qr/called with 1 bind variables when 0 are needed/, 'right error';
+is $db->query('select ? as test', 23)->hash->{test}, 23, 'right result';
 
 # Fork safety
 $dbh = $pg->db->dbh;

@@ -9,7 +9,6 @@ use Mojo::Pg::Transaction;
 use Scalar::Util 'weaken';
 
 has [qw(dbh pg)];
-has max_statements => 10;
 
 sub DESTROY {
   my $self = shift;
@@ -41,6 +40,8 @@ sub do {
   return $self;
 }
 
+sub dollar_only { ++$_[0]->{dollar_only} and return $_[0] }
+
 sub is_listening { !!keys %{shift->{listen} || {}} }
 
 sub listen {
@@ -69,16 +70,21 @@ sub query {
   my ($self, $query) = (shift, shift);
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
 
+  # Dollar only
+  my $dbh = $self->dbh;
+  local $dbh->{pg_placeholder_dollaronly} = 1 if delete $self->{dollar_only};
+
   # Blocking
   unless ($cb) {
-    my $sth = $self->_dequeue(0, $query);
+    my $sth = $dbh->prepare($query);
     $sth->execute(@_);
     $self->_notifications;
-    return Mojo::Pg::Results->new(db => $self, sth => $sth);
+    return Mojo::Pg::Results->new(sth => $sth);
   }
 
   # Non-blocking
-  push @{$self->{waiting}}, {args => [@_], cb => $cb, query => $query};
+  my $sth = $dbh->prepare($query, {pg_async => PG_ASYNC});
+  push @{$self->{waiting}}, {args => [@_], cb => $cb, sth => $sth};
   $self->$_ for qw(_next _watch);
 }
 
@@ -94,33 +100,9 @@ sub unlisten {
   return $self;
 }
 
-sub _dequeue {
-  my ($self, $async, $query) = @_;
-
-  my $queue = $self->{queue} ||= [];
-  for (my $i = 0; $i <= $#$queue; $i++) {
-    my $sth = $queue->[$i];
-    return splice @$queue, $i, 1
-      if !(!$sth->{pg_async} ^ !$async) && $sth->{Statement} eq $query;
-  }
-
-  return $self->dbh->prepare($query, $async ? {pg_async => PG_ASYNC} : ());
-}
-
-sub _enqueue {
-  my ($self, $sth) = @_;
-  push @{$self->{queue}}, $sth;
-  shift @{$self->{queue}} while @{$self->{queue}} > $self->max_statements;
-}
-
 sub _next {
-  my $self = shift;
-
-  return unless my $next = $self->{waiting}[0];
-  return if $next->{sth};
-
-  my $sth = $next->{sth} = $self->_dequeue(1, $next->{query});
-  $sth->execute(@{$next->{args}});
+  return unless my $next = shift->{waiting}[0];
+  $next->{sth}->execute(@{$next->{args}}) unless $next->{executed}++;
 }
 
 sub _notifications {
@@ -156,7 +138,7 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, Mojo::Pg::Results->new(db => $self, sth => $sth));
+      $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
       $self->_next;
       $self->_unwatch unless $self->backlog || $self->is_listening;
     }
@@ -176,8 +158,8 @@ Mojo::Pg::Database - Database
   use Mojo::Pg::Database;
 
   my $db = Mojo::Pg::Database->new(pg => $pg, dbh => $dbh);
-  $db->query('select * from foo')->hashes
-    ->map(sub { $_->{bar} })->join("\n")->say;
+  $db->query('select * from foo')
+    ->hashes->map(sub { $_->{bar} })->join("\n")->say;
 
 =head1 DESCRIPTION
 
@@ -226,14 +208,6 @@ L<DBD::Pg> database handle used for all queries.
 
 L<Mojo::Pg> object this database belongs to.
 
-=head2 max_statements
-
-  my $max = $db->max_statements;
-  $db     = $db->max_statements(5);
-
-Maximum number of statement handles to cache for future queries, defaults to
-C<10>.
-
 =head1 METHODS
 
 L<Mojo::Pg::Database> inherits all methods from L<Mojo::EventEmitter> and
@@ -269,6 +243,17 @@ Disconnect L</"dbh"> and prevent it from getting cached again.
   $db = $db->do('create table foo (bar text)');
 
 Execute a statement and discard its result.
+
+=head2 dollar_only
+
+  $db = $db->dollar_only;
+
+Activate C<pg_placeholder_dollaronly> for next L</"query"> call, to allow C<?>
+to be used as an operator.
+
+  use Mojo::JSON 'decode_json';
+  $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
+    ->hashes->map(sub { json_decode($_->{bar})->{baz} })->join("\n")->say;
 
 =head2 is_listening
 
@@ -308,9 +293,7 @@ Check database connection.
   my $results = $db->query('insert into foo values (?, ?, ?)', @values);
 
 Execute a blocking statement and return a L<Mojo::Pg::Results> object with the
-results. The L<DBD::Pg> statement handle will be automatically cached again
-when that object is destroyed, so future queries can reuse it to increase
-performance. You can also append a callback to perform operation non-blocking.
+results. You can also append a callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;

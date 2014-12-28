@@ -118,8 +118,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   }
 
   # Select all rows blocking
-  $db->query('select * from names')->hashes
-    ->map(sub { $_->{name} })->join("\n")->say;
+  $db->query('select * from names')
+    ->hashes->map(sub { $_->{name} })->join("\n")->say;
 
   # Select all rows non-blocking
   Mojo::IOLoop->delay(
@@ -148,9 +148,9 @@ L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicio.us> real-time web framework.
 
-Database and statement handles are cached automatically, so they can be reused
-transparently to increase performance. And you can handle connection timeouts
-gracefully by holding on to them only for short amounts of time.
+Database handles are cached automatically, so they can be reused transparently
+to increase performance. And you can handle connection timeouts gracefully by
+holding on to them only for short amounts of time.
 
   use Mojolicious::Lite;
   use Mojo::Pg;
