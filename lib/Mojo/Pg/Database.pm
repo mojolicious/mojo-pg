@@ -248,7 +248,7 @@ Execute a statement and discard its result.
 
   $db = $db->dollar_only;
 
-Activate C<pg_placeholder_dollaronly> for next L</"query"> call, to allow C<?>
+Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?>
 to be used as an operator.
 
   use Mojo::JSON 'decode_json';
