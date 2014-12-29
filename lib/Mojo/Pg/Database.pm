@@ -253,7 +253,7 @@ to be used as an operator.
 
   use Mojo::JSON 'decode_json';
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
-    ->hashes->map(sub { json_decode($_->{bar})->{baz} })->join("\n")->say;
+    ->hashes->map(sub { decode_json($_->{bar})->{baz} })->join("\n")->say;
 
 =head2 is_listening
 
