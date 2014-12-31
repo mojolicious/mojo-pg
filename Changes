@@ -1,5 +1,5 @@
 
-1.07  2014-12-29
+1.07  2015-01-01
 
 1.06  2014-12-28
   - Added dollar_only method to Mojo::Pg::Database.
