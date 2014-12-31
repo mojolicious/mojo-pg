@@ -148,6 +148,22 @@ eval { $db->dollar_only->query('select ? as test', 23) };
 like $@, qr/called with 1 bind variables when 0 are needed/, 'right error';
 is $db->query('select ? as test', 23)->hash->{test}, 23, 'right result';
 
+# JSON
+$db = $pg->db;
+is_deeply $db->json({bar => 'baz'})->query('select ?::json as foo')->hash,
+  {foo => {bar => 'baz'}}, 'right structure';
+is_deeply $db->json({bar => 'baz'})->query('select ?::json as foo')->array,
+  [{bar => 'baz'}], 'right structure';
+is_deeply $db->json({bar => 'baz'})->query('select ?::json as foo')
+  ->hashes->first, {foo => {bar => 'baz'}}, 'right structure';
+is_deeply $db->json({bar => 'baz'})->query('select ?::json as foo')
+  ->arrays->first, [{bar => 'baz'}], 'right structure';
+is_deeply $db->json({bar => 'baz'})->query('select ?::json as foo')
+  ->no_json->hash, {foo => '{"bar":"baz"}'}, 'right structure';
+is_deeply $db->json({bar => 'baz'})->val('yada')
+  ->query('select ?::json as foo, ? as yada')->hash,
+  {foo => {bar => 'baz'}, yada => 'yada'}, 'right structure';
+
 # Fork safety
 $dbh = $pg->db->dbh;
 my ($connections, $current) = @_;

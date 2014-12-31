@@ -4,6 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use DBD::Pg ':async';
 use IO::Handle;
 use Mojo::IOLoop;
+use Mojo::JSON 'encode_json';
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
 use Scalar::Util 'weaken';
@@ -44,6 +45,10 @@ sub dollar_only { ++$_[0]->{dollar_only} and return $_[0] }
 
 sub is_listening { !!keys %{shift->{listen} || {}} }
 
+sub json {
+  shift->val(map { encode_json $_} @_);
+}
+
 sub listen {
   my ($self, $name) = @_;
 
@@ -70,6 +75,8 @@ sub query {
   my ($self, $query) = (shift, shift);
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
 
+  my @values = $self->{values} ? (@{delete $self->{values}}, @_) : @_;
+
   # Dollar only
   my $dbh = $self->dbh;
   local $dbh->{pg_placeholder_dollaronly} = 1 if delete $self->{dollar_only};
@@ -77,14 +84,14 @@ sub query {
   # Blocking
   unless ($cb) {
     my $sth = $dbh->prepare($query);
-    $sth->execute(@_);
+    $sth->execute(@values);
     $self->_notifications;
     return Mojo::Pg::Results->new(sth => $sth);
   }
 
   # Non-blocking
   my $sth = $dbh->prepare($query, {pg_async => PG_ASYNC});
-  push @{$self->{waiting}}, {args => [@_], cb => $cb, sth => $sth};
+  push @{$self->{waiting}}, {args => \@values, cb => $cb, sth => $sth};
   $self->$_ for qw(_next _watch);
 }
 
@@ -97,6 +104,12 @@ sub unlisten {
   $name eq '*' ? delete($self->{listen}) : delete($self->{listen}{$name});
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
+  return $self;
+}
+
+sub val {
+  my $self = shift;
+  push @{$self->{values}}, @_;
   return $self;
 }
 
@@ -251,15 +264,22 @@ Execute a statement and discard its result.
 Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?>
 to be used as an operator.
 
-  use Mojo::JSON 'decode_json';
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
-    ->hashes->map(sub { decode_json($_->{bar})->{baz} })->join("\n")->say;
+    ->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
 
 =head2 is_listening
 
   my $bool = $db->is_listening;
 
 Check if L</"dbh"> is listening for notifications.
+
+=head2 json
+
+  $db = $db->json(@values);
+
+Enqueue JSON placeholder values for next L</"query"> call.
+
+  say $db->json({b => 'c'})->query('select ?::json as a')->hash->{a}{b};
 
 =head2 listen
 
@@ -307,6 +327,14 @@ results. You can also append a callback to perform operation non-blocking.
   $db = $db->unlisten('*');
 
 Stop listening for notifications.
+
+=head2 val
+
+  $db = $db->val(@values);
+
+Enqueue placeholder values for next L</"query"> call.
+
+  $db->val('a')->json({b => 'c'})->query('insert into test values (?, ?)');
 
 =head1 SEE ALSO
 
