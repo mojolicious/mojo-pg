@@ -167,6 +167,9 @@ is_deeply $db->query('select ?::json as foo', undef)->expand->hash,
   {foo => undef}, 'right structure';
 is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef],
   'right structure';
+my $results = $db->query('select ?::json', undef);
+is_deeply $results->expand->array, [undef], 'right structure';
+is_deeply $results->expand->array, undef, 'no more results';
 
 # Fork safety
 $dbh = $pg->db->dbh;

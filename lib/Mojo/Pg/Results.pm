@@ -30,7 +30,7 @@ sub text { tablify shift->arrays }
 sub _expand {
   my ($self, @data) = @_;
 
-  return @data unless $self->{expand};
+  return @data unless $data[0] && $self->{expand};
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
@@ -38,7 +38,7 @@ sub _expand {
       0 .. $#$types;
     ($idx, $name) = @$self{qw(idx name)} = (\@idx, [@{$self->columns}[@idx]]);
   }
-  return @data unless @$idx && @data;
+  return @data unless @$idx;
 
   for my $data (@data) {
     if (ref $data eq 'HASH') {
