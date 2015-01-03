@@ -117,7 +117,10 @@ Return column names as an array reference.
 
   $results = $results->expand;
 
-Decode C<json> and C<jsonb> fields automatically.
+Decode C<json> and C<jsonb> fields automatically for all rows.
+
+  # Expand JSON
+  $results->expand->hashes->map(sub { $_->{foo}{bar} })->join("\n")->say;
 
 =head2 hash
 
