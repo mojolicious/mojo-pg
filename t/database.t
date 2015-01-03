@@ -163,6 +163,10 @@ is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->hash,
   {foo => '{"bar":"baz"}'}, 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => \1})
   ->expand->hashes->first, {foo => true}, 'right structure';
+is_deeply $db->query('select ?::json as foo', undef)->expand->hash,
+  {foo => undef}, 'right structure';
+is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef],
+  'right structure';
 
 # Fork safety
 $dbh = $pg->db->dbh;

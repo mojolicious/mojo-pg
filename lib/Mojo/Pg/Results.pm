@@ -42,9 +42,9 @@ sub _expand {
 
   for my $data (@data) {
     if (ref $data eq 'HASH') {
-      $data->{$_} = decode_json $data->{$_} for @$name;
+      $data->{$_} and $data->{$_} = decode_json $data->{$_} for @$name;
     }
-    else { $data->[$_] = decode_json $data->[$_] for @$idx }
+    else { $data->[$_] and $data->[$_] = decode_json $data->[$_] for @$idx }
   }
 
   return @data;
