@@ -258,7 +258,7 @@ Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?>
 to be used as an operator.
 
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
-    ->json->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
+    ->expand->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
 
 =head2 is_listening
 

@@ -7,30 +7,30 @@ use Mojo::Util 'tablify';
 
 has 'sth';
 
-sub array { ($_[0]->_decode($_[0]->sth->fetchrow_arrayref))[0] }
+sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
 
 sub arrays {
-  Mojo::Collection->new($_[0]->_decode(@{$_[0]->sth->fetchall_arrayref}));
+  Mojo::Collection->new($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref}));
 }
 
 sub columns { shift->sth->{NAME} }
 
-sub hash { ($_[0]->_decode($_[0]->sth->fetchrow_hashref))[0] }
+sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
 
-sub json { ++$_[0]{json} and return $_[0] }
+sub expand { ++$_[0]{expand} and return $_[0] }
 
 sub hashes {
-  Mojo::Collection->new($_[0]->_decode(@{$_[0]->sth->fetchall_arrayref({})}));
+  Mojo::Collection->new($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})}));
 }
 
 sub rows { shift->sth->rows }
 
 sub text { tablify shift->arrays }
 
-sub _decode {
+sub _expand {
   my ($self, @data) = @_;
 
-  return @data unless $self->{json};
+  return @data unless $self->{expand};
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
@@ -113,6 +113,12 @@ containing array references.
 
 Return column names as an array reference.
 
+=head2 expand
+
+  $results = $results->expand;
+
+Decode C<json> and C<jsonb> fields automatically.
+
 =head2 hash
 
   my $hash = $results->hash;
@@ -133,12 +139,6 @@ containing hash references.
 
   # Process all rows at once
   say $results->hashes->reduce(sub { $a->{money} + $b->{money} });
-
-=head2 json
-
-  $results = $results->json;
-
-Decode C<json> and C<jsonb> fields automatically.
 
 =head2 rows
 

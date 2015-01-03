@@ -1,7 +1,7 @@
 
 1.07  2015-01-03
   - Added support for encoding and decoding of JSON values.
-  - Added json method to Mojo::Pg::Results.
+  - Added expand method to Mojo::Pg::Results.
 
 1.06  2014-12-28
   - Added dollar_only method to Mojo::Pg::Database.

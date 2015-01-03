@@ -152,17 +152,17 @@ is $db->query('select ? as test', 23)->hash->{test}, 23, 'right result';
 # JSON
 $db = $pg->db;
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->json->hash, {foo => {bar => 'baz'}}, 'right structure';
+  ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->json->array, [{bar => 'baz'}], 'right structure';
+  ->expand->array, [{bar => 'baz'}], 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->json->hashes->first, {foo => {bar => 'baz'}}, 'right structure';
+  ->expand->hashes->first, {foo => {bar => 'baz'}}, 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->json->arrays->first, [{bar => 'baz'}], 'right structure';
+  ->expand->arrays->first, [{bar => 'baz'}], 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->hash,
   {foo => '{"bar":"baz"}'}, 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => \1})
-  ->json->hashes->first, {foo => true}, 'right structure';
+  ->expand->hashes->first, {foo => true}, 'right structure';
 
 # Fork safety
 $dbh = $pg->db->dbh;

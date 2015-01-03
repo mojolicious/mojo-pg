@@ -119,7 +119,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # JSON roundtrip
   say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-    ->json->hash->{foo}{bar};
+    ->expand->hash->{foo}{bar};
 
   # Select all rows blocking
   $db->query('select * from names')
