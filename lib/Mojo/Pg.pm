@@ -273,6 +273,9 @@ connection. The L<DBD::Pg> database handle will be automatically cached again
 when that object is destroyed, so you can handle connection timeouts
 gracefully by holding on to it only for short amounts of time.
 
+  say $pg->db->query('select * from accounts')
+    ->hashes->reduce(sub { $a->{money} + $b->{money} });
+
 =head2 from_string
 
   $pg = $pg->from_string('postgresql://postgres@/test');
