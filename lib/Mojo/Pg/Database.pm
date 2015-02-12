@@ -35,8 +35,8 @@ sub disconnect {
 }
 
 sub do {
-  my $self = shift;
-  $self->dbh->do(@_);
+  my ($self, $query) = (shift, shift);
+  $self->dbh->do($query, undef, _values(@_));
   $self->_notifications;
   return $self;
 }
@@ -70,9 +70,7 @@ sub ping { shift->dbh->ping }
 sub query {
   my ($self, $query) = (shift, shift);
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
-
-  # JSON
-  my @values = map { _json($_) ? encode_json $_->{json} : $_ } @_;
+  my @values = _values(@_);
 
   # Dollar only
   my $dbh = $self->dbh;
@@ -122,6 +120,10 @@ sub _unwatch {
   my $self = shift;
   return unless delete $self->{watching};
   Mojo::IOLoop->singleton->reactor->remove($self->{handle});
+}
+
+sub _values {
+  map { _json($_) ? encode_json $_->{json} : $_ } @_;
 }
 
 sub _watch {
@@ -247,8 +249,11 @@ Disconnect L</"dbh"> and prevent it from getting cached again.
 =head2 do
 
   $db = $db->do('create table foo (bar text)');
+  $db = $db->do('insert into foo values (?, ?, ?)', @values);
 
 Execute a statement and discard its result.
+
+  $db->do('insert into foo values (?)', {json => {bar => 'baz'}});
 
 =head2 dollar_only
 

@@ -13,25 +13,33 @@ my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my $db = $pg->db->do(
   'create table if not exists results_test (
      id   serial primary key,
-     name text
+     name text,
+     info json
    )'
 );
-$db->query('insert into results_test (name) values (?)', $_) for qw(foo bar);
+$db->do('insert into results_test (name, info) values (?, ?)',
+  $_, {json => {$_ => $_}})
+  for qw(foo bar);
 
 # Result methods
 is_deeply $db->query('select * from results_test')->rows, 2, 'two rows';
-is_deeply $db->query('select * from results_test')->columns, ['id', 'name'],
-  'right structure';
-is_deeply $db->query('select * from results_test')->array, [1, 'foo'],
-  'right structure';
+is_deeply $db->query('select * from results_test')->columns,
+  ['id', 'name', 'info'], 'right structure';
+is_deeply $db->query('select * from results_test')->array,
+  [1, 'foo', '{"foo":"foo"}'], 'right structure';
 is_deeply $db->query('select * from results_test')->arrays->to_array,
-  [[1, 'foo'], [2, 'bar']], 'right structure';
+  [[1, 'foo', '{"foo":"foo"}'], [2, 'bar', '{"bar":"bar"}']],
+  'right structure';
 is_deeply $db->query('select * from results_test')->hash,
-  {id => 1, name => 'foo'}, 'right structure';
-is_deeply $db->query('select * from results_test')->hashes->to_array,
-  [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
-is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
-  'right text';
+  {id => 1, name => 'foo', info => '{"foo":"foo"}'}, 'right structure';
+my $results = [
+  {id => 1, name => 'foo', info => {foo => 'foo'}},
+  {id => 2, name => 'bar', info => {bar => 'bar'}}
+];
+is_deeply $db->query('select * from results_test')->expand->hashes->to_array,
+  $results, 'right structure';
+is $pg->db->query('select * from results_test')->text,
+  qq/1  foo  {"foo":"foo"}\n2  bar  {"bar":"bar"}\n/, 'right text';
 
 # Transactions
 {
@@ -40,9 +48,12 @@ is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
     ->do("insert into results_test (name) values ('tx1')");
   $tx->commit;
 };
+$results = [
+  {id => 3, name => 'tx1', info => undef},
+  {id => 4, name => 'tx1', info => undef}
+];
 is_deeply $db->query('select * from results_test where name = ?', 'tx1')
-  ->hashes->to_array, [{id => 3, name => 'tx1'}, {id => 4, name => 'tx1'}],
-  'right structure';
+  ->hashes->to_array, $results, 'right structure';
 {
   my $tx = $db->begin;
   $db->do("insert into results_test (name) values ('tx2')")
