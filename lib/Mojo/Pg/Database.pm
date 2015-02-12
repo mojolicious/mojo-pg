@@ -53,7 +53,7 @@ sub listen {
 
   my $dbh = $self->dbh;
   local $dbh->{AutoCommit} = 1;
-  $self->query('listen ' . $dbh->quote_identifier($name))
+  $dbh->do('listen ' . $dbh->quote_identifier($name))
     unless $self->{listen}{$name}++;
   $self->_watch;
 
@@ -100,7 +100,7 @@ sub unlisten {
 
   my $dbh = $self->dbh;
   local $dbh->{AutoCommit} = 1;
-  $self->query('unlisten' . $dbh->quote_identifier($name));
+  $dbh->do('unlisten' . $dbh->quote_identifier($name));
   $name eq '*' ? delete($self->{listen}) : delete($self->{listen}{$name});
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
