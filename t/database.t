@@ -215,7 +215,7 @@ Mojo::IOLoop->delay(
     my ($delay, $name, $pid, $payload) = @_;
     push @notifications, [$name, $pid, $payload];
     $db2->listen('bar')->once(notification => $delay->begin);
-    Mojo::IOLoop->next_tick(sub { $db2->do("notify bar, 'baz'") });
+    Mojo::IOLoop->next_tick(sub { $db2->query("notify bar, 'baz'") });
   },
   sub {
     my ($delay, $name, $pid, $payload) = @_;

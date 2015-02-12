@@ -1,6 +1,6 @@
 
 1.08  2015-02-12
-  - Improved do method in Mojo::Pg::Database to accept placeholder values.
+  - Deprecated Mojo::Pg::Database::do in favor of Mojo::Pg::Database::query.
 
 1.07  2015-01-03
   - Added support for encoding and decoding of JSON values.

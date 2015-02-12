@@ -50,7 +50,7 @@ sub migrate {
   # Lock migrations table and check version again
   local @{$db->dbh}{qw(AutoCommit RaiseError)} = (1, 1);
   my $tx = $db->begin;
-  $db->do('lock table mojo_migrations in exclusive mode');
+  $db->query('lock table mojo_migrations in exclusive mode');
   return $self if (my $active = $self->_active($db)) == $target;
 
   # Up

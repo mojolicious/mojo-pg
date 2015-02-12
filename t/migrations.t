@@ -91,7 +91,7 @@ is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 eval { $pg->migrations->migrate(23) };
 like $@, qr/Version 23 has no migration/, 'right error';
 
-$pg->db->do('drop table mojo_migrations');
+$pg->db->query('drop table mojo_migrations');
 
 done_testing();
 
