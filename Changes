@@ -1,4 +1,6 @@
 
+1.09  2015-02-13
+
 1.08  2015-02-12
   - Deprecated Mojo::Pg::Database::do in favor of Mojo::Pg::Database::query.
 
