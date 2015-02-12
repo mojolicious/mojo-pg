@@ -35,6 +35,7 @@ sub disconnect {
   $self->dbh->disconnect;
 }
 
+# DEPRECATED!
 sub do {
   deprecated 'Mojo::Pg::Database::do is DEPRECATED'
     . ' in favor of Mojo::Pg::Database::query';
@@ -236,6 +237,7 @@ Begin transaction and return L<Mojo::Pg::Transaction> object, which will
 automatically roll back the transaction unless
 L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
+  # Add names in a transaction
   my $tx = $db->begin;
   $db->query('insert into names values (?)', 'Baerbel');
   $db->query('insert into names values (?)', 'Wolfgang');
@@ -254,6 +256,7 @@ Disconnect L</"dbh"> and prevent it from getting cached again.
 Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?>
 to be used as an operator.
 
+  # Check for a key in a JSON document
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
     ->expand->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
 

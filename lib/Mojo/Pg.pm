@@ -273,6 +273,7 @@ connection. The L<DBD::Pg> database handle will be automatically cached again
 when that object is destroyed, so you can handle connection timeouts
 gracefully by holding on to it only for short amounts of time.
 
+  # Add up all the money
   say $pg->db->query('select * from accounts')
     ->hashes->reduce(sub { $a->{money} + $b->{money} });
 
