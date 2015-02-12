@@ -153,6 +153,8 @@ is $db->query('select ? as test', 23)->hash->{test}, 23, 'right result';
 $db = $pg->db;
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
   ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
+is_deeply $db->query('select ?::jsonb as foo', {json => {bar => 'baz'}})
+  ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
   ->expand->array, [{bar => 'baz'}], 'right structure';
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
