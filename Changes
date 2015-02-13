@@ -1,5 +1,6 @@
 
 1.09  2015-02-14
+  - Improved fork-safety by activating AutoInactiveDestroy by default.
 
 1.08  2015-02-12
   - Deprecated Mojo::Pg::Database::do in favor of Mojo::Pg::Database::query.

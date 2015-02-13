@@ -16,7 +16,13 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub {
-  {AutoCommit => 1, PrintError => 0, RaiseError => 1, pg_server_prepare => 0};
+  {
+    AutoCommit          => 1,
+    AutoInactiveDestroy => 1,
+    PrintError          => 0,
+    RaiseError          => 1,
+    pg_server_prepare   => 0
+  };
 };
 has [qw(password username)] => '';
 
@@ -25,7 +31,7 @@ our $VERSION = '1.09';
 sub db {
   my $self = shift;
 
-  # Fork safety
+  # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
   my ($dbh, $handle) = @{$self->_dequeue};
@@ -242,8 +248,9 @@ easily.
   my $options = $pg->options;
   $pg         = $pg->options({AutoCommit => 1});
 
-Options for database handles, defaults to activating C<AutoCommit> as well as
-C<RaiseError> and deactivating C<PrintError> as well as C<pg_server_prepare>.
+Options for database handles, defaults to activating C<AutoCommit>,
+C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>
+as well as C<pg_server_prepare>.
 
 =head2 password
 
