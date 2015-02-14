@@ -68,7 +68,9 @@ Mojo::Pg::PubSub - Publish/Subscribe
 =head1 DESCRIPTION
 
 L<Mojo::Pg::PubSub> is a scalable implementation of the publish/subscribe
-pattern based on PostgreSQL notifications.
+pattern based on PostgreSQL notifications. It allows many consumers to share
+the same database connection and is therefore very efficient, avoiding common
+scalability problems.
 
 =head1 EVENTS
 
@@ -104,19 +106,19 @@ implements the following new ones.
 
   my $cb = $pubsub->listen(foo => sub {...});
 
-Listen for notifications on a channel.
+Subscribe to a channel.
 
 =head2 notify
 
   $pubsub = $pubsub->notify(foo => 'bar');
 
-Send notification on a channel.
+Notify a channel.
 
 =head2 unlisten
 
   $pubsub = $pubsub->unlisten(foo => $cb);
 
-Stop listening for notifications on a channel.
+Unsubscribe from a channel.
 
 =head1 SEE ALSO
 
