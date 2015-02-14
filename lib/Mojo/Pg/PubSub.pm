@@ -69,9 +69,9 @@ Mojo::Pg::PubSub - Publish/Subscribe
 =head1 DESCRIPTION
 
 L<Mojo::Pg::PubSub> is a scalable implementation of the publish/subscribe
-pattern based on PostgreSQL notifications. It allows many consumers to share
-the same database connection and is therefore very efficient, avoiding common
-scalability problems.
+pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and
+allows many consumers to share the same database connection, to avoid many
+common scalability problems.
 
 =head1 EVENTS
 
