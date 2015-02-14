@@ -149,13 +149,17 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     }
   )->wait;
 
-  # Listen for notifications non-blocking
-  $db->on(notification => sub {
-    my ($db, $name, $pid, $payload) = @_;
-    say "$name: $payload";
-    $db->notify('bar', $payload) if $name eq 'foo';
+  # Send and receive notifications non-blocking
+  $pg->pubsub->listen(foo => sub {
+    my ($pubsub, $payload) = @_;
+    say "foo: $payload";
+    $pubsub->notify(bar => $payload);
   });
-  $db->listen('foo');
+  $pg->pubsub->listen(bar => sub {
+    my ($pubsub, $payload) = @_;
+    say "bar: $payload";
+  });
+  $pg->pubsub->notify(foo => 'PostgreSQL rocks!');
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
 =head1 DESCRIPTION
