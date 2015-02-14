@@ -38,7 +38,7 @@ sub _db {
   $db->once(
     close => sub {
       delete $self->{db};
-      $self->emit(error => $@) unless eval { $self->_db };
+      eval { $self->_db };
     }
   );
   $db->listen($_) for keys %{$self->{chans}};
@@ -77,15 +77,6 @@ common scalability problems.
 
 L<Mojo::Pg::PubSub> inherits all events from L<Mojo::EventEmitter> and can
 emit the following new ones.
-
-=head2 error
-
-  $pubsub->on(error => sub {
-    my ($pubsub, $err) = @_;
-    ...
-  });
-
-Emitted if reconnecting to the database failed, fatal if unhandled.
 
 =head2 reconnect
 
