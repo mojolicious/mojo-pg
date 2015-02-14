@@ -5,9 +5,14 @@ use Scalar::Util 'weaken';
 
 has 'pg';
 
+sub is_listening {
+  !!eval { shift->_db };
+}
+
 sub listen {
   my ($self, $name, $cb) = @_;
-  $self->_db->listen($name) unless push(@{$self->{chans}{$name}}, $cb) > 1;
+  $self->_db->listen($name) unless @{$self->{chans}{$name} ||= []};
+  push @{$self->{chans}{$name}}, $cb;
   return $cb;
 }
 
@@ -15,9 +20,9 @@ sub notify { $_[0]->_db->notify(@_[1, 2]) and return $_[0] }
 
 sub unlisten {
   my ($self, $name, $cb) = @_;
-  my $chans = $self->{chans}{$name};
-  @$chans = grep { $cb ne $_ } @$chans;
-  $self->_db->unlisten($name) and delete $self->{chans}{$name} unless @$chans;
+  my $chan = $self->{chans}{$name};
+  @$chan = grep { $cb ne $_ } @$chan;
+  $self->_db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
   return $self;
 }
 
@@ -34,13 +39,8 @@ sub _db {
       for my $cb (@{$self->{chans}{$name}}) { $self->$cb($payload) }
     }
   );
-  $db->once(
-    close => sub {
-      delete $self->{db};
-      my $db = $self->_db;
-      $db->listen($_) for keys %{$self->{chans}};
-    }
-  );
+  $db->once(close => sub { delete $self->{db}; $self->is_listening });
+  $db->listen($_) for keys %{$self->{chans}};
 
   return $db;
 }
@@ -101,6 +101,12 @@ L<Mojo::Pg> object this publish/subscribe container belongs to.
 
 L<Mojo::Pg::PubSub> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
+
+=head2 is_listening
+
+  my $bool = $pubsub->is_listening;
+
+Check if a database connection can be established.
 
 =head2 listen
 
