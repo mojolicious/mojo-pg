@@ -273,6 +273,15 @@ Database password, defaults to an empty string.
 L<Mojo::Pg::PubSub> object you can use to send and receive notifications very
 efficiently.
 
+  # Subscribe to a channel
+  $pg->pubsub->listen(news => sub {
+    my ($pubsub, $payload) = @_;
+    say "Received: $payload";
+  });
+
+  # Notify a channel
+  $pg->pubsub->notify(news => 'PostgreSQL rocks!');
+
 =head2 username
 
   my $username = $pg->username;
