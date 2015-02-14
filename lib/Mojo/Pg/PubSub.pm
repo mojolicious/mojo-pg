@@ -107,7 +107,18 @@ implements the following new ones.
 
   my $cb = $pubsub->listen(foo => sub {...});
 
-Subscribe to a channel.
+Subscribe to a channel, there is no limit on how many subscribers a channel
+can have.
+
+  # Subscribe to the same channel twice
+  $pubsub->listen(foo => sub {
+    my ($pubsub, $payload) = @_;
+    say "One: $payload";
+  });
+  $pubsub->listen(foo => sub {
+    my ($pubsub, $payload) = @_;
+    say "Two: $payload";
+  });
 
 =head2 notify
 
