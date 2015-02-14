@@ -270,7 +270,8 @@ Database password, defaults to an empty string.
   my $pubsub = $pg->pubsub;
   $pg        = $pg->pubsub(Mojo::Pg::PubSub->new);
 
-L<Mojo::Pg::PubSub> object you can use to send and receive notifications.
+L<Mojo::Pg::PubSub> object you can use to send and receive notifications very
+efficiently.
 
 =head2 username
 

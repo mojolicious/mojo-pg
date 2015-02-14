@@ -60,7 +60,9 @@ Mojo::Pg::PubSub - Publish/Subscribe
   my $pubsub = Mojo::Pg::PubSub->new(pg => $pg);
   my $cb = $pubsub->listen(foo => sub {
     my ($pubsub, $payload) = @_;
+    say "Received: $payload";
   });
+  $pubsub->notify(foo => 'bar');
   $pubsub->unlisten(foo => $cb);
 
 =head1 DESCRIPTION
