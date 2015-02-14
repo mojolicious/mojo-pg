@@ -11,14 +11,11 @@ websocket '/channel' => sub {
   $c->inactivity_timeout(3600);
 
   # Forward messages from the browser to PostgreSQL
-  $c->on(message => sub { shift->pg->pubsub->notify(message => shift) });
+  $c->on(message => sub { shift->pg->pubsub->notify(mojochat => shift) });
 
   # Forward messages from PostgreSQL to the browser
-  my $cb = $c->pg->pubsub->listen(message => sub {
-    my ($pubsub, $msg) = @_;
-    $c->send($msg);
-  });
-  $c->on(finish => sub { shift->pg->pubsub->unlisten(message => $cb) });
+  my $cb = $c->pg->pubsub->listen(mojochat => sub { $c->send(pop) });
+  $c->on(finish => sub { shift->pg->pubsub->unlisten(mojochat => $cb) });
 };
 
 app->start;
