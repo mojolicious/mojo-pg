@@ -5,6 +5,7 @@ use Carp 'croak';
 use DBI;
 use Mojo::Pg::Database;
 use Mojo::Pg::Migrations;
+use Mojo::Pg::PubSub;
 use Mojo::URL;
 use Scalar::Util 'weaken';
 
@@ -25,6 +26,11 @@ has options => sub {
   };
 };
 has [qw(password username)] => '';
+has pubsub => sub {
+  my $pubsub = Mojo::Pg::PubSub->new(pg => shift);
+  weaken $pubsub->{pg};
+  return $pubsub;
+};
 
 our $VERSION = '1.09';
 
@@ -258,6 +264,13 @@ as well as C<pg_server_prepare>.
   $pg          = $pg->password('s3cret');
 
 Database password, defaults to an empty string.
+
+=head2 pubsub
+
+  my $pubsub = $pg->pubsub;
+  $pg        = $pg->pubsub(Mojo::Pg::PubSub->new);
+
+L<Mojo::Pg::PubSub> object you can use to send and receive notifications.
 
 =head2 username
 
