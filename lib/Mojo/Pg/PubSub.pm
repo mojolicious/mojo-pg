@@ -5,10 +5,6 @@ use Scalar::Util 'weaken';
 
 has 'pg';
 
-sub is_listening {
-  !!eval { shift->_db };
-}
-
 sub listen {
   my ($self, $name, $cb) = @_;
   $self->_db->listen($name) unless @{$self->{chans}{$name} ||= []};
@@ -39,7 +35,12 @@ sub _db {
       for my $cb (@{$self->{chans}{$name}}) { $self->$cb($payload) }
     }
   );
-  $db->once(close => sub { delete $self->{db}; $self->is_listening });
+  $db->once(
+    close => sub {
+      delete $self->{db};
+      eval { $self->_db };
+    }
+  );
   $db->listen($_) for keys %{$self->{chans}};
 
   return $db;
@@ -101,12 +102,6 @@ L<Mojo::Pg> object this publish/subscribe container belongs to.
 
 L<Mojo::Pg::PubSub> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
-
-=head2 is_listening
-
-  my $bool = $pubsub->is_listening;
-
-Check if a database connection can be established.
 
 =head2 listen
 
