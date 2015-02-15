@@ -10,9 +10,29 @@ plan skip_all => 'set TEST_ONLINE to enable this test'
 use Mojo::IOLoop;
 use Mojo::Pg;
 
-# Notifications with event loop
+# Reconnect
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-my (@all, @test);
+my (@dbhs, @test);
+$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+ok !$pg->pubsub->db->is_listening, 'not listening';
+$pg->pubsub->listen(pstest => sub { push @test, pop });
+ok $pg->pubsub->db->is_listening, 'listening';
+is $dbhs[0], $pg->pubsub->db->dbh, 'right database handle';
+is_deeply \@test, [], 'no messages';
+{
+  local $pg->pubsub->db->dbh->{Warn} = 0;
+  $pg->pubsub->on(reconnect => sub { Mojo::IOLoop->stop });
+  $pg->db->query('select pg_terminate_backend(?)', $pg->pubsub->db->pid);
+  Mojo::IOLoop->start;
+  ok $dbhs[1], 'database handle';
+  isnt $dbhs[0], $dbhs[1], 'different database handles';
+  $pg->pubsub->notify(pstest => 'works');
+  is_deeply \@test, ['works'], 'right messages';
+};
+
+# Notifications with event loop
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+my @all = @test = ();
 $pg->pubsub->db->on(notification => sub { push @all, [@_[1, 3]] });
 $pg->pubsub->listen(
   pstest => sub {
