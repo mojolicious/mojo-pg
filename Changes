@@ -1,5 +1,7 @@
 
-1.09  2015-02-14
+1.09  2015-02-15
+  - Added EXPERIMENTAL module Mojo::Pg::PubSub.
+  - Added EXPERIMENTAL pubsub attribute to Mojo::Pg.
   - Improved fork-safety by activating AutoInactiveDestroy by default.
 
 1.08  2015-02-12
