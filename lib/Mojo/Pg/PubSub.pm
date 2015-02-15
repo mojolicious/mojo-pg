@@ -6,7 +6,7 @@ use Scalar::Util 'weaken';
 has db => sub {
   my $self = shift;
 
-  my $db = $self->pg->db;
+  my $db = $self->{db} = $self->pg->db;
   weaken $db->{pg};
   weaken $self;
   $db->on(

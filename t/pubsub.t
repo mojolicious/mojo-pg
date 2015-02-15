@@ -21,12 +21,12 @@ is $dbhs[0], $pg->pubsub->db->dbh, 'same database handle';
 is_deeply \@test, [], 'no messages';
 {
   local $pg->pubsub->db->dbh->{Warn} = 0;
-  $pg->pubsub->on(reconnect => sub { Mojo::IOLoop->stop });
+  $pg->pubsub->on(
+    reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
   $pg->db->query('select pg_terminate_backend(?)', $pg->pubsub->db->pid);
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
-  $pg->pubsub->notify(pstest => 'works');
   is_deeply \@test, ['works'], 'right messages';
 };
 
