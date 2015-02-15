@@ -21,7 +21,7 @@ has db => sub {
       eval { $self->db };
     }
   );
-  $db->listen($_) for keys %{$self->{chans}};
+  $db->listen($_) for keys %{$self->{chans}}, 'mojo_pg_pubsub';
   $self->emit(reconnect => $db);
 
   return $db;
