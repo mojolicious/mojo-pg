@@ -19,7 +19,6 @@ websocket '/channel' => sub {
 };
 
 app->start;
-
 __DATA__
 
 @@ chat.html.ep
