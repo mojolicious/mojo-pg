@@ -22,7 +22,6 @@ app->start;
 __DATA__
 
 @@ chat.html.ep
-
 <form onsubmit="sendChat(this.children[0]); return false"><input></form>
 <div id="log"></div>
 <script>
