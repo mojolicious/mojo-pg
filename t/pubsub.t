@@ -17,7 +17,7 @@ $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 ok !$pg->pubsub->db->is_listening, 'not listening';
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $pg->pubsub->db->is_listening, 'listening';
-is $dbhs[0], $pg->pubsub->db->dbh, 'right database handle';
+is $dbhs[0], $pg->pubsub->db->dbh, 'same database handle';
 is_deeply \@test, [], 'no messages';
 {
   local $pg->pubsub->db->dbh->{Warn} = 0;
