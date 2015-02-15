@@ -12,8 +12,8 @@ use Mojo::Pg;
 
 # Notifications with event loop
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-my (@all, @test);
-$pg->pubsub->db->on(notification => sub { push @all, [@_[1, 3]] });
+my ($db, @all, @test);
+$pg->pubsub->on(reconnect => sub { $db = pop });
 $pg->pubsub->listen(
   pstest => sub {
     my ($pubsub, $payload) = @_;
@@ -22,6 +22,7 @@ $pg->pubsub->listen(
     Mojo::IOLoop->stop if $payload eq 'stop';
   }
 );
+$db->on(notification => sub { push @all, [@_[1, 3]] });
 $pg->db->notify(pstest => 'test');
 Mojo::IOLoop->start;
 is_deeply \@test, ['test', 'stop'], 'right messages';
@@ -30,10 +31,12 @@ is_deeply \@all, [['pstest', 'test'], ['pstest', 'stop']],
 
 # Unsubscribe
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$db = undef;
+$pg->pubsub->on(reconnect => sub { $db = pop });
 @all = @test = ();
-$pg->pubsub->db->on(notification => sub { push @all, [@_[1, 3]] });
 my $first  = $pg->pubsub->listen(pstest => sub { push @test, pop });
 my $second = $pg->pubsub->listen(pstest => sub { push @test, pop });
+$db->on(notification => sub { push @all, [@_[1, 3]] });
 $pg->pubsub->notify(pstest => 'first');
 is_deeply \@test, ['first', 'first'], 'right messages';
 is_deeply \@all, [['pstest', 'first']], 'right notifications';
@@ -51,13 +54,13 @@ $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my @dbhs = @test = ();
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
-is $dbhs[0], $pg->pubsub->db->dbh, 'same database handle';
+ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
-  local $pg->pubsub->db->dbh->{Warn} = 0;
+  local $dbhs[0]->{Warn} = 0;
   $pg->pubsub->on(
     reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
-  $pg->db->query('select pg_terminate_backend(?)', $pg->pubsub->db->pid);
+  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]->{pg_pid});
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
@@ -68,12 +71,13 @@ is_deeply \@test, [], 'no messages';
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
-is $dbhs[0], $pg->pubsub->db->dbh, 'same database handle';
+$pg->pubsub->notify(pstest => 'fail');
+ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
-  local $pg->pubsub->db->dbh->{Warn} = 0;
+  local $dbhs[0]->{Warn} = 0;
   $pg->pubsub->on(reconnect => sub { Mojo::IOLoop->stop });
-  $pg->db->query('select pg_terminate_backend(?)', $pg->pubsub->db->pid);
+  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]->{pg_pid});
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
