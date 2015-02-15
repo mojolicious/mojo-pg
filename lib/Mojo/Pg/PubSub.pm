@@ -72,6 +72,8 @@ pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and
 allows many consumers to share the same database connection, to avoid many
 common scalability problems.
 
+Note that this module is EXPERIMENTAL and might change without warning!
+
 =head1 EVENTS
 
 L<Mojo::Pg::PubSub> inherits all events from L<Mojo::EventEmitter> and can

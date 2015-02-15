@@ -275,7 +275,8 @@ Database password, defaults to an empty string.
   $pg        = $pg->pubsub(Mojo::Pg::PubSub->new);
 
 L<Mojo::Pg::PubSub> object you can use to send and receive notifications very
-efficiently, by sharing a single database connection with many consumers.
+efficiently, by sharing a single database connection with many consumers. Note
+that this attribute is EXPERIMENTAL and might change without warning!
 
   # Subscribe to a channel
   $pg->pubsub->listen(news => sub {
