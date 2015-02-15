@@ -1,4 +1,6 @@
 
+1.10  2015-02-16
+
 1.09  2015-02-15
   - Added EXPERIMENTAL module Mojo::Pg::PubSub.
   - Added EXPERIMENTAL pubsub attribute to Mojo::Pg.
