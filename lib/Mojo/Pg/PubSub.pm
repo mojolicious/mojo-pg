@@ -3,31 +3,11 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 use Scalar::Util 'weaken';
 
-has 'pg';
-
-sub listen {
-  my ($self, $name, $cb) = @_;
-  $self->_db->listen($name) unless @{$self->{chans}{$name} ||= []};
-  push @{$self->{chans}{$name}}, $cb;
-  return $cb;
-}
-
-sub notify { $_[0]->_db->notify(@_[1, 2]) and return $_[0] }
-
-sub unlisten {
-  my ($self, $name, $cb) = @_;
-  my $chan = $self->{chans}{$name};
-  @$chan = grep { $cb ne $_ } @$chan;
-  $self->_db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
-  return $self;
-}
-
-sub _db {
+has db => sub {
   my $self = shift;
 
-  return $self->{db} if $self->{db};
-
-  $self->emit(reconnect => my $db = $self->{db} = $self->pg->db);
+  my $db = $self->pg->db;
+  weaken $db->{pg};
   weaken $self;
   $db->on(
     notification => sub {
@@ -38,12 +18,31 @@ sub _db {
   $db->once(
     close => sub {
       delete $self->{db};
-      eval { $self->_db };
+      eval { $self->db };
     }
   );
   $db->listen($_) for keys %{$self->{chans}};
+  $self->emit(reconnect => $db);
 
   return $db;
+};
+has 'pg';
+
+sub listen {
+  my ($self, $name, $cb) = @_;
+  $self->db->listen($name) unless @{$self->{chans}{$name} ||= []};
+  push @{$self->{chans}{$name}}, $cb;
+  return $cb;
+}
+
+sub notify { $_[0]->db->notify(@_[1, 2]) and return $_[0] }
+
+sub unlisten {
+  my ($self, $name, $cb) = @_;
+  my $chan = $self->{chans}{$name};
+  @$chan = grep { $cb ne $_ } @$chan;
+  $self->db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
+  return $self;
 }
 
 1;
@@ -90,6 +89,14 @@ Emitted when a new database connection has been established.
 =head1 ATTRIBUTES
 
 L<Mojo::Pg::PubSub> implements the following attributes.
+
+=head2 db
+
+  my $db  = $pubsub->db;
+  $pubsub = $pubsub->db(Mojo::Pg::Database->new);
+
+L<Mojo::Pg::Database> object that is currently being used to send and receive
+notifications.
 
 =head2 pg
 
