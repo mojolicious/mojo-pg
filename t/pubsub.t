@@ -38,11 +38,11 @@ $pg->pubsub->listen(
   pstest => sub {
     my ($pubsub, $payload) = @_;
     push @test, $payload;
-    Mojo::IOLoop->next_tick(sub { $pubsub->notify(pstest => 'stop') });
+    Mojo::IOLoop->next_tick(sub { $pubsub->pg->db->notify(pstest => 'stop') });
     Mojo::IOLoop->stop if $payload eq 'stop';
   }
 );
-Mojo::IOLoop->next_tick(sub { $pg->db->notify(pstest => 'test') });
+$pg->db->notify(pstest => 'test');
 Mojo::IOLoop->start;
 is_deeply \@test, ['test', 'stop'], 'right messages';
 is_deeply \@all, [['pstest', 'test'], ['pstest', 'stop']],
