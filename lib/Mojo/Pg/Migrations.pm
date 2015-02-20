@@ -2,7 +2,7 @@ package Mojo::Pg::Migrations;
 use Mojo::Base -base;
 
 use Carp 'croak';
-use Mojo::Loader;
+use Mojo::Loader 'data_section';
 use Mojo::Util 'slurp';
 
 use constant DEBUG => $ENV{MOJO_MIGRATIONS_DEBUG} || 0;
@@ -15,7 +15,7 @@ sub active { $_[0]->_active($_[0]->pg->db) }
 sub from_data {
   my ($self, $class, $name) = @_;
   return $self->from_string(
-    Mojo::Loader->new->data($class //= caller, $name // $self->name));
+    data_section($class //= caller, $name // $self->name));
 }
 
 sub from_file { shift->from_string(slurp pop) }
@@ -170,7 +170,8 @@ Currently active version.
   $migrations = $migrations->from_data('main', 'file_name');
 
 Extract migrations from a file in the DATA section of a class with
-L<Mojo::Loader>, defaults to using the caller class and L</"name">.
+L<Mojo::Loader/"data_section">, defaults to using the caller class and
+L</"name">.
 
   __DATA__
   @@ migrations

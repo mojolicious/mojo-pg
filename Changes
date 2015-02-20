@@ -1,5 +1,6 @@
 
-1.10  2015-02-16
+1.10  2015-02-20
+  - Updated for Mojolicious 5.81.
 
 1.09  2015-02-15
   - Added EXPERIMENTAL module Mojo::Pg::PubSub.
