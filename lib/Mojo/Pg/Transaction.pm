@@ -65,6 +65,8 @@ Commit transaction.
 =head2 new
 
   my $tx = Mojo::Pg::Transaction->new;
+  my $tx = Mojo::Pg::Transaction->new(db => Mojo::Pg::Database->new);
+  my $tx = Mojo::Pg::Transaction->new({db => Mojo::Pg::Database->new});
 
 Construct a new L<Mojo::Pg::Transaction> object.
 
