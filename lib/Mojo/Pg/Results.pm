@@ -83,8 +83,8 @@ L<DBD::Pg> statement handle results are fetched from.
 
 =head1 METHODS
 
-L<Mojo::Pg::Results> inherits all methods from L<Mojo::Base> and implements
-the following new ones.
+L<Mojo::Pg::Results> inherits all methods from L<Mojo::Base> and implements the
+following new ones.
 
 =head2 array
 

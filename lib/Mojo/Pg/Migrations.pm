@@ -209,8 +209,8 @@ Latest version available.
   $migrations = $migrations->migrate;
   $migrations = $migrations->migrate(3);
 
-Migrate from L</"active"> to a different version, up or down, defaults to
-using L</"latest">. All version numbers need to be positive, with version C<0>
+Migrate from L</"active"> to a different version, up or down, defaults to using
+L</"latest">. All version numbers need to be positive, with version C<0>
 representing an empty database.
 
   # Reset database

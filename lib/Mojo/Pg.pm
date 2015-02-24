@@ -188,8 +188,8 @@ holding on to them only for short amounts of time.
 
 While all I/O operations are performed blocking, you can wait for long running
 queries asynchronously, allowing the L<Mojo::IOLoop> event loop to perform
-other tasks in the meantime. Since database connections usually have a very
-low latency, this often results in very good performance.
+other tasks in the meantime. Since database connections usually have a very low
+latency, this often results in very good performance.
 
 Every database connection can only handle one active query at a time, this
 includes asynchronous ones. So if you start more than one, they will be put on
@@ -305,8 +305,8 @@ following new ones.
 
 Get L<Mojo::Pg::Database> object for a cached or newly established database
 connection. The L<DBD::Pg> database handle will be automatically cached again
-when that object is destroyed, so you can handle connection timeouts
-gracefully by holding on to it only for short amounts of time.
+when that object is destroyed, so you can handle connection timeouts gracefully
+by holding on to it only for short amounts of time.
 
   # Add up all the money
   say $pg->db->query('select * from accounts')

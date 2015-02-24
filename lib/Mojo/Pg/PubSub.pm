@@ -71,9 +71,9 @@ Mojo::Pg::PubSub - Publish/Subscribe
 =head1 DESCRIPTION
 
 L<Mojo::Pg::PubSub> is a scalable implementation of the publish/subscribe
-pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and
-allows many consumers to share the same database connection, to avoid many
-common scalability problems.
+pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and allows
+many consumers to share the same database connection, to avoid many common
+scalability problems.
 
 Note that this module is EXPERIMENTAL and might change without warning!
 
@@ -112,8 +112,8 @@ implements the following new ones.
 
   my $cb = $pubsub->listen(foo => sub {...});
 
-Subscribe to a channel, there is no limit on how many subscribers a channel
-can have.
+Subscribe to a channel, there is no limit on how many subscribers a channel can
+have.
 
   # Subscribe to the same channel twice
   $pubsub->listen(foo => sub {
