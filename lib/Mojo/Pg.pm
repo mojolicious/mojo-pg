@@ -350,6 +350,26 @@ L</"from_string"> if necessary.
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
 
+=head1 REFERENCE
+
+This is the class hierarchy of the L<Mojo::Pg> distribution.
+
+=over 2
+
+=item * L<Mojo::Pg>
+
+=item * L<Mojo::Pg::Database>
+
+=item * L<Mojo::Pg::Migrations>
+
+=item * L<Mojo::Pg::PubSub>
+
+=item * L<Mojo::Pg::Results>
+
+=item * L<Mojo::Pg::Transaction>
+
+=back
+
 =head1 AUTHOR
 
 Sebastian Riedel, C<sri@cpan.org>.
