@@ -122,6 +122,7 @@ C<-- VERSION UP/DOWN>.
   insert into messages values ('I ♥ Mojolicious!');
   -- 1 down
   drop table messages;
+
   -- 2 up (...you can comment freely here...)
   create table stuff (whatever int);
   -- 2 down
