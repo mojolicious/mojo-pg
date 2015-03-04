@@ -1,5 +1,7 @@
 
 1.11  2015-03-04
+  - Removed experimental status from Mojo::Pg::PubSub.
+  - Removed experimental status from pubsub attribute in Mojo::Pg.
 
 1.10  2015-02-20
   - Updated for Mojolicious 5.81.
