@@ -1,5 +1,6 @@
 
-1.12  2015-03-05
+1.12  2015-03-09
+  - Fixed Mojo::Pg::Migrations to handle UTF-8 encoded files correctly.
 
 1.11  2015-03-04
   - Removed experimental status from Mojo::Pg::PubSub.

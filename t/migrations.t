@@ -37,9 +37,9 @@ create table if not exists migration_test_one (foo varchar(255));
 
   -- 2 up
 
-insert into migration_test_one values ('works');
+insert into migration_test_one values ('works ♥');
 -- 2 down
-delete from migration_test_one where foo = 'works';
+delete from migration_test_one where foo = 'works ♥';
 --
 --  3 Up, create
 --        another
@@ -57,7 +57,7 @@ is $pg->migrations->latest, 4, 'latest version is 4';
 is $pg->migrations->active, 0, 'active version is 0';
 is $pg->migrations->migrate->active, 4, 'active version is 4';
 is_deeply $pg->db->query('select * from migration_test_one')->hash,
-  {foo => 'works'}, 'right structure';
+  {foo => 'works ♥'}, 'right structure';
 is $pg->migrations->migrate->active, 4, 'active version is 4';
 is $pg->migrations->migrate(1)->active, 1, 'active version is 1';
 is $pg->db->query('select * from migration_test_one')->hash, undef,
@@ -83,7 +83,8 @@ is $pg2->migrations->migrate(2)->active, 2, 'active version is 3';
 is $pg->migrations->active, 0, 'active version is still 0';
 is $pg->migrations->migrate->active, 4, 'active version is 4';
 is_deeply $pg2->db->query('select * from migration_test_three')
-  ->hashes->to_array, [{baz => 'just'}, {baz => 'works'}], 'right structure';
+  ->hashes->to_array, [{baz => 'just'}, {baz => 'works ♥'}],
+  'right structure';
 is $pg->migrations->migrate(0)->active,  0, 'active version is 0';
 is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 
