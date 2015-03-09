@@ -1,4 +1,6 @@
 
+1.13  2015-03-10
+
 1.12  2015-03-09
   - Fixed Mojo::Pg::Migrations to handle UTF-8 encoded files correctly.
 
