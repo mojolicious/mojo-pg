@@ -108,20 +108,25 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Create a table
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
-  $pg->db->query('create table if not exists names (name text)');
+  $pg->db->query(
+    'create table if not exists names (id serial primary key, name text)');
 
   # Insert a few rows
   my $db = $pg->db;
-  $db->query('insert into names values (?)', 'Sara');
-  $db->query('insert into names values (?)', 'Daniel');
+  $db->query('insert into names (name) values (?)', 'Sara');
+  $db->query('insert into names (name) values (?)', 'Daniel');
 
   # Insert more rows in a transaction
   {
     my $tx = $db->begin;
-    $db->query('insert into names values (?)', 'Baerbel');
-    $db->query('insert into names values (?)', 'Wolfgang');
+    $db->query('insert into names (name) values (?)', 'Baerbel');
+    $db->query('insert into names (name) values (?)', 'Wolfgang');
     $tx->commit;
   };
+
+  # Insert another row and return the generated id
+  say $db->query('insert into names (name) values (?) returning id', 'Stefan')
+    ->hash->{id};
 
   # Select one row at a time
   my $results = $db->query('select * from names');
@@ -129,13 +134,13 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     say $next->{name};
   }
 
-  # JSON roundtrip
-  say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-    ->expand->hash->{foo}{bar};
-
   # Select all rows blocking
   $db->query('select * from names')
     ->hashes->map(sub { $_->{name} })->join("\n")->say;
+
+  # JSON roundtrip
+  say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
+    ->expand->hash->{foo}{bar};
 
   # Select all rows non-blocking
   Mojo::IOLoop->delay(
