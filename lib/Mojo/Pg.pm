@@ -108,13 +108,12 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Create a table
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
-  $pg->db->query(
-    'create table if not exists names (id serial primary key, name text)');
+  $pg->db->query('create table names (id serial primary key, name text)');
 
   # Insert a few rows
   my $db = $pg->db;
   $db->query('insert into names (name) values (?)', 'Sara');
-  $db->query('insert into names (name) values (?)', 'Daniel');
+  $db->query('insert into names (name) values (?)', 'Stefan');
 
   # Insert more rows in a transaction
   {
@@ -125,7 +124,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   };
 
   # Insert another row and return the generated id
-  say $db->query('insert into names (name) values (?) returning id', 'Stefan')
+  say $db->query('insert into names (name) values (?) returning id', 'Daniel')
     ->hash->{id};
 
   # JSON roundtrip
