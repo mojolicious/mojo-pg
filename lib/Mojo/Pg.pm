@@ -128,6 +128,10 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   say $db->query('insert into names (name) values (?) returning id', 'Stefan')
     ->hash->{id};
 
+  # JSON roundtrip
+  say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
+    ->expand->hash->{foo}{bar};
+
   # Select one row at a time
   my $results = $db->query('select * from names');
   while (my $next = $results->hash) {
@@ -149,10 +153,6 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
       $results->hashes->map(sub { $_->{name} })->join("\n")->say;
     }
   )->wait;
-
-  # JSON roundtrip
-  say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-    ->expand->hash->{foo}{bar};
 
   # Send and receive notifications non-blocking
   $pg->pubsub->listen(foo => sub {
