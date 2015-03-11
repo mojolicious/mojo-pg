@@ -108,7 +108,7 @@ sub unlisten {
   my $dbh = $self->dbh;
   local $dbh->{AutoCommit} = 1;
   $dbh->do('unlisten ' . $dbh->quote_identifier($name));
-  $name eq '*' ? delete($self->{listen}) : delete($self->{listen}{$name});
+  $name eq '*' ? delete $self->{listen} : delete $self->{listen}{$name};
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
   return $self;
