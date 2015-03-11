@@ -63,7 +63,13 @@ sub listen {
 
 sub notify {
   my ($self, $name, $payload) = @_;
-  $self->query('select pg_notify($1, $2)', $name, $payload);
+
+  my $dbh    = $self->dbh;
+  my $notify = 'notify ' . $dbh->quote_identifier($name);
+  $notify .= ', ' . $dbh->quote($payload) if defined $payload;
+  $dbh->do($notify);
+  $self->_notifications;
+
   return $self;
 }
 
@@ -101,7 +107,7 @@ sub unlisten {
 
   my $dbh = $self->dbh;
   local $dbh->{AutoCommit} = 1;
-  $dbh->do('unlisten' . $dbh->quote_identifier($name));
+  $dbh->do('unlisten ' . $dbh->quote_identifier($name));
   $name eq '*' ? delete($self->{listen}) : delete($self->{listen}{$name});
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
