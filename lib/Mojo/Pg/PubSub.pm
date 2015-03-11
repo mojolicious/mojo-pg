@@ -125,6 +125,7 @@ have.
 
 =head2 notify
 
+  $pubsub = $pubsub->notify('foo');
   $pubsub = $pubsub->notify(foo => 'bar');
 
 Notify a channel.

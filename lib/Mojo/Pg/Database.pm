@@ -276,15 +276,15 @@ Check if L</"dbh"> is listening for notifications.
 
   $db = $db->listen('foo');
 
-Start listening for notifications when the L<Mojo::IOLoop> event loop is
-running.
+Subscribe to a channel and receive L</"notification"> events when the
+L<Mojo::IOLoop> event loop is running.
 
 =head2 notify
 
   $db = $db->notify('foo');
-  $db = $db->notify('foo', 'bar');
+  $db = $db->notify(foo => 'bar');
 
-Send notification with optional payload.
+Notify a channel.
 
 =head2 pid
 
@@ -318,7 +318,7 @@ results. You can also append a callback to perform operation non-blocking.
   $db = $db->unlisten('foo');
   $db = $db->unlisten('*');
 
-Stop listening for notifications.
+Unsubscribe from a channel, C<*> can be used to unsubscribe from all channels.
 
 =head1 SEE ALSO
 
