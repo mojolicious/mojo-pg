@@ -1,5 +1,7 @@
 
 1.14  2015-03-12
+  - Fixed bug where non-blocking queries could get lost after the database
+    connection got closed unexpectedly.
 
 1.13  2015-03-11
   - Improved notify performance significantly.

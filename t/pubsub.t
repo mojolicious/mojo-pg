@@ -57,10 +57,10 @@ $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
-  local $dbhs[0]->{Warn} = 0;
+  local $dbhs[0]{Warn} = 0;
   $pg->pubsub->on(
     reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
-  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]->{pg_pid});
+  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
@@ -75,9 +75,9 @@ $pg->pubsub->notify(pstest => 'fail');
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
-  local $dbhs[0]->{Warn} = 0;
+  local $dbhs[0]{Warn} = 0;
   $pg->pubsub->on(reconnect => sub { Mojo::IOLoop->stop });
-  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]->{pg_pid});
+  $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';

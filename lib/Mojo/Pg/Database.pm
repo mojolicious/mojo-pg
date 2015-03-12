@@ -14,8 +14,12 @@ has [qw(dbh pg)];
 
 sub DESTROY {
   my $self = shift;
-  return unless my $pg = $self->pg;
-  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, $self->{handle}) }
+
+  my $waiting = $self->{waiting} || [];
+  $_->{cb}($self, 'Premature connection close', undef) for @$waiting;
+
+  return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
+  $pg->_enqueue($dbh, $self->{handle});
 }
 
 sub backlog { scalar @{shift->{waiting} || []} }
@@ -31,7 +35,6 @@ sub begin {
 sub disconnect {
   my $self = shift;
   $self->_unwatch;
-  delete $self->{queue};
   $self->dbh->disconnect;
 }
 

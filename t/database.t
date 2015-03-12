@@ -316,13 +316,25 @@ like $@, qr/does_not_exist/, 'right error';
 $pg->db->query(
   'does_not_exist' => sub {
     my ($db, $err, $results) = @_;
-    $fail   = $err;
-    $result = $results;
+    ($fail, $result) = ($err, $results);
     Mojo::IOLoop->stop;
   }
 );
 Mojo::IOLoop->start;
 like $fail, qr/does_not_exist/, 'right error';
 is $result->sth->errstr, $fail, 'same error';
+
+# Clean up non-blocking queries
+($fail, $result) = ();
+$db = $pg->db;
+$db->query(
+  'select 1' => sub {
+    my ($db, $err, $results) = @_;
+    ($fail, $result) = ($err, $results);
+  }
+);
+$db->disconnect;
+undef $db;
+is $fail, 'Premature connection close', 'right error';
 
 done_testing();
