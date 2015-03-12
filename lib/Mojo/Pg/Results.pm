@@ -9,9 +9,7 @@ has 'sth';
 
 sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
 
-sub arrays {
-  Mojo::Collection->new($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref}));
-}
+sub arrays { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref})) }
 
 sub columns { shift->sth->{NAME} }
 
@@ -19,13 +17,13 @@ sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
 
 sub expand { ++$_[0]{expand} and return $_[0] }
 
-sub hashes {
-  Mojo::Collection->new($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})}));
-}
+sub hashes { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})})) }
 
 sub rows { shift->sth->rows }
 
 sub text { tablify shift->arrays }
+
+sub _collect { Mojo::Collection->new(@_) }
 
 sub _expand {
   my ($self, @data) = @_;
