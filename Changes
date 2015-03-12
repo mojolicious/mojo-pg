@@ -1,4 +1,6 @@
 
+1.15  2015-03-13
+
 1.14  2015-03-12
   - Fixed bug where non-blocking queries could get lost after the database
     connection got closed unexpectedly.
