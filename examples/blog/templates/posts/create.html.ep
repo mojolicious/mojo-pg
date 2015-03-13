@@ -1,4 +1,4 @@
-% title 'New post';
+% layout 'blog', title => 'New post';
 <h2>New post</h2>
 %= form_for store_post => begin
   %= label_for title => 'Title'

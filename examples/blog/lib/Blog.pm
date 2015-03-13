@@ -10,7 +10,6 @@ sub startup {
   # Configuration
   $self->plugin('Config');
   $self->secrets($self->config('secrets'));
-  $self->defaults(layout => 'blog');
 
   # Model
   $self->helper(pg => sub { state $pg = Mojo::Pg->new(shift->config('pg')) });

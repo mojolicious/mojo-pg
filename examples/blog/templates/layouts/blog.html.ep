@@ -2,7 +2,15 @@
 <html>
   <head>
     <title><%= title %></title>
-    %= stylesheet '/blog.css'
+    <style>
+      a, body { color: #2a2a2a }
+      body { font: 0.9em 'Helvetica Neue', Helvetica, sans-serif }
+      input[type=text], textarea { width: 600px }
+      input.field-with-error, textarea.field-with-error {
+        border: 4px solid #f00;
+      }
+      textarea { height: 300px }
+    </style>
   </head>
   <body>
     <h1><%= link_to 'Blog' => 'posts' %></h1>
