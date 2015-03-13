@@ -1,5 +1,9 @@
 -- 1 up
-create table posts (id serial primary key, title text, body text);
+create table if not exists posts (
+  id    serial primary key,
+  title text,
+  body  text
+);
 
 -- 1 down
-drop table posts;
+drop table if exists posts;
