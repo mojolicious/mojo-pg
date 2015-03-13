@@ -1,0 +1,13 @@
+% title 'New post';
+<h2>New post</h2>
+%= form_for store_post => begin
+  %= label_for title => 'Title'
+  <br>
+  %= text_field 'title'
+  <br>
+  %= label_for body => 'Body'
+  <br>
+  %= text_area 'body'
+  <br>
+  %= submit_button 'Create post'
+% end

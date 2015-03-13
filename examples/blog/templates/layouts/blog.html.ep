@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    %= stylesheet '/blog.css'
+  </head>
+  <body>
+    <h1><%= link_to 'Blog' => 'posts' %></h1>
+    %= content
+  </body>
+</html>
