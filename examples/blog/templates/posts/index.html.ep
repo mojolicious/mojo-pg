@@ -1,9 +1,7 @@
 % layout 'blog', title => 'Blog';
 % for my $post ($c->posts->all) {
   <p>
-    <h2>
-      %= link_to $post->{title} => url_for('show_post', id => $post->{id})
-    </h2>
+    <h2><%= link_to $post->{title} => show_post => {id => $post->{id}} %></h2>
     %= $post->{body}
   </p>
 % }
