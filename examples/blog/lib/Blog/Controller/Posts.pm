@@ -1,6 +1,12 @@
 package Blog::Controller::Posts;
 use Mojo::Base 'Mojolicious::Controller';
 
+sub remove {
+  my $self = shift;
+  $self->posts->withdraw($self->param('id'));
+  $self->redirect_to('posts');
+}
+
 sub show {
   my $self = shift;
   $self->stash(post => $self->posts->find($self->param('id')));
@@ -16,7 +22,7 @@ sub store {
 
   my $title = $validation->param('title');
   my $body  = $validation->param('body');
-  my $id    = $self->posts->add($title, $body);
+  my $id    = $self->posts->publish($title, $body);
   $self->redirect_to('show_post', id => $id);
 }
 

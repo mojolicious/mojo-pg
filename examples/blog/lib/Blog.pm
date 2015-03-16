@@ -24,9 +24,10 @@ sub startup {
   my $r = $self->routes;
   $r->get('/' => sub { shift->redirect_to('posts') });
   $r->get('/posts')->to('posts#index');
-  $r->post('/posts')->to('posts#store')->name('store_post');
   $r->get('/posts/create')->to('posts#create')->name('create_post');
+  $r->post('/posts')->to('posts#store')->name('store_post');
   $r->get('/posts/:id')->to('posts#show')->name('show_post');
+  $r->delete('/posts/:id')->to('posts#remove')->name('remove_post');
 }
 
 1;
