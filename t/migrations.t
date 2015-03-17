@@ -13,7 +13,7 @@ use Mojo::Pg;
 
 # Clean up before start
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-$pg->db->query('drop table mojo_migrations');
+$pg->db->query('drop table if exists mojo_migrations');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
