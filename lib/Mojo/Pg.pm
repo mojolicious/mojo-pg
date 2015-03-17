@@ -256,7 +256,7 @@ L<Mojo::Pg::Migrations> object you can use to change your database schema more
 easily.
 
   # Load migrations from file and migrate to latest version
-  $pg->migrations->from_file('/Users/sri/migrations.sql')->migrate;
+  $pg->migrations->from_file('/home/sri/migrations.sql')->migrate;
 
 =head2 options
 
