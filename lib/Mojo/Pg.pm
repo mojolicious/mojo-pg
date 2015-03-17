@@ -277,8 +277,7 @@ easily.
   $pg         = $pg->options({AutoCommit => 1});
 
 Options for database handles, defaults to activating C<AutoCommit>,
-C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>
-as well as C<pg_server_prepare>.
+C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>.
 
 =head2 password
 
@@ -351,7 +350,7 @@ Parse configuration from connection string.
   $pg->from_string('postgresql://sri@%2ftmp%2fpg.sock/db4');
 
   # Username, database and additional options
-  $pg->from_string('postgresql://sri@/db5?PrintError=1&pg_server_prepare=1');
+  $pg->from_string('postgresql://sri@/db5?PrintError=1&pg_server_prepare=0');
 
   # Service and additional options
   $pg->from_string('postgresql://?service=foo&PrintError=1&RaiseError=0');
