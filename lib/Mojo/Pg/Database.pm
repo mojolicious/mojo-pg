@@ -19,7 +19,7 @@ sub DESTROY {
   $_->{cb}($self, 'Premature connection close', undef) for @$waiting;
 
   return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
-  $pg->_enqueue($dbh, $self->{handle});
+  $pg->_enqueue($dbh, @$self{qw(handle queue)});
 }
 
 sub backlog { scalar @{shift->{waiting} || []} }
@@ -35,6 +35,7 @@ sub begin {
 sub disconnect {
   my $self = shift;
   $self->_unwatch;
+  delete $self->{queue};
   $self->dbh->disconnect;
 }
 
@@ -88,19 +89,19 @@ sub query {
   my @values = map { _json($_) ? encode_json $_->{json} : $_ } @_;
 
   # Dollar only
-  my $dbh = $self->dbh;
-  local $dbh->{pg_placeholder_dollaronly} = 1 if delete $self->{dollar_only};
+  local $self->dbh->{pg_placeholder_dollaronly} = 1
+    if delete $self->{dollar_only};
 
   # Blocking
   unless ($cb) {
-    my $sth = $dbh->prepare($query);
+    my $sth = $self->_dequeue($query);
     $sth->execute(@values);
     $self->_notifications;
-    return Mojo::Pg::Results->new(sth => $sth);
+    return Mojo::Pg::Results->new(db => $self, sth => $sth);
   }
 
   # Non-blocking
-  my $sth = $dbh->prepare($query, {pg_async => PG_ASYNC});
+  my $sth = $self->_dequeue($query, 1);
   push @{$self->{waiting}}, {args => \@values, cb => $cb, sth => $sth};
   $self->$_ for qw(_next _watch);
 }
@@ -115,6 +116,25 @@ sub unlisten {
   $self->_unwatch unless $self->backlog || $self->is_listening;
 
   return $self;
+}
+
+sub _dequeue {
+  my ($self, $query, $async) = @_;
+
+  my $queue = $self->{queue} ||= [];
+  for (my $i = 0; $i <= $#$queue; $i++) {
+    my $sth = $queue->[$i];
+    return splice @$queue, $i, 1
+      if !(!$sth->{pg_async} ^ !$async) && $sth->{Statement} eq $query;
+  }
+
+  return $self->dbh->prepare($query, $async ? {pg_async => PG_ASYNC} : ());
+}
+
+sub _enqueue {
+  my ($self, $sth) = @_;
+  push @{$self->{queue}}, $sth;
+  shift @{$self->{queue}} while @{$self->{queue}} > $self->pg->max_statements;
 }
 
 sub _json { ref $_[0] eq 'HASH' && (keys %{$_[0]})[0] eq 'json' }
@@ -157,7 +177,7 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
+      $self->$cb($err, Mojo::Pg::Results->new(db => $self, sth => $sth));
       $self->_next;
       $self->_unwatch unless $self->backlog || $self->is_listening;
     }
@@ -311,7 +331,9 @@ Check database connection.
   my $results = $db->query('select ?::json as foo', {json => {bar => 'baz'}});
 
 Execute a blocking statement and return a L<Mojo::Pg::Results> object with the
-results. You can also append a callback to perform operation non-blocking.
+results. The L<DBD::Pg> statement handle will be automatically cached again
+when that object is destroyed, so future queries can reuse it to increase
+performance.You can also append a callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;

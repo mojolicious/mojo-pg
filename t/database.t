@@ -73,13 +73,27 @@ is $pg->db->dbh, $dbh, 'same database handle';
 $pg->db->disconnect;
 isnt $pg->db->dbh, $dbh, 'different database handles';
 
+# Statement cache
+is $pg->max_statements, 10, 'right default';
+$db = $pg->db;
+my $sth = $db->query('select 3 as three')->sth;
+is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
+isnt $db->query('select 4 as four')->sth, $sth, 'different statement handles';
+is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
+undef $db;
+$db = $pg->max_statements(2)->db;
+is $db->query('select 3 as three')->sth,   $sth, 'same statement handle';
+isnt $db->query('select 5 as five')->sth,  $sth, 'different statement handles';
+isnt $db->query('select 6 as six')->sth,   $sth, 'different statement handles';
+isnt $db->query('select 3 as three')->sth, $sth, 'different statement handles';
+
 # Dollar only
 $db = $pg->db;
-is $db->dollar_only->query('select $1 as test', 23)->hash->{test}, 23,
+is $db->dollar_only->query('select $1::int as test', 23)->hash->{test}, 23,
   'right result';
-eval { $db->dollar_only->query('select ? as test', 23) };
+eval { $db->dollar_only->query('select ?::int as test', 23) };
 like $@, qr/called with 1 bind variables when 0 are needed/, 'right error';
-is $db->query('select ? as test', 23)->hash->{test}, 23, 'right result';
+is $db->query('select ?::int as test', 23)->hash->{test}, 23, 'right result';
 
 # JSON
 $db = $pg->db;

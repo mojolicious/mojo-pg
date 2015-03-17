@@ -11,6 +11,7 @@ use Scalar::Util 'weaken';
 
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
+has max_statements  => 10;
 has migrations      => sub {
   my $migrations = Mojo::Pg::Migrations->new(pg => shift);
   weaken $migrations->{pg};
@@ -21,8 +22,7 @@ has options => sub {
     AutoCommit          => 1,
     AutoInactiveDestroy => 1,
     PrintError          => 0,
-    RaiseError          => 1,
-    pg_server_prepare   => 0
+    RaiseError          => 1
   };
 };
 has [qw(password username)] => '';
@@ -40,8 +40,13 @@ sub db {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  my ($dbh, $handle) = @{$self->_dequeue};
-  return Mojo::Pg::Database->new(dbh => $dbh, handle => $handle, pg => $self);
+  my ($dbh, $handle, $sths) = @{$self->_dequeue};
+  return Mojo::Pg::Database->new(
+    dbh    => $dbh,
+    handle => $handle,
+    pg     => $self,
+    queue  => $sths
+  );
 }
 
 sub from_string {
@@ -88,9 +93,9 @@ sub _dequeue {
 }
 
 sub _enqueue {
-  my ($self, $dbh, $handle) = @_;
+  my ($self, $dbh, $handle, $sths) = @_;
   my $queue = $self->{queue} ||= [];
-  push @$queue, [$dbh, $handle] if $dbh->{Active};
+  push @$queue, [$dbh, $handle, $sths] if $dbh->{Active};
   shift @$queue while @$queue > $self->max_connections;
 }
 
@@ -173,9 +178,9 @@ L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicio.us> real-time web framework.
 
-Database handles are cached automatically, so they can be reused transparently
-to increase performance. And you can handle connection timeouts gracefully by
-holding on to them only for short amounts of time.
+Database and statement handles are cached automatically, so they can be reused
+transparently to increase performance. And you can handle connection timeouts
+gracefully by holding on to them only for short amounts of time.
 
   use Mojolicious::Lite;
   use Mojo::Pg;
@@ -246,6 +251,14 @@ Data source name, defaults to C<dbi:Pg:>.
 
 Maximum number of idle database handles to cache for future use, defaults to
 C<5>.
+
+=head2 max_statements
+
+  my $max = $pg->max_statements;
+  $pg     = $pg->max_statements(5);
+
+Maximum number of statement handles to cache per database handle for future
+queries, defaults to C<10>.
 
 =head2 migrations
 

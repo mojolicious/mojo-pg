@@ -12,8 +12,7 @@ my $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 0,
-  RaiseError          => 1,
-  pg_server_prepare   => 0
+  RaiseError          => 1
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -26,8 +25,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 0,
-  RaiseError          => 1,
-  pg_server_prepare   => 0
+  RaiseError          => 1
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -40,8 +38,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 1,
-  RaiseError          => 1,
-  pg_server_prepare   => 0
+  RaiseError          => 1
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -55,8 +52,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 0,
-  RaiseError          => 1,
-  pg_server_prepare   => 0
+  RaiseError          => 1
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -69,8 +65,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 0,
-  RaiseError          => 1,
-  pg_server_prepare   => 0
+  RaiseError          => 1
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -84,8 +79,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 1,
-  RaiseError          => 0,
-  pg_server_prepare   => 0
+  RaiseError          => 0
 };
 is_deeply $pg->options, $options, 'right options';
 
@@ -98,8 +92,7 @@ $options = {
   AutoCommit          => 1,
   AutoInactiveDestroy => 1,
   PrintError          => 0,
-  RaiseError          => 0,
-  pg_server_prepare   => 0
+  RaiseError          => 0
 };
 is_deeply $pg->options, $options, 'right options';
 
