@@ -116,12 +116,13 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->query('insert into names (name) values (?)', 'Stefan');
 
   # Insert more rows in a transaction
-  {
+  eval {
     my $tx = $db->begin;
     $db->query('insert into names (name) values (?)', 'Baerbel');
     $db->query('insert into names (name) values (?)', 'Wolfgang');
     $tx->commit;
   };
+  say $@ if $@;
 
   # Insert another row and return the generated id
   say $db->query('insert into names (name) values (?) returning id', 'Daniel')

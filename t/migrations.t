@@ -11,7 +11,9 @@ use File::Spec::Functions 'catfile';
 use FindBin;
 use Mojo::Pg;
 
+# Clean up before start
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg->db->query('drop table mojo_migrations');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
@@ -21,10 +23,11 @@ is $pg->migrations->migrate->active, 0, 'active version is 0';
 
 # Migrations from DATA section
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
-is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
-  'latest version is 2';
+is $pg->migrations->name('test2')->from_data->latest, 2, 'latest version is 2';
 is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
   ->latest, 7, 'latest version is 7';
+is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
+  'latest version is 2';
 
 # Different syntax variations
 $pg->migrations->name('migrations_test')->from_string(<<EOF);
@@ -91,8 +94,6 @@ is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 # Unknown version
 eval { $pg->migrations->migrate(23) };
 like $@, qr/Version 23 has no migration/, 'right error';
-
-$pg->db->query('drop table mojo_migrations');
 
 done_testing();
 

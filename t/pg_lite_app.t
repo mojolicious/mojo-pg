@@ -14,7 +14,8 @@ use Test::Mojo;
 
 helper pg => sub { state $pg = Mojo::Pg->new($ENV{TEST_ONLINE}) };
 
-app->pg->migrations->name('app_test')->from_data->migrate;
+app->pg->db->query('create table if not exists app_test (stuff text)');
+app->pg->db->query('insert into app_test values (?)', 'I ♥ Mojolicious!');
 
 get '/blocking' => sub {
   my $c  = shift;
@@ -50,17 +51,6 @@ $t->get_ok('/non-blocking')->status_is(200)->header_is('X-Ref', $ref)
   ->content_is('I ♥ Mojolicious!');
 $t->get_ok('/non-blocking')->status_is(200)->header_is('X-Ref', $ref)
   ->content_is('I ♥ Mojolicious!');
-$t->app->pg->migrations->migrate(0);
+$t->app->pg->db->query('drop table app_test');
 
 done_testing();
-
-__DATA__
-@@ app_test
--- 1 up
-create table if not exists app_test (stuff text);
-
--- 2 up
-insert into app_test values ('I ♥ Mojolicious!');
-
--- 1 down
-drop table app_test;

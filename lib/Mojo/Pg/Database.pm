@@ -247,10 +247,13 @@ automatically roll back the transaction unless
 L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   # Add names in a transaction
-  my $tx = $db->begin;
-  $db->query('insert into names values (?)', 'Baerbel');
-  $db->query('insert into names values (?)', 'Wolfgang');
-  $tx->commit;
+  eval {
+    my $tx = $db->begin;
+    $db->query('insert into names values (?)', 'Baerbel');
+    $db->query('insert into names values (?)', 'Wolfgang');
+    $tx->commit;
+  };
+  say $@ if $@;
 
 =head2 disconnect
 
