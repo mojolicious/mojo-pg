@@ -22,7 +22,9 @@ is $pg->migrations->active, 0,            'active version is 0';
 is $pg->migrations->migrate->active, 0, 'active version is 0';
 
 # Migrations from DATA section
+is $pg->migrations->from_data->latest, 0, 'latest version is 0';
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
+is $pg->migrations->name('test1')->from_data->latest, 7, 'latest version is 7';
 is $pg->migrations->name('test2')->from_data->latest, 2, 'latest version is 2';
 is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
   ->latest, 7, 'latest version is 7';
