@@ -246,11 +246,11 @@ Begin transaction and return L<Mojo::Pg::Transaction> object, which will
 automatically roll back the transaction unless
 L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
-  # Add names in a transaction
+  # Insert rows in a transaction
   eval {
     my $tx = $db->begin;
-    $db->query('insert into names values (?)', 'Baerbel');
-    $db->query('insert into names values (?)', 'Wolfgang');
+    $db->query('insert into frameworks values (?)', 'Catalyst');
+    $db->query('insert into frameworks values (?)', 'Mojolicious');
     $tx->commit;
   };
   say $@ if $@;
