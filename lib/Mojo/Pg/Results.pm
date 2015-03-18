@@ -5,7 +5,12 @@ use Mojo::Collection;
 use Mojo::JSON 'decode_json';
 use Mojo::Util 'tablify';
 
-has 'sth';
+has [qw(db sth)];
+
+sub DESTROY {
+  my $self = shift;
+  if ((my $db = $self->db) && (my $sth = $self->sth)) { $db->_enqueue($sth) }
+}
 
 sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
 
@@ -60,7 +65,7 @@ Mojo::Pg::Results - Results
 
   use Mojo::Pg::Results;
 
-  my $results = Mojo::Pg::Results->new(sth => $sth);
+  my $results = Mojo::Pg::Results->new(db => $db, sth => $sth);
   $results->hashes->map(sub { $_->{foo} })->shuffle->join("\n")->say;
 
 =head1 DESCRIPTION
@@ -71,6 +76,13 @@ L<Mojo::Pg::Database>.
 =head1 ATTRIBUTES
 
 L<Mojo::Pg::Results> implements the following attributes.
+
+=head2 db
+
+  my $db   = $results->db;
+  $results = $results->db(Mojo::Pg::Database->new);
+
+L<Mojo::Pg::Database> object these results belong to.
 
 =head2 sth
 

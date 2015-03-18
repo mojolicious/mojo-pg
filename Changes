@@ -1,5 +1,7 @@
 
 1.16  2015-03-18
+  - Improved performance for many different queries significantly with a
+    statement handle cache.
 
 1.15  2015-03-17
   - Improved portability of some tests.
