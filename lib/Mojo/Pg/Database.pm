@@ -88,19 +88,19 @@ sub query {
   my @values = map { _json($_) ? encode_json $_->{json} : $_ } @_;
 
   # Dollar only
-  my $dbh = $self->dbh;
-  local $dbh->{pg_placeholder_dollaronly} = 1 if delete $self->{dollar_only};
+  my %attrs;
+  $attrs{pg_placeholder_dollaronly} = 1 if delete $self->{dollar_only};
 
   # Blocking
   unless ($cb) {
-    my $sth = $dbh->prepare($query);
+    my $sth = $self->dbh->prepare($query, \%attrs);
     $sth->execute(@values);
     $self->_notifications;
     return Mojo::Pg::Results->new(sth => $sth);
   }
 
   # Non-blocking
-  my $sth = $dbh->prepare($query, {pg_async => PG_ASYNC});
+  my $sth = $self->dbh->prepare($query, {%attrs, pg_async => PG_ASYNC});
   push @{$self->{waiting}}, {args => \@values, cb => $cb, sth => $sth};
   $self->$_ for qw(_next _watch);
 }
