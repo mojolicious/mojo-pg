@@ -1,4 +1,6 @@
 
+1.17  2015-03-19
+
 1.16  2015-03-18
   - Added max_statements attribute to Mojo::Pg.
   - Added db attribute to Mojo::Pg::Results.
