@@ -274,10 +274,12 @@ easily.
 =head2 options
 
   my $options = $pg->options;
-  $pg         = $pg->options({AutoCommit => 1});
+  $pg         = $pg->options({AutoCommit => 1, RaiseError => 1});
 
 Options for database handles, defaults to activating C<AutoCommit>,
 C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>.
+Note that C<AutoCommit> and C<RaiseError> are considered mandatory, so
+deactivating them would be very dangerous.
 
 =head2 password
 

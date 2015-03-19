@@ -48,7 +48,6 @@ sub migrate {
   return $self if $self->_active($db) == $target;
 
   # Lock migrations table and check version again
-  local @{$db->dbh}{qw(AutoCommit RaiseError)} = (1, 1);
   my $tx = $db->begin;
   $db->query('lock table mojo_migrations in exclusive mode');
   return $self if (my $active = $self->_active($db)) == $target;
@@ -76,14 +75,15 @@ sub migrate {
 sub _active {
   my ($self, $db) = @_;
 
-  my $dbh  = $db->dbh;
   my $name = $self->name;
-  local @$dbh{qw(AutoCommit RaiseError)} = (1, 0);
-  my $results
-    = $db->query('select version from mojo_migrations where name = $1', $name);
+  my $results;
+  {
+    local $db->dbh->{RaiseError} = 0;
+    my $sql = 'select version from mojo_migrations where name = $1';
+    $results = $db->query($sql, $name);
+  };
   if (my $next = $results->array) { return $next->[0] }
 
-  local @$dbh{qw(AutoCommit RaiseError)} = (1, 1);
   $db->query(
     'create table if not exists mojo_migrations (
        name    text unique not null,
