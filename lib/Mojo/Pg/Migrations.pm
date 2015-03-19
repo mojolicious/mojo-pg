@@ -45,12 +45,12 @@ sub migrate {
 
   # Already the right version (make sure migrations table exists)
   my $db = $self->pg->db;
-  return $self if $self->_active($db) == $target;
+  return $self if $self->_active($db, 1) == $target;
 
   # Lock migrations table and check version again
   my $tx = $db->begin;
   $db->query('lock table mojo_migrations in exclusive mode');
-  return $self if (my $active = $self->_active($db)) == $target;
+  return $self if (my $active = $self->_active($db, 1)) == $target;
 
   # Up
   my $sql;
@@ -73,7 +73,7 @@ sub migrate {
 }
 
 sub _active {
-  my ($self, $db) = @_;
+  my ($self, $db, $create) = @_;
 
   my $name = $self->name;
   my $results;
@@ -82,7 +82,7 @@ sub _active {
     my $sql = 'select version from mojo_migrations where name = $1';
     $results = $db->query($sql, $name);
   };
-  if (my $next = $results->array) { return $next->[0] }
+  if ((my $next = $results->array) || !$create) { return $next->[0] || 0 }
 
   $db->query(
     'create table if not exists mojo_migrations (
