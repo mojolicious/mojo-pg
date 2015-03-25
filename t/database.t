@@ -242,4 +242,17 @@ eval {
 };
 like $@, qr/Non-blocking query already in progress/, 'right error';
 
+# CLean up non-blocking query
+$fail = undef;
+$db   = $pg->db;
+$db->query(
+  'select 1' => sub {
+    my ($db, $err, $results) = @_;
+    $fail = $err;
+  }
+);
+$db->disconnect;
+undef $db;
+is $fail, 'Premature connection close', 'right error';
+
 done_testing();

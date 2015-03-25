@@ -14,8 +14,12 @@ has [qw(dbh pg)];
 
 sub DESTROY {
   my $self = shift;
-  return unless my $pg = $self->pg;
-  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, $self->{handle}) }
+
+  my $waiting = $self->{waiting};
+  $waiting->{cb}($self, 'Premature connection close', undef) if $waiting;
+
+  return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
+  $pg->_enqueue($dbh, $self->{handle});
 }
 
 sub begin {
@@ -279,9 +283,9 @@ Check database connection.
   my $results = $db->query('select ?::json as foo', {json => {bar => 'baz'}});
 
 Execute a blocking statement and return a L<Mojo::Pg::Results> object with the
-results. The L<DBD::Pg> statement handle will be automatically cached again
-when that object is destroyed, so future queries can reuse it to increase
-performance. You can also append a callback to perform operation non-blocking.
+results. The L<DBD::Pg> statement handle will be automatically reused when it
+is not active anymore, to increase the performance of future queries. You can
+also append a callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
