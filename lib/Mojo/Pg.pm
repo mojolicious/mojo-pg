@@ -11,7 +11,6 @@ use Scalar::Util 'weaken';
 
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
-has max_statements  => 10;
 has migrations      => sub {
   my $migrations = Mojo::Pg::Migrations->new(pg => shift);
   weaken $migrations->{pg};
@@ -32,7 +31,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '1.18';
+our $VERSION = '2.0';
 
 sub db {
   my $self = shift;
@@ -40,13 +39,8 @@ sub db {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  my ($dbh, $handle, $sths) = @{$self->_dequeue};
-  return Mojo::Pg::Database->new(
-    dbh    => $dbh,
-    handle => $handle,
-    pg     => $self,
-    sths   => $sths
-  );
+  my ($dbh, $handle) = @{$self->_dequeue};
+  return Mojo::Pg::Database->new(dbh => $dbh, handle => $handle, pg => $self);
 }
 
 sub from_string {
@@ -93,9 +87,9 @@ sub _dequeue {
 }
 
 sub _enqueue {
-  my ($self, $dbh, $handle, $sths) = @_;
+  my ($self, $dbh, $handle) = @_;
   my $queue = $self->{queue} ||= [];
-  push @$queue, [$dbh, $handle, $sths] if $dbh->{Active};
+  push @$queue, [$dbh, $handle] if $dbh->{Active};
   shift @$queue while @$queue > $self->max_connections;
 }
 
@@ -245,14 +239,6 @@ Data source name, defaults to C<dbi:Pg:>.
 
 Maximum number of idle database handles to cache for future use, defaults to
 C<5>.
-
-=head2 max_statements
-
-  my $max = $pg->max_statements;
-  $pg     = $pg->max_statements(5);
-
-Maximum number of statement handles to cache per database handle for future
-queries, defaults to C<10>.
 
 =head2 migrations
 

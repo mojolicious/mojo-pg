@@ -15,7 +15,7 @@ has [qw(dbh pg)];
 sub DESTROY {
   my $self = shift;
   return unless my $pg = $self->pg;
-  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, @$self{qw(handle sths)}) }
+  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, $self->{handle}) }
 }
 
 sub begin {
@@ -29,7 +29,6 @@ sub begin {
 sub disconnect {
   my $self = shift;
   $self->_unwatch;
-  delete $self->{sths};
   $self->dbh->disconnect;
 }
 
@@ -70,19 +69,16 @@ sub query {
 
   croak 'Non-blocking query already in progress' if $self->{waiting};
 
-  # JSON
-  my @values = map { _json($_) ? encode_json $_->{json} : $_ } @_;
-
   my %attrs;
   $attrs{pg_placeholder_dollaronly} = 1        if delete $self->{dollar_only};
   $attrs{pg_async}                  = PG_ASYNC if $cb;
-  my $sth = $self->_dequeue($query, \%attrs);
-  $sth->execute(@values);
+  my $sth = $self->dbh->prepare_cached($query, \%attrs, 3);
+  $sth->execute(map { _json($_) ? encode_json $_->{json} : $_ } @_);
 
   # Blocking
   unless ($cb) {
     $self->_notifications;
-    return Mojo::Pg::Results->new(db => $self, sth => $sth);
+    return Mojo::Pg::Results->new(sth => $sth);
   }
 
   # Non-blocking
@@ -99,25 +95,6 @@ sub unlisten {
   $self->_unwatch unless $self->{waiting} || $self->is_listening;
 
   return $self;
-}
-
-sub _dequeue {
-  my ($self, $query, $attrs) = @_;
-
-  my $sths = $self->{sths} ||= [];
-  for (my $i = 0; $i <= $#$sths; $i++) {
-    my $sth = $sths->[$i];
-    next if !$sth->{pg_async} ^ !exists $attrs->{pg_async};
-    return splice @$sths, $i, 1 if $sth->{Statement} eq $query;
-  }
-
-  return $self->dbh->prepare($query, $attrs);
-}
-
-sub _enqueue {
-  my ($self, $sth) = @_;
-  push @{$self->{sths}}, $sth;
-  shift @{$self->{sths}} while @{$self->{sths}} > $self->pg->max_statements;
 }
 
 sub _json { ref $_[0] eq 'HASH' && (keys %{$_[0]})[0] eq 'json' }
@@ -155,7 +132,7 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, Mojo::Pg::Results->new(db => $self, sth => $sth));
+      $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
       $self->_unwatch unless $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);

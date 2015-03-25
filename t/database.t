@@ -70,18 +70,21 @@ $pg->db->disconnect;
 isnt $pg->db->dbh, $dbh, 'different database handles';
 
 # Statement cache
-is $pg->max_statements, 10, 'right default';
 $db = $pg->db;
 my $sth = $db->query('select 3 as three')->sth;
 is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
 isnt $db->query('select 4 as four')->sth, $sth, 'different statement handles';
 is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
 undef $db;
-$db = $pg->max_statements(2)->db;
-is $db->query('select 3 as three')->sth,   $sth, 'same statement handle';
-isnt $db->query('select 5 as five')->sth,  $sth, 'different statement handles';
-isnt $db->query('select 6 as six')->sth,   $sth, 'different statement handles';
+$db = $pg->db;
+my $results = $db->query('select 3 as three');
+is $results->sth, $sth, 'same statement handle';
 isnt $db->query('select 3 as three')->sth, $sth, 'different statement handles';
+$sth = $db->query('select 3 as three')->sth;
+is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
+isnt $db->query('select 5 as five')->sth, $sth, 'different statement handles';
+isnt $db->query('select 6 as six')->sth,  $sth, 'different statement handles';
+is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
 
 # Dollar only
 $db = $pg->db;
@@ -111,7 +114,7 @@ is_deeply $db->query('select ?::json as foo', undef)->expand->hash,
   {foo => undef}, 'right structure';
 is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef],
   'right structure';
-my $results = $db->query('select ?::json', undef);
+$results = $db->query('select ?::json', undef);
 is_deeply $results->expand->array, [undef], 'right structure';
 is_deeply $results->expand->array, undef, 'no more results';
 
