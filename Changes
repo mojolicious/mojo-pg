@@ -1,4 +1,6 @@
 
+2.01  2015-03-26
+
 2.0  2015-03-25
   - Removed support for sequential non-blocking queries, because they are
     currently incompatible with DBD::Pg.
