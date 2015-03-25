@@ -88,9 +88,11 @@ sub _dequeue {
 
 sub _enqueue {
   my ($self, $dbh, $handle) = @_;
+
+  # The database handle needs to be destroyed before the file handle
   my $queue = $self->{queue} ||= [];
   push @$queue, [$dbh, $handle] if $dbh->{Active};
-  shift @$queue while @$queue > $self->max_connections;
+  shift(@$queue)->[0] = undef while @$queue > $self->max_connections;
 }
 
 1;

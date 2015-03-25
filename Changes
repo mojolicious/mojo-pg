@@ -1,6 +1,6 @@
 
 2.0  2015-03-25
-  - Removed support for sequential non-blocking operations, because they are
+  - Removed support for sequential non-blocking queries, because they are
     currently incompatible with DBD::Pg.
   - Removed max_statements attribute from Mojo::Pg.
   - Removed db attribute from Mojo::Pg::Results.
