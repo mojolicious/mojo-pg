@@ -1,5 +1,9 @@
 
-1.18  2015-03-21
+1.18  2015-03-25
+  - Removed support for sequential non-blocking operations, because they are
+    currently incompatible with DBD::Pg.
+  - Removed backlog method from Mojo::Pg::Database.
+  - Removed deprecated do method from Mojo::Pg::Database.
 
 1.17  2015-03-20
   - Improved Mojo::Pg::Migrations to make no changes to the database when

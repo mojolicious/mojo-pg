@@ -22,7 +22,6 @@ is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash,
 # Non-blocking select
 my ($fail, $result);
 my $db = $pg->db;
-is $db->backlog, 0, 'no operations waiting';
 $db->query(
   'select 1 as one, 2 as two, 3 as three' => sub {
     my ($db, $err, $results) = @_;
@@ -31,9 +30,7 @@ $db->query(
     Mojo::IOLoop->stop;
   }
 );
-is $db->backlog, 1, 'one operation waiting';
 Mojo::IOLoop->start;
-is $db->backlog, 0, 'no operations waiting';
 ok !$fail, 'no error';
 is_deeply $result, {one => 1, two => 2, three => 3}, 'right structure';
 
@@ -42,10 +39,9 @@ is_deeply $result, {one => 1, two => 2, three => 3}, 'right structure';
 Mojo::IOLoop->delay(
   sub {
     my $delay = shift;
-    my $db    = $pg->db;
-    $db->query('select 1 as one' => $delay->begin);
-    $db->query('select 2 as two' => $delay->begin);
-    $db->query('select 2 as two' => $delay->begin);
+    $pg->db->query('select 1 as one' => $delay->begin);
+    $pg->db->query('select 2 as two' => $delay->begin);
+    $pg->db->query('select 2 as two' => $delay->begin);
   },
   sub {
     my ($delay, $err_one, $one, $err_two, $two, $err_again, $again) = @_;
@@ -235,17 +231,12 @@ Mojo::IOLoop->start;
 like $fail, qr/does_not_exist/, 'right error';
 is $result->sth->errstr, $fail, 'same error';
 
-# Clean up non-blocking queries
-($fail, $result) = ();
+# Non-blocking query in progress
 $db = $pg->db;
-$db->query(
-  'select 1' => sub {
-    my ($db, $err, $results) = @_;
-    ($fail, $result) = ($err, $results);
-  }
-);
-$db->disconnect;
-undef $db;
-is $fail, 'Premature connection close', 'right error';
+$db->query('select 1' => sub { });
+eval {
+  $db->query('select 1' => sub { });
+};
+like $@, qr/Non-blocking query already in progress/, 'right error';
 
 done_testing();

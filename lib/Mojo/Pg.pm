@@ -202,14 +202,8 @@ other tasks in the meantime. Since database connections usually have a very low
 latency, this often results in very good performance.
 
 Every database connection can only handle one active query at a time, this
-includes asynchronous ones. So if you start more than one, they will be put on
-a waiting list and performed sequentially. To perform multiple queries
-concurrently, you have to use multiple connections.
-
-  # Performed sequentially (10 seconds)
-  my $db = $pg->db;
-  $db->query('select pg_sleep(5)' => sub {...});
-  $db->query('select pg_sleep(5)' => sub {...});
+includes asynchronous ones. To perform multiple queries concurrently, you have
+to use multiple connections.
 
   # Performed concurrently (5 seconds)
   $pg->db->query('select pg_sleep(5)' => sub {...});

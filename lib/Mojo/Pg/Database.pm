@@ -1,28 +1,22 @@
 package Mojo::Pg::Database;
 use Mojo::Base 'Mojo::EventEmitter';
 
+use Carp 'croak';
 use DBD::Pg ':async';
 use IO::Handle;
 use Mojo::IOLoop;
 use Mojo::JSON 'encode_json';
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
-use Mojo::Util 'deprecated';
 use Scalar::Util 'weaken';
 
 has [qw(dbh pg)];
 
 sub DESTROY {
   my $self = shift;
-
-  my $waiting = $self->{waiting} || [];
-  $_->{cb}($self, 'Premature connection close', undef) for @$waiting;
-
-  return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
-  $pg->_enqueue($dbh, @$self{qw(handle sths)});
+  return unless my $pg = $self->pg;
+  if (my $dbh = $self->dbh) { $pg->_enqueue($dbh, @$self{qw(handle sths)}) }
 }
-
-sub backlog { scalar @{shift->{waiting} || []} }
 
 sub begin {
   my $self = shift;
@@ -37,16 +31,6 @@ sub disconnect {
   $self->_unwatch;
   delete $self->{sths};
   $self->dbh->disconnect;
-}
-
-# DEPRECATED!
-sub do {
-  deprecated 'Mojo::Pg::Database::do is DEPRECATED'
-    . ' in favor of Mojo::Pg::Database::query';
-  my $self = shift;
-  $self->dbh->do(@_);
-  $self->_notifications;
-  return $self;
 }
 
 sub dollar_only { ++$_[0]{dollar_only} and return $_[0] }
@@ -84,6 +68,8 @@ sub query {
   my ($self, $query) = (shift, shift);
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
 
+  croak 'Non-blocking query already in progress' if $self->{waiting};
+
   # JSON
   my @values = map { _json($_) ? encode_json $_->{json} : $_ } @_;
 
@@ -91,17 +77,17 @@ sub query {
   $attrs{pg_placeholder_dollaronly} = 1        if delete $self->{dollar_only};
   $attrs{pg_async}                  = PG_ASYNC if $cb;
   my $sth = $self->_dequeue($query, \%attrs);
+  $sth->execute(@values);
 
   # Blocking
   unless ($cb) {
-    $sth->execute(@values);
     $self->_notifications;
     return Mojo::Pg::Results->new(db => $self, sth => $sth);
   }
 
   # Non-blocking
-  push @{$self->{waiting}}, {args => \@values, cb => $cb, sth => $sth};
-  $self->$_ for qw(_next _watch);
+  $self->{waiting} = {cb => $cb, sth => $sth};
+  $self->_watch;
 }
 
 sub unlisten {
@@ -110,7 +96,7 @@ sub unlisten {
   my $dbh = $self->dbh;
   $dbh->do('unlisten ' . $dbh->quote_identifier($name));
   $name eq '*' ? delete $self->{listen} : delete $self->{listen}{$name};
-  $self->_unwatch unless $self->backlog || $self->is_listening;
+  $self->_unwatch unless $self->{waiting} || $self->is_listening;
 
   return $self;
 }
@@ -136,11 +122,6 @@ sub _enqueue {
 
 sub _json { ref $_[0] eq 'HASH' && (keys %{$_[0]})[0] eq 'json' }
 
-sub _next {
-  return unless my $next = shift->{waiting}[0];
-  $next->{sth}->execute(@{$next->{args}}) unless $next->{executed}++;
-}
-
 sub _notifications {
   my $self = shift;
   while (my $notify = $self->dbh->pg_notifies) {
@@ -150,8 +131,8 @@ sub _notifications {
 
 sub _unwatch {
   my $self = shift;
-  return unless delete $self->{watching};
-  Mojo::IOLoop->singleton->reactor->remove($self->{handle});
+  Mojo::IOLoop->singleton->reactor->remove($self->{handle})
+    if delete $self->{watching};
 }
 
 sub _watch {
@@ -167,16 +148,15 @@ sub _watch {
 
       $self->emit('close')->_unwatch
         if !eval { $self->_notifications; 1 } && $self->is_listening;
-      return unless (my $waiting = $self->{waiting}) && $dbh->pg_ready;
-      my ($sth, $cb) = @{shift @$waiting}{qw(sth cb)};
+      return unless $self->{waiting} && $dbh->pg_ready;
+      my ($sth, $cb) = @{delete $self->{waiting}}{qw(sth cb)};
 
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, Mojo::Pg::Results->new(db => $self, sth => $sth));
-      $self->_next;
-      $self->_unwatch unless $self->backlog || $self->is_listening;
+      $self->_unwatch unless $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
 }
@@ -248,12 +228,6 @@ L<Mojo::Pg> object this database belongs to.
 
 L<Mojo::Pg::Database> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
-
-=head2 backlog
-
-  my $num = $db->backlog;
-
-Number of waiting non-blocking queries.
 
 =head2 begin
 
