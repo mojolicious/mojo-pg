@@ -1,4 +1,6 @@
 
+2.02  2015-03-26
+
 2.01  2015-03-25
   - Fixed bug where Perl would close the DBD::Pg file descriptor unexpectedly.
 
