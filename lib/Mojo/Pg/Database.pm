@@ -3,7 +3,6 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 use Carp 'croak';
 use DBD::Pg ':async';
-use IO::Handle;
 use Mojo::IOLoop;
 use Mojo::JSON 'encode_json';
 use Mojo::Pg::Results;
@@ -16,10 +15,10 @@ sub DESTROY {
   my $self = shift;
 
   my $waiting = $self->{waiting};
-  $waiting->{cb}($self, 'Premature connection close', undef) if $waiting;
+  $waiting->{cb}($self, 'Premature connection close', undef) if $waiting->{cb};
 
   return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
-  $pg->_enqueue($dbh, $self->{handle});
+  $pg->_enqueue($dbh);
 }
 
 sub begin {
@@ -122,7 +121,10 @@ sub _watch {
   return if $self->{watching} || $self->{watching}++;
 
   my $dbh = $self->dbh;
-  $self->{handle} ||= IO::Handle->new_from_fd($dbh->{pg_socket}, 'r');
+  $self->{handle} ||= do {
+    open my $handle, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
+    $handle;
+  };
   Mojo::IOLoop->singleton->reactor->io(
     $self->{handle} => sub {
       my $reactor = shift;

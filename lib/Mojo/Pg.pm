@@ -39,8 +39,7 @@ sub db {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  my ($dbh, $handle) = @{$self->_dequeue};
-  return Mojo::Pg::Database->new(dbh => $dbh, handle => $handle, pg => $self);
+  return Mojo::Pg::Database->new(dbh => $self->_dequeue, pg => $self);
 }
 
 sub from_string {
@@ -80,19 +79,17 @@ sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
 sub _dequeue {
   my $self = shift;
-  while (my $c = shift @{$self->{queue} || []}) { return $c if $c->[0]->ping }
+  while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
   $self->emit(connection => $dbh);
-  return [$dbh];
+  return $dbh;
 }
 
 sub _enqueue {
-  my ($self, $dbh, $handle) = @_;
-
-  # The database handle needs to be destroyed before the file handle
+  my ($self, $dbh) = @_;
   my $queue = $self->{queue} ||= [];
-  push @$queue, [$dbh, $handle] if $dbh->{Active};
-  shift(@$queue)->[0] = undef while @$queue > $self->max_connections;
+  push @$queue, $dbh if $dbh->{Active};
+  shift @$queue while @$queue > $self->max_connections;
 }
 
 1;
