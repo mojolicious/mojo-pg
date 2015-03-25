@@ -121,10 +121,9 @@ sub _watch {
   return if $self->{watching} || $self->{watching}++;
 
   my $dbh = $self->dbh;
-  $self->{handle} ||= do {
-    open my $handle, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
-    $handle;
-  };
+  unless ($self->{handle}) {
+    open $self->{handle}, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
+  }
   Mojo::IOLoop->singleton->reactor->io(
     $self->{handle} => sub {
       my $reactor = shift;
