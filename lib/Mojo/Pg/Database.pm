@@ -114,8 +114,9 @@ sub _notifications {
 
 sub _unwatch {
   my $self = shift;
-  Mojo::IOLoop->singleton->reactor->remove($self->{handle})
-    if delete $self->{watching};
+  return unless delete $self->{watching};
+  Mojo::IOLoop->singleton->reactor->remove($self->{handle});
+  $self->emit('close') if $self->is_listening;
 }
 
 sub _watch {
@@ -131,8 +132,7 @@ sub _watch {
     $self->{handle} => sub {
       my $reactor = shift;
 
-      $self->emit('close')->_unwatch
-        if !eval { $self->_notifications; 1 } && $self->is_listening;
+      $self->_unwatch if !eval { $self->_notifications; 1 };
       return unless $self->{waiting} && $dbh->pg_ready;
       my ($sth, $cb) = @{delete $self->{waiting}}{qw(sth cb)};
 

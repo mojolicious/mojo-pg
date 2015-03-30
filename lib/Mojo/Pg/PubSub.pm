@@ -26,7 +26,7 @@ sub _db {
   my $self = shift;
 
   # Fork-safety
-  $self->{db} and delete($self->{db})->disconnect
+  delete $self->{pid} and $self->{db} and $self->{db}->disconnect
     unless ($self->{pid} //= $$) eq $$;
 
   return $self->{db} if $self->{db};

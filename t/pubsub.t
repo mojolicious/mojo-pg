@@ -103,6 +103,10 @@ is_deeply \@test, ['first'], 'right messages';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
   ok !$dbhs[0]->ping, 'not connected';
   is_deeply \@test, ['first', 'second'], 'right messages';
+  $pg->pubsub->notify(pstest => 'third');
+  ok $dbhs[1]->ping, 'connected';
+  ok !$dbhs[2], 'no database handle';
+  is_deeply \@test, ['first', 'second', 'third'], 'right messages';
 };
 
 done_testing();
