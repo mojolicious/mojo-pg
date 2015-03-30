@@ -14,7 +14,7 @@ has [qw(dbh pg)];
 sub DESTROY {
   my $self = shift;
 
-  # Global destruction
+  # Supported on Perl 5.14+
   return if defined(${^GLOBAL_PHASE}) && ${^GLOBAL_PHASE} eq 'DESTRUCT';
 
   my $waiting = $self->{waiting};
