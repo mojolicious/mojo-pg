@@ -86,4 +86,23 @@ is_deeply \@test, [], 'no messages';
   is_deeply \@test, ['works too'], 'right messages';
 };
 
+# Fork-safety
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+@dbhs = @test = ();
+$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+$pg->pubsub->listen(pstest => sub { push @test, pop });
+ok $dbhs[0], 'database handle';
+ok $dbhs[0]->ping, 'connected';
+$pg->pubsub->notify(pstest => 'first');
+is_deeply \@test, ['first'], 'right messages';
+{
+  local $$ = -23;
+  $pg->pubsub->notify(pstest => 'second');
+  ok $dbhs[1], 'database handle';
+  ok $dbhs[1]->ping, 'connected';
+  isnt $dbhs[0], $dbhs[1], 'different database handles';
+  ok !$dbhs[0]->ping, 'not connected';
+  is_deeply \@test, ['first', 'second'], 'right messages';
+};
+
 done_testing();
