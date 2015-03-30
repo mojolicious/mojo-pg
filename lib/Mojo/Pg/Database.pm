@@ -14,6 +14,9 @@ has [qw(dbh pg)];
 sub DESTROY {
   my $self = shift;
 
+  # Global destruction
+  return if defined(${^GLOBAL_PHASE}) && ${^GLOBAL_PHASE} eq 'DESTRUCT';
+
   my $waiting = $self->{waiting};
   $waiting->{cb}($self, 'Premature connection close', undef) if $waiting->{cb};
 
