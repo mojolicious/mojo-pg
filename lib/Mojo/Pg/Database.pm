@@ -15,7 +15,7 @@ sub DESTROY {
   my $self = shift;
 
   # Supported on Perl 5.14+
-  return if defined(${^GLOBAL_PHASE}) && ${^GLOBAL_PHASE} eq 'DESTRUCT';
+  return if defined ${^GLOBAL_PHASE} && ${^GLOBAL_PHASE} eq 'DESTRUCT';
 
   my $waiting = $self->{waiting};
   $waiting->{cb}($self, 'Premature connection close', undef) if $waiting->{cb};
