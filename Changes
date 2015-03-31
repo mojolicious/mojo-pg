@@ -1,4 +1,6 @@
 
+2.03  2015-03-31
+
 2.02  2015-03-30
   - Improved fork-safety of Mojo::Pg::PubSub.
 
