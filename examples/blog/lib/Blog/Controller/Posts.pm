@@ -1,10 +1,7 @@
 package Blog::Controller::Posts;
 use Mojo::Base 'Mojolicious::Controller';
 
-sub create {
-  my $self = shift;
-  $self->stash(post => {});
-}
+sub create { shift->stash(post => {}) }
 
 sub edit {
   my $self = shift;
