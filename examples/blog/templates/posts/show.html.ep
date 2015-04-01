@@ -1,6 +1,7 @@
 % layout 'blog', title => $post->{title};
 <h2><%= $post->{title} %></h2>
 <p><%= $post->{body} %></p>
+%= link_to 'Edit post' => edit_post => {id => $post->{id}}
 %= form_for remove_post => {id => $post->{id}} => begin
   %= submit_button 'Remove post'
 % end

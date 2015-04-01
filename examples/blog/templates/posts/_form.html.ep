@@ -1,0 +1,11 @@
+%= form_for $target => begin
+  %= label_for title => 'Title'
+  <br>
+  %= text_field title => $post->{title}
+  <br>
+  %= label_for body => 'Body'
+  <br>
+  %= text_area body => $post->{body}
+  <br>
+  %= submit_button $title
+% end
