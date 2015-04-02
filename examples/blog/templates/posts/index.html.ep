@@ -5,4 +5,4 @@
     %= $post->{body}
   </p>
 % }
-%= link_to 'New post' => 'create_post'
+%= button_to 'New post' => 'create_post'
