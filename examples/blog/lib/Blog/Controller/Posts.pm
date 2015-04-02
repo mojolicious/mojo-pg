@@ -28,7 +28,7 @@ sub store {
   my $self = shift;
 
   my $validation = $self->_validation;
-  return $self->render('posts/create') if $validation->has_error;
+  return $self->render('posts/create', post => {}) if $validation->has_error;
 
   my $id = $self->posts->publish($validation->output);
   $self->redirect_to('show_post', id => $id);
@@ -38,7 +38,7 @@ sub update {
   my $self = shift;
 
   my $validation = $self->_validation;
-  return $self->render('posts/edit') if $validation->has_error;
+  return $self->render('posts/edit', post => {}) if $validation->has_error;
 
   my $id = $self->param('id');
   $self->posts->revise($id, $validation->output);
