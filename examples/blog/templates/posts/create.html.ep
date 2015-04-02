@@ -1,3 +1,3 @@
 % layout 'blog', title => 'New post';
 <h2>New post</h2>
-%= include 'posts/_form', target => 'store_post', description => 'Create post'
+%= include 'posts/_form', caption => 'Create post', target => 'store_post'

@@ -7,5 +7,5 @@
   <br>
   %= text_area body => $post->{body}
   <br>
-  %= submit_button $description
+  %= submit_button $caption
 % end
