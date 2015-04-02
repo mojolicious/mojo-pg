@@ -103,7 +103,7 @@ sub unlisten {
   return $self;
 }
 
-sub _json { ref $_[0] eq 'HASH' && (keys %{$_[0]})[0] eq 'json' }
+sub _json { ref $_[0] eq 'HASH' && exists $_[0]{json} }
 
 sub _notifications {
   my $self = shift;
