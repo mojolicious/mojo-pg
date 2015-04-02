@@ -1,9 +1,5 @@
 % layout 'blog', title => $post->{title};
 <h2><%= $post->{title} %></h2>
 <p><%= $post->{body} %></p>
-%= form_for edit_post => {id => $post->{id}} => begin
-  %= submit_button 'Edit post'
-% end
-%= form_for remove_post => {id => $post->{id}} => begin
-  %= submit_button 'Remove post'
-% end
+%= button_to 'Edit post'   => edit_post   => {id => $post->{id}}
+%= button_to 'Remove post' => remove_post => {id => $post->{id}}
