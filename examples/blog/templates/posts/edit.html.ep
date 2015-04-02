@@ -1,3 +1,6 @@
 % layout 'blog', title => 'Edit post';
 <h2>Edit post</h2>
-%= include 'posts/_form', caption => 'Update post', target => 'update_post'
+%= include 'posts/_form', caption => 'Update', target => 'update_post'
+%= form_for remove_post => {id => $post->{id}} => begin
+  %= submit_button 'Remove'
+% end

@@ -5,6 +5,4 @@
     %= $post->{body}
   </p>
 % }
-%= form_for create_post => begin
-  %= submit_button 'New post'
-% end
+%= link_to 'New post' => 'create_post'
