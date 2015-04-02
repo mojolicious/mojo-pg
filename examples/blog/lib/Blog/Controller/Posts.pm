@@ -15,7 +15,7 @@ sub index {
 
 sub remove {
   my $self = shift;
-  $self->posts->withdraw($self->param('id'));
+  $self->posts->remove($self->param('id'));
   $self->redirect_to('posts');
 }
 
@@ -31,7 +31,7 @@ sub store {
   return $self->render(action => 'create', post => {})
     if $validation->has_error;
 
-  my $id = $self->posts->publish($validation->output);
+  my $id = $self->posts->add($validation->output);
   $self->redirect_to('show_post', id => $id);
 }
 
@@ -42,7 +42,7 @@ sub update {
   return $self->render(action => 'edit', post => {}) if $validation->has_error;
 
   my $id = $self->param('id');
-  $self->posts->revise($id, $validation->output);
+  $self->posts->save($id, $validation->output);
   $self->redirect_to('show_post', id => $id);
 }
 
