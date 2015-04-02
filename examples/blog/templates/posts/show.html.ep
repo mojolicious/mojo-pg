@@ -2,8 +2,8 @@
 <h2><%= $post->{title} %></h2>
 <p><%= $post->{body} %></p>
 %= form_for edit_post => {id => $post->{id}} => begin
-  %= submit_button 'Edit post'
+  %= submit_button 'Edit'
 % end
 %= form_for remove_post => {id => $post->{id}} => begin
-  %= submit_button 'Remove post'
+  %= submit_button 'Remove'
 % end
