@@ -40,6 +40,7 @@ is $pg->migrations->from_data->latest, 0, 'latest version is 0';
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
 is $pg->migrations->name('test1')->from_data->latest, 7, 'latest version is 7';
 is $pg->migrations->name('test2')->from_data->latest, 2, 'latest version is 2';
+is $pg->migrations->name('test3')->from_data->latest, 12, 'latest version is 12';
 is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
   ->latest, 7, 'latest version is 7';
 is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
@@ -121,3 +122,42 @@ create table migration_test_four (test int));
 @@ test2
 -- 2 up
 create table migration_test_five (test int);
+
+@@ test3
+-- 1 up
+CREATE TABLE "MyTable" (
+    col1 text
+);
+
+-- 2 up
+ALTER TABLE "MyTable" ADD COLUMN col2 text;
+
+-- 3 up
+ALTER TABLE "MyTable" ADD COLUMN col3 text;
+
+-- 4 up
+ALTER TABLE "MyTable" ADD COLUMN col4 text;
+
+-- 5 up
+ALTER TABLE "MyTable" ADD COLUMN col5 text;
+
+-- 6 up
+ALTER TABLE "MyTable" ADD COLUMN col6 text;
+
+-- 7 up
+ALTER TABLE "MyTable" ADD COLUMN col7 text;
+
+-- 8 up
+ALTER TABLE "MyTable" ADD COLUMN col8 text;
+
+-- 9 up
+ALTER TABLE "MyTable" ADD COLUMN col9 text;
+
+-- 10 up
+ALTER TABLE "MyTable" ADD COLUMN col10 text;
+
+-- 11 up
+ALTER TABLE "MyTable" ADD COLUMN col11 text;
+
+-- 12 up
+ALTER TABLE "MyTable" ADD COLUMN col12 text;
