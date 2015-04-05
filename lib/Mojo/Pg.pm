@@ -371,6 +371,16 @@ This is the class hierarchy of the L<Mojo::Pg> distribution.
 
 Sebastian Riedel, C<sri@cpan.org>.
 
+=head1 CREDITS
+
+In alphabetical order:
+
+=over 2
+
+Hernan Lopes
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014-2015, Sebastian Riedel.

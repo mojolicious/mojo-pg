@@ -33,7 +33,9 @@ sub from_string {
   return $self;
 }
 
-sub latest { (sort keys %{shift->{migrations}{up}})[-1] || 0 }
+sub latest {
+  (sort { $a <=> $b } keys %{shift->{migrations}{up}})[-1] || 0;
+}
 
 sub migrate {
   my ($self, $target) = @_;

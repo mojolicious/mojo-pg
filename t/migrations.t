@@ -38,10 +38,11 @@ ok $pg->db->query(
 # Migrations from DATA section
 is $pg->migrations->from_data->latest, 0, 'latest version is 0';
 is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
-is $pg->migrations->name('test1')->from_data->latest, 7, 'latest version is 7';
+is $pg->migrations->name('test1')->from_data->latest, 10,
+  'latest version is 10';
 is $pg->migrations->name('test2')->from_data->latest, 2, 'latest version is 2';
 is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
-  ->latest, 7, 'latest version is 7';
+  ->latest, 10, 'latest version is 10';
 is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
   'latest version is 2';
 
@@ -117,6 +118,9 @@ __DATA__
 @@ test1
 -- 7 up
 create table migration_test_four (test int));
+
+-- 10 up
+insert into migration_test_four values (10);
 
 @@ test2
 -- 2 up
