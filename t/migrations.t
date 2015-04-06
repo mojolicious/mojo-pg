@@ -68,24 +68,24 @@ create table if not exists migration_test_two (bar varchar(255));
 --3  DOWN
 drop table if exists migration_test_two;
 
--- 4 up (not down)
+-- 10 up (not down)
 insert into migration_test_two values ('works too');
--- 4 down (not up)
+-- 10 down (not up)
 delete from migration_test_two where bar = 'works too';
 EOF
-is $pg->migrations->latest, 4, 'latest version is 4';
-is $pg->migrations->active, 0, 'active version is 0';
-is $pg->migrations->migrate->active, 4, 'active version is 4';
+is $pg->migrations->latest, 10, 'latest version is 10';
+is $pg->migrations->active, 0,  'active version is 0';
+is $pg->migrations->migrate->active, 10, 'active version is 10';
 is_deeply $pg->db->query('select * from migration_test_one')->hash,
   {foo => 'works ♥'}, 'right structure';
-is $pg->migrations->migrate->active, 4, 'active version is 4';
+is $pg->migrations->migrate->active, 10, 'active version is 10';
 is $pg->migrations->migrate(1)->active, 1, 'active version is 1';
 is $pg->db->query('select * from migration_test_one')->hash, undef,
   'no result';
 is $pg->migrations->migrate(3)->active, 3, 'active version is 3';
 is $pg->db->query('select * from migration_test_two')->hash, undef,
   'no result';
-is $pg->migrations->migrate->active, 4, 'active version is 4';
+is $pg->migrations->migrate->active, 10, 'active version is 10';
 is_deeply $pg->db->query('select * from migration_test_two')->hash,
   {bar => 'works too'}, 'right structure';
 is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
@@ -101,7 +101,7 @@ like $@, qr/does_not_exist/, 'right error';
 is $pg2->migrations->migrate(3)->active, 3, 'active version is 3';
 is $pg2->migrations->migrate(2)->active, 2, 'active version is 3';
 is $pg->migrations->active, 0, 'active version is still 0';
-is $pg->migrations->migrate->active, 4, 'active version is 4';
+is $pg->migrations->migrate->active, 10, 'active version is 10';
 is_deeply $pg2->db->query('select * from migration_test_three')
   ->hashes->to_array, [{baz => 'just'}, {baz => 'works ♥'}],
   'right structure';

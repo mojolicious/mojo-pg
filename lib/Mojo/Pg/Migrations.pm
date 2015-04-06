@@ -57,14 +57,14 @@ sub migrate {
   # Up
   my $sql;
   if ($active < $target) {
-    my @up = grep { $_ <= $target && $_ > $active } sort keys %$up;
-    $sql = join '', @$up{@up};
+    my @up = grep { $_ <= $target && $_ > $active } keys %$up;
+    $sql = join '', @$up{sort { $a <=> $b } @up};
   }
 
   # Down
   else {
-    my @down = grep { $_ > $target && $_ <= $active } reverse sort keys %$down;
-    $sql = join '', @$down{@down};
+    my @down = grep { $_ > $target && $_ <= $active } keys %$down;
+    $sql = join '', @$down{reverse sort { $a <=> $b } @down};
   }
 
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;

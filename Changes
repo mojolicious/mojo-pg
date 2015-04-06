@@ -1,5 +1,7 @@
 
 2.05  2015-04-06
+  - Fixed bug in Mojo::Pg::Migrations where migrations would sometimes be
+    executed in the wrong order.
 
 2.04  2015-04-05
   - Fixed bug in Mojo::Pg::Migrations where the latest version could not always
