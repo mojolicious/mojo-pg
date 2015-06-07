@@ -141,7 +141,7 @@ sub _watch {
       my $err = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
-      $self->_unwatch unless $self->is_listening;
+      $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
 }

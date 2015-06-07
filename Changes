@@ -1,5 +1,7 @@
 
-2.06  2015-04-07
+2.06  2015-06-07
+  - Fixed bug in Mojo::Pg::Database where sequential non-blocking queries would
+    not work correctly.
 
 2.05  2015-04-06
   - Fixed bug in Mojo::Pg::Migrations where migrations would sometimes be

@@ -53,6 +53,30 @@ Mojo::IOLoop->delay(
 ok !$fail, 'no error';
 is_deeply $result, [{one => 1}, {two => 2}, {two => 2}], 'right structure';
 
+# Sequential non-blocking selects
+($fail, $result) = (undef, []);
+$db = $pg->db;
+Mojo::IOLoop->delay(
+  sub {
+    my $delay = shift;
+    $db->query('select 1 as one' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $one) = @_;
+    $fail = $err;
+    push @$result, $one->hashes->first;
+    $db->query('select 2 as two' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $two) = @_;
+    $fail ||= $err;
+    push @$result, $two->hashes->first;
+    $db->query('select 2 as two' => $delay->begin);
+  }
+)->wait;
+ok !$fail, 'no error';
+is_deeply $result, [{one => 1}, {two => 2}], 'right structure';
+
 # Connection cache
 is $pg->max_connections, 5, 'right default';
 my @dbhs = map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db;
