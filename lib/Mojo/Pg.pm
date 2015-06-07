@@ -31,7 +31,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '2.06';
+our $VERSION = '2.07';
 
 sub db {
   my $self = shift;
