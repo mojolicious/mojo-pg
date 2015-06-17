@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Carp 'croak';
 use DBD::Pg ':async';
 use Mojo::IOLoop;
-use Mojo::JSON 'encode_json';
+use Mojo::JSON 'to_json';
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
 use Scalar::Util 'weaken';
@@ -79,7 +79,7 @@ sub query {
   $attrs{pg_placeholder_dollaronly} = 1        if delete $self->{dollar_only};
   $attrs{pg_async}                  = PG_ASYNC if $cb;
   my $sth = $self->dbh->prepare_cached($query, \%attrs, 3);
-  $sth->execute(map { _json($_) ? encode_json $_->{json} : $_ } @_);
+  $sth->execute(map { _json($_) ? to_json $_->{json} : $_ } @_);
 
   # Blocking
   unless ($cb) {

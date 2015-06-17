@@ -148,6 +148,8 @@ is_deeply $results->expand->array, [undef], 'right structure';
 is_deeply $results->expand->array, undef, 'no more results';
 is_deeply $db->query('select ?::json as unicode', {json => {'☃' => '♥'}})
   ->expand->hash, {unicode => {'☃' => '♥'}}, 'right structure';
+is_deeply $db->query("select json_build_object('☃', ?::text) as unicode",
+  '♥')->expand->hash, {unicode => {'☃' => '♥'}}, 'right structure';
 
 # Fork-safety
 $dbh = $pg->db->dbh;

@@ -2,7 +2,7 @@ package Mojo::Pg::Results;
 use Mojo::Base -base;
 
 use Mojo::Collection;
-use Mojo::JSON 'decode_json';
+use Mojo::JSON 'from_json';
 use Mojo::Util 'tablify';
 
 has 'sth';
@@ -48,7 +48,7 @@ sub _expand {
   return @data;
 }
 
-sub _json { $_[0] = decode_json $_[0] }
+sub _json { $_[0] = from_json $_[0] }
 
 1;
 
