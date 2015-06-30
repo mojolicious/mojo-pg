@@ -21,7 +21,7 @@ WriteMakefile(
       repository => 'https://github.com/kraih/mojo-pg.git',
       x_IRC      => 'irc://irc.perl.org/#mojo'
     },
-    no_index => {directory => ['t']}
+    no_index => {directory => ['t', 'examples']}
   },
   PREREQ_PM => {Mojolicious => '6.0', 'DBD::Pg' => 0},
   test      => {TESTS       => 't/*.t t/*/*.t'}
