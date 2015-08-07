@@ -65,22 +65,22 @@ Mojo::IOLoop->delay(
     my ($delay, $err, $one) = @_;
     $fail = $err;
     push @$result, $one->hashes->first;
+    $db->query('select 1 as one' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $again) = @_;
+    $fail ||= $err;
+    push @$result, $again->hashes->first;
     $db->query('select 2 as two' => $delay->begin);
   },
   sub {
     my ($delay, $err, $two) = @_;
     $fail ||= $err;
     push @$result, $two->hashes->first;
-    $db->query('select 3 as three' => $delay->begin);
-  },
-  sub {
-    my ($delay, $err, $three) = @_;
-    $fail ||= $err;
-    push @$result, $three->hashes->first;
   }
 )->wait;
 ok !$fail, 'no error';
-is_deeply $result, [{one => 1}, {two => 2}, {three => 3}], 'right structure';
+is_deeply $result, [{one => 1}, {one => 1}, {two => 2}], 'right structure';
 
 # Connection cache
 is $pg->max_connections, 5, 'right default';
