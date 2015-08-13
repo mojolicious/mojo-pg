@@ -1,6 +1,6 @@
 
-2.08  2015-08-13
-  - Improved support for long-lived Mojo::Pg::Results objects.
+2.08  2015-08-14
+  - Improved support for long-lived Mojo::Pg::Results objects. (Grinnz, sri)
 
 2.07  2015-06-17
   - Fixed a few JSON encoding and decoding issues.

@@ -377,6 +377,8 @@ In alphabetical order:
 
 =over 2
 
+Dan Book
+
 Hernan Lopes
 
 =back
