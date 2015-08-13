@@ -62,6 +62,13 @@ like $@, qr/does_not_exist/, 'right error';
 is_deeply $db->query('select * from results_test where name = ?', 'tx3')
   ->hashes->to_array, [], 'no results';
 
+# Long-lived results
+my $results1 = $db->query('select 1 as one');
+is_deeply $results1->hashes, [{one => 1}], 'right structure';
+my $results2 = $db->query('select 1 as one');
+undef $results1;
+is_deeply $results2->hashes, [{one => 1}], 'right structure';
+
 $db->query('drop table results_test');
 
 done_testing();

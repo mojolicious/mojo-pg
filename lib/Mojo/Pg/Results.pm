@@ -7,7 +7,11 @@ use Mojo::Util 'tablify';
 
 has 'sth';
 
-sub DESTROY { $_[0]{sth}->finish if $_[0]{sth} }
+sub DESTROY {
+  my $self = shift;
+  return unless my $sth = $self->{sth};
+  $sth->finish unless --$sth->{private_mojo_results};
+}
 
 sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
 
@@ -20,6 +24,12 @@ sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
 sub expand { ++$_[0]{expand} and return $_[0] }
 
 sub hashes { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})})) }
+
+sub new {
+  my $self = shift->SUPER::new(@_);
+  ($self->{sth}{private_mojo_results} //= 0)++;
+  return $self;
+}
 
 sub rows { shift->sth->rows }
 
@@ -142,6 +152,14 @@ containing hash references.
 
   # Process all rows at once
   say $results->hashes->reduce(sub { $a->{money} + $b->{money} });
+
+=head2 new
+
+  my $results = Mojo::Pg::Results->new;
+  my $results = Mojo::Pg::Results->new(sth => $sth);
+  my $results = Mojo::Pg::Results->new({sth => $sth});
+
+Construct a new L<Mojo::Pg::Results> object.
 
 =head2 rows
 
