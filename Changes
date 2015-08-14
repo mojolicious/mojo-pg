@@ -1,4 +1,6 @@
 
+2.09  2015-08-15
+
 2.08  2015-08-14
   - Improved support for long-lived Mojo::Pg::Results objects. (Grinnz, sri)
 
