@@ -231,6 +231,20 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
   };
   say $@ if $@;
 
+  # Upsert rows in a transaction
+  eval {
+    my $tx = $db->begin;
+    $db->query('insert into wines values (?, ?)', 10, 'Chateau');
+    $tx->savepoint('sp1');
+    eval { $db->query('insert into wines values (?, ?)', 24, 'Chateau') };
+    if ($@) {
+      $tx->rollback_to('sp1');
+      $db->query('update wines set stock = stock + ? where winename = ?',
+        24, 'Chateau');
+    }
+    $tx->commit;
+  };
+
 =head2 disconnect
 
   $db->disconnect;
