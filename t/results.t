@@ -71,7 +71,7 @@ my $id;
     ->array->[0];
   $tx->savepoint('s1');
   eval { $db->query("insert into results_test values (?, 'sp2')", $id); };
-  if ($@ && $db->dbh->state == 23505) {
+  if ($@) {
     $tx->rollback_to('s1');
     $db->query("update results_test set name ='sp2' where id = ?", $id);
   }

@@ -20,9 +20,9 @@ sub new {
   return $self;
 }
 
-sub savepoint { $_[0]->{dbh}->pg_savepoint($_[1]) }
-
 sub rollback_to { $_[0]->{dbh}->pg_rollback_to($_[1]) }
+
+sub savepoint { $_[0]->{dbh}->pg_savepoint($_[1]) }
 
 1;
 
@@ -74,17 +74,17 @@ Commit transaction.
 
 Construct a new L<Mojo::Pg::Transaction> object.
 
-=head2 savepoint
-
-  $tx->savepoint('savepoint_name');
-
-Creates a savepoint.
-
 =head2 rollback_to
 
   $tx->rollback_to('savepoint_name');
 
 Rolls the database back to a named savepoint.
+
+=head2 savepoint
+
+  $tx->savepoint('savepoint_name');
+
+Creates a savepoint.
 
 =head1 SEE ALSO
 
