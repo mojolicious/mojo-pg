@@ -4,8 +4,7 @@ BEGIN { $ENV{MOJO_REACTOR} = 'Mojo::Reactor::Poll' }
 
 use Test::More;
 
-plan skip_all => 'set TEST_ONLINE to enable this test'
-  unless $ENV{TEST_ONLINE};
+plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::IOLoop;
 use Mojo::JSON 'true';
@@ -46,8 +45,7 @@ Mojo::IOLoop->delay(
   sub {
     my ($delay, $err_one, $one, $err_two, $two, $err_again, $again) = @_;
     $fail = $err_one || $err_two || $err_again;
-    $result
-      = [$one->hashes->first, $two->hashes->first, $again->hashes->first];
+    $result = [$one->hashes->first, $two->hashes->first, $again->hashes->first];
   }
 )->wait;
 ok !$fail, 'no error';
@@ -85,8 +83,7 @@ is_deeply $result, [{one => 1}, {one => 1}, {two => 2}], 'right structure';
 # Connection cache
 is $pg->max_connections, 5, 'right default';
 my @dbhs = map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db;
-is_deeply \@dbhs,
-  [map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
+is_deeply \@dbhs, [map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
   'same database handles';
 @dbhs = ();
 my $dbh = $pg->max_connections(1)->db->dbh;

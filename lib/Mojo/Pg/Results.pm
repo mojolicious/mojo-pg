@@ -51,8 +51,8 @@ sub _expand {
   return @data unless @$idx;
 
   for my $data (@data) {
-    if (ref $data eq 'HASH') { $data->{$_} and _json($data->{$_}) for @$name }
-    else                     { $data->[$_] and _json($data->[$_]) for @$idx }
+    if   (ref $data eq 'HASH') { $data->{$_} and _json($data->{$_}) for @$name }
+    else                       { $data->[$_] and _json($data->[$_]) for @$idx }
   }
 
   return @data;

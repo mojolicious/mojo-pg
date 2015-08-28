@@ -17,12 +17,7 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub {
-  {
-    AutoCommit          => 1,
-    AutoInactiveDestroy => 1,
-    PrintError          => 0,
-    RaiseError          => 1
-  };
+  {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0, RaiseError => 1};
 };
 has [qw(password username)] => '';
 has pubsub => sub {

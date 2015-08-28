@@ -4,8 +4,7 @@ BEGIN { $ENV{MOJO_REACTOR} = 'Mojo::Reactor::Poll' }
 
 use Test::More;
 
-plan skip_all => 'set TEST_ONLINE to enable this test'
-  unless $ENV{TEST_ONLINE};
+plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use File::Spec::Functions 'catfile';
 use FindBin;
@@ -41,8 +40,8 @@ is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
 is $pg->migrations->name('test1')->from_data->latest, 10,
   'latest version is 10';
 is $pg->migrations->name('test2')->from_data->latest, 2, 'latest version is 2';
-is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')
-  ->latest, 10, 'latest version is 10';
+is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')->latest,
+  10, 'latest version is 10';
 is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2,
   'latest version is 2';
 
@@ -80,11 +79,9 @@ is_deeply $pg->db->query('select * from migration_test_one')->hash,
   {foo => 'works ♥'}, 'right structure';
 is $pg->migrations->migrate->active, 10, 'active version is 10';
 is $pg->migrations->migrate(1)->active, 1, 'active version is 1';
-is $pg->db->query('select * from migration_test_one')->hash, undef,
-  'no result';
+is $pg->db->query('select * from migration_test_one')->hash, undef, 'no result';
 is $pg->migrations->migrate(3)->active, 3, 'active version is 3';
-is $pg->db->query('select * from migration_test_two')->hash, undef,
-  'no result';
+is $pg->db->query('select * from migration_test_two')->hash, undef, 'no result';
 is $pg->migrations->migrate->active, 10, 'active version is 10';
 is_deeply $pg->db->query('select * from migration_test_two')->hash,
   {bar => 'works too'}, 'right structure';
