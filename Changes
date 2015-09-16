@@ -1,5 +1,7 @@
 
-2.10  2015-09-03
+2.10  2015-09-16
+  - Updated DBD::Pg requirement to 3.5.1 due to certain JSON features not
+    working with older versions.
 
 2.09  2015-08-29
   - Fixed Makefile.PL to be compliant with version 2 of the CPAN distribution
