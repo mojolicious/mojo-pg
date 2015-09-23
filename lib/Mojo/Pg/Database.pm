@@ -26,7 +26,6 @@ sub DESTROY {
 
 sub begin {
   my $self = shift;
-  $self->dbh->begin_work;
   my $tx = Mojo::Pg::Transaction->new(db => $self);
   weaken $tx->{db};
   return $tx;
