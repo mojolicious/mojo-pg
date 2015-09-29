@@ -106,9 +106,8 @@ sub _json { ref $_[0] eq 'HASH' && exists $_[0]{json} }
 
 sub _notifications {
   my $self = shift;
-  while (my $notify = $self->dbh->pg_notifies) {
-    $self->emit(notification => @$notify);
-  }
+  my $dbh  = $self->dbh;
+  while (my $n = $dbh->pg_notifies) { $self->emit(notification => @$n) }
 }
 
 sub _unwatch {

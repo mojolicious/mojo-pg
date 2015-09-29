@@ -1,5 +1,6 @@
 
-2.11  2015-09-23
+2.11  2015-09-29
+  - Improved notification performance slightly.
 
 2.10  2015-09-16
   - Updated DBD::Pg requirement to 3.5.1 due to certain JSON features not
