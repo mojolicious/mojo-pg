@@ -1,16 +1,16 @@
 package Blog::Controller::Posts;
 use Mojo::Base 'Mojolicious::Controller';
 
-sub create { shift->stash(post => {}) }
+sub create { shift->render(post => {}) }
 
 sub edit {
   my $self = shift;
-  $self->stash(post => $self->posts->find($self->param('id')));
+  $self->render(post => $self->posts->find($self->param('id')));
 }
 
 sub index {
   my $self = shift;
-  $self->stash(posts => $self->posts->all);
+  $self->render(posts => $self->posts->all);
 }
 
 sub remove {
@@ -21,7 +21,7 @@ sub remove {
 
 sub show {
   my $self = shift;
-  $self->stash(post => $self->posts->find($self->param('id')));
+  $self->render(post => $self->posts->find($self->param('id')));
 }
 
 sub store {
