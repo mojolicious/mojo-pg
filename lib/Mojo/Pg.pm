@@ -215,6 +215,11 @@ following new ones.
 
 Emitted when a new database connection has been established.
 
+  $pg->on(connection => sub {
+    my ($pg, $dbh) = @_;
+    $dbh->do('set search_path to my_schema');
+  });
+
 =head1 ATTRIBUTES
 
 L<Mojo::Pg> implements the following attributes.
