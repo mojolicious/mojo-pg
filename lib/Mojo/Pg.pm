@@ -25,6 +25,7 @@ has pubsub => sub {
   weaken $pubsub->{pg};
   return $pubsub;
 };
+has 'search_path';
 
 our $VERSION = '2.13';
 
@@ -74,9 +75,15 @@ sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
 sub _dequeue {
   my $self = shift;
+
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
+  if (my $s = $self->search_path) {
+    my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$s;
+    $dbh->do("set search_path to $search_path");
+  }
   $self->emit(connection => $dbh);
+
   return $dbh;
 }
 
@@ -283,6 +290,17 @@ efficiently, by sharing a single database connection with many consumers.
 
   # Notify a channel
   $pg->pubsub->notify(news => 'PostgreSQL rocks!');
+
+=head2 search_path
+
+  my $search_path = $pg->search_path;
+  $pg             = $pg->search_path(['foo', 'public']);
+
+Schema search path assigned to all new connections.
+
+  # Isolate tests and avoid race conditions when running them in parallel
+  $pg->search_path(['test_one']);
+  $pg->migrations->migrate(0)->migrate;
 
 =head2 username
 

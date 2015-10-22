@@ -14,6 +14,13 @@ use Mojo::Pg;
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 ok $pg->db->ping, 'connected';
 
+# Custom search_path
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg->search_path(['foo', 'bar']);
+is_deeply $pg->db->query('show search_path')->hash,
+  {search_path => 'foo, bar'}, 'right structure';
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+
 # Blocking select
 is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash,
   {one => 1, two => 2, three => 3}, 'right structure';
