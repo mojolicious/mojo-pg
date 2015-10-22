@@ -78,8 +78,8 @@ sub _dequeue {
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
-  if (my $s = $self->search_path) {
-    my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$s;
+  if (my $path = $self->search_path) {
+    my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
     $dbh->do("set search_path to $search_path");
   }
   $self->emit(connection => $dbh);
@@ -293,8 +293,8 @@ efficiently, by sharing a single database connection with many consumers.
 
 =head2 search_path
 
-  my $search_path = $pg->search_path;
-  $pg             = $pg->search_path(['foo', 'public']);
+  my $path = $pg->search_path;
+  $pg      = $pg->search_path(['foo', 'public']);
 
 Schema search path assigned to all new connections.
 
