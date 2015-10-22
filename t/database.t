@@ -15,7 +15,7 @@ my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 ok $pg->db->ping, 'connected';
 
 # Custom search_path
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path('foo, bar');
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['foo', 'bar']);
 is_deeply $pg->db->query('show search_path')->hash,
   {search_path => 'foo, bar'}, 'right structure';
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
