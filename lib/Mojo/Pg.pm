@@ -78,10 +78,7 @@ sub _dequeue {
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
-  if (my $path = $self->search_path) {
-    my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
-    $dbh->do("set search_path to $search_path");
-  }
+  if (my $path = $self->search_path) { $dbh->do("set search_path to $path") }
   $self->emit(connection => $dbh);
 
   return $dbh;
@@ -294,12 +291,12 @@ efficiently, by sharing a single database connection with many consumers.
 =head2 search_path
 
   my $path = $pg->search_path;
-  $pg      = $pg->search_path(['foo', 'public']);
+  $pg      = $pg->search_path('foo,public');
 
 Schema search path assigned to all new connections.
 
   # Isolate tests and avoid race conditions when running them in parallel
-  $pg->search_path(['test_one']);
+  $pg->search_path('test_one');
   $pg->migrations->migrate(0)->migrate;
 
 =head2 username
