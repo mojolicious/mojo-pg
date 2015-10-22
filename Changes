@@ -1,5 +1,5 @@
 
-2.13  2015-10-22
+2.13  2015-10-23
   - Added search_path attribute to Mojo::Pg.
 
 2.12  2015-10-05
