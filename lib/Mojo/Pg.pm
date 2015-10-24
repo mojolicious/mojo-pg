@@ -294,7 +294,7 @@ efficiently, by sharing a single database connection with many consumers.
 =head2 search_path
 
   my $path = $pg->search_path;
-  $pg      = $pg->search_path(['foo', 'public']);
+  $pg      = $pg->search_path(['$user', 'foo', 'public']);
 
 Schema search path assigned to all new connections.
 
