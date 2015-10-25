@@ -1,5 +1,7 @@
 
 2.14  2015-10-25
+  - Improved unlisten method in Mojo::Pg::PubSub with support for removing all
+    subscribers of a channel at once.
 
 2.13  2015-10-23
   - Added search_path attribute to Mojo::Pg.

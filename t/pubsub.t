@@ -47,6 +47,15 @@ $pg->pubsub->unlisten(pstest => $second)->notify(pstest => 'third');
 is_deeply \@test, ['', '', 'first', 'first', 'second'], 'right messages';
 is_deeply \@all, [['pstest', ''], ['pstest', 'first'], ['pstest', 'second']],
   'right notifications';
+@all = @test = ();
+my $third  = $pg->pubsub->listen(pstest => sub { push @test, pop });
+my $fourth = $pg->pubsub->listen(pstest => sub { push @test, pop });
+$pg->pubsub->notify(pstest => 'first');
+is_deeply \@test, ['first', 'first'], 'right messages';
+$pg->pubsub->notify(pstest => 'second');
+is_deeply \@test, ['first', 'first', 'second', 'second'], 'right messages';
+$pg->pubsub->unlisten('pstest')->notify(pstest => 'third');
+is_deeply \@test, ['first', 'first', 'second', 'second'], 'right messages';
 
 # Reconnect while listening
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
