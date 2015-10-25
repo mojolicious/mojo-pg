@@ -27,7 +27,7 @@ has pubsub => sub {
 };
 has 'search_path';
 
-our $VERSION = '2.14';
+our $VERSION = '2.15';
 
 sub db {
   my $self = shift;
