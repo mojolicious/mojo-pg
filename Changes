@@ -1,5 +1,7 @@
 
-2.15  2015-10-26
+2.15  2015-10-30
+  - Improved Mojo::Pg::Migrations to detect if the currently active version is
+    greater than the latest version.
 
 2.14  2015-10-25
   - Improved unlisten method in Mojo::Pg::PubSub with support for removing all

@@ -25,7 +25,8 @@ ok !$pg->db->query(
      select 1 from information_schema.tables
      where table_schema = 'public' and table_name = 'mojo_migrations'
    )"
-)->array->[0], 'migrations table does not exist';
+  )->array->[0],
+  'migrations table does not exist';
 is $pg->migrations->migrate->active, 0, 'active version is 0';
 ok $pg->db->query(
   "select exists(
@@ -108,6 +109,28 @@ is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 # Unknown version
 eval { $pg->migrations->migrate(23) };
 like $@, qr/Version 23 has no migration/, 'right error';
+
+# Version mismatch
+my $newer = <<EOF;
+-- 2 up
+create table migration_test_five (test int);
+-- 2 down
+drop table migration_test_five;
+EOF
+$pg->migrations->name('migrations_test3')->from_string($newer);
+is $pg->migrations->migrate->active, 2, 'active version is 2';
+$pg->migrations->from_string(<<EOF);
+-- 1 up
+create table migration_test_five (test int);
+EOF
+eval { $pg->migrations->migrate };
+like $@, qr/Active version 2 is greater than the latest version 1/,
+  'right error';
+eval { $pg->migrations->migrate(0) };
+like $@, qr/Active version 2 is greater than the latest version 1/,
+  'right error';
+is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
+  'active version is 0';
 
 done_testing();
 

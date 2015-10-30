@@ -39,9 +39,10 @@ sub latest {
 
 sub migrate {
   my ($self, $target) = @_;
-  $target //= $self->latest;
 
   # Unknown version
+  my $latest = $self->latest;
+  $target //= $latest;
   my ($up, $down) = @{$self->{migrations}}{qw(up down)};
   croak "Version $target has no migration" if $target != 0 && !$up->{$target};
 
@@ -53,6 +54,10 @@ sub migrate {
   my $tx = $db->begin;
   $db->query('lock table mojo_migrations in exclusive mode');
   return $self if (my $active = $self->_active($db, 1)) == $target;
+
+  # Newer version
+  croak "Active version $active is greater than the latest version $latest"
+    if $active > $latest;
 
   # Up
   my $sql;
