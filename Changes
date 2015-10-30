@@ -1,4 +1,6 @@
 
+2.16  2015-10-31
+
 2.15  2015-10-30
   - Improved Mojo::Pg::Migrations to detect if the currently active version is
     greater than the latest version.
