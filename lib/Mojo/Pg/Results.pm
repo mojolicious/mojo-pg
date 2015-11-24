@@ -23,6 +23,8 @@ sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
 
 sub expand { ++$_[0]{expand} and return $_[0] }
 
+sub finish { shift->sth->finish }
+
 sub hashes { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})})) }
 
 sub new {
@@ -100,7 +102,8 @@ following new ones.
 
   my $array = $results->array;
 
-Fetch next row from L</"sth"> and return it as an array reference.
+Fetch next row from L</"sth"> and return it as an array reference. Note that
+L</"finish"> needs to be called if you are not fetching all the possible rows.
 
   # Process one row at a time
   while (my $next = $results->array) {
@@ -132,11 +135,19 @@ Decode C<json> and C<jsonb> fields automatically for all rows.
   # Expand JSON
   $results->expand->hashes->map(sub { $_->{foo}{bar} })->join("\n")->say;
 
+=head2 finish
+
+  $results->finish;
+
+Indicate that you are finished with L</"sth"> and will not be fetching all the
+remaining rows.
+
 =head2 hash
 
   my $hash = $results->hash;
 
-Fetch next row from L</"sth"> and return it as a hash reference.
+Fetch next row from L</"sth"> and return it as a hash reference. Note that
+L</"finish"> needs to be called if you are not fetching all the possible rows.
 
   # Process one row at a time
   while (my $next = $results->hash) {

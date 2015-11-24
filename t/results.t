@@ -33,6 +33,42 @@ is_deeply $db->query('select * from results_test')->hashes->to_array,
 is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
   'right text';
 
+# Iterate
+my $results = $db->query('select * from results_test');
+is_deeply $results->array, [1, 'foo'], 'right structure';
+is_deeply $results->array, [2, 'bar'], 'right structure';
+is $results->array, undef, 'no more results';
+
+# Non-blocking query where not all results have been fetched
+my ($fail, $result);
+Mojo::IOLoop->delay(
+  sub {
+    my $delay = shift;
+    $db->query('select name from results_test' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $results) = @_;
+    $fail = $err;
+    push @$result, $results->array;
+    $results->finish;
+    $db->query('select name from results_test' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $results) = @_;
+    $fail ||= $err;
+    push @$result, $results->array;
+    $results->finish;
+    $db->query('select name from results_test' => $delay->begin);
+  },
+  sub {
+    my ($delay, $err, $results) = @_;
+    $fail ||= $err;
+    push @$result, $results->array;
+  }
+)->wait;
+ok !$fail, 'no error';
+is_deeply $result, [['foo'], ['foo'], ['foo']], 'right structure';
+
 # Transactions
 {
   my $tx = $db->begin;
