@@ -1,5 +1,6 @@
 
-2.17  2016-01-01
+2.17  2016-01-03
+  - Updated links to Mojolicious website.
 
 2.16  2015-11-25
   - Added finish method to Mojo::Pg::Results.

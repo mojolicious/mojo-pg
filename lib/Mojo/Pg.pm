@@ -171,7 +171,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
 L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
-L<Mojolicious|http://mojolicio.us> real-time web framework.
+L<Mojolicious|http://mojolicious.org> real-time web framework.
 
 Database and statement handles are cached automatically, so they can be reused
 transparently to increase performance. And you can handle connection timeouts
@@ -411,6 +411,6 @@ the terms of the Artistic License version 2.0.
 =head1 SEE ALSO
 
 L<https://github.com/kraih/mojo-pg>, L<Mojolicious::Guides>,
-L<http://mojolicio.us>.
+L<http://mojolicious.org>.
 
 =cut

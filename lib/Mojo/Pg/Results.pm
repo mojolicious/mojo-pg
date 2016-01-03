@@ -187,6 +187,6 @@ L<Mojo::Util/"tablify">.
 
 =head1 SEE ALSO
 
-L<Mojo::Pg>, L<Mojolicious::Guides>, L<http://mojolicio.us>.
+L<Mojo::Pg>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
 
 =cut

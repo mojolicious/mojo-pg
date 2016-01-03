@@ -3,7 +3,7 @@
 
   A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes
   [PostgreSQL](http://www.postgresql.org) a lot of fun to use with the
-  [Mojolicious](http://mojolicio.us) real-time web framework.
+  [Mojolicious](http://mojolicious.org) real-time web framework.
 
 ```perl
 use Mojolicious::Lite;
