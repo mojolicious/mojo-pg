@@ -9,6 +9,7 @@ use Mojo::Pg::PubSub;
 use Mojo::URL;
 use Scalar::Util 'weaken';
 
+has [qw(auto_migrate search_path)];
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
 has migrations      => sub {
@@ -25,7 +26,6 @@ has pubsub => sub {
   weaken $pubsub->{pg};
   return $pubsub;
 };
-has 'search_path';
 
 our $VERSION = '2.18';
 
@@ -82,6 +82,8 @@ sub _dequeue {
     my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
     $dbh->do("set search_path to $search_path");
   }
+  ++$self->{migrated} and $self->migrations->migrate
+    if $self->auto_migrate && !$self->{migrated};
   $self->emit(connection => $dbh);
 
   return $dbh;
@@ -230,6 +232,14 @@ Emitted when a new database connection has been established.
 =head1 ATTRIBUTES
 
 L<Mojo::Pg> implements the following attributes.
+
+=head2 auto_migrate
+
+  my $bool = $pg->auto_migrate;
+  $pg      = $pg->auto_migrate($bool);
+
+Automatically migrate to the latest database schema with L</"migrations">, as
+soon as the first database connection has been established.
 
 =head2 dsn
 
