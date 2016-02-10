@@ -1,5 +1,5 @@
 
-2.19  2016-01-24
+2.19  2016-02-10
 
 2.18  2016-01-23
   - Added auto_migrate attribute to Mojo::Pg.
