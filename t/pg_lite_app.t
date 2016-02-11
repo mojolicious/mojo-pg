@@ -11,7 +11,15 @@ use Mojolicious::Lite;
 use Scalar::Util 'refaddr';
 use Test::Mojo;
 
-helper pg => sub { state $pg = Mojo::Pg->new($ENV{TEST_ONLINE}) };
+# Isolate tests
+my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg->db->query('drop schema if exists mojo_pg_app_test cascade');
+$pg->db->query('create schema mojo_pg_app_test');
+
+helper pg => sub {
+  state $pg
+    = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_pg_app_test']);
+};
 
 app->pg->db->query('create table if not exists app_test (stuff text)');
 app->pg->db->query('insert into app_test values (?)', 'I ♥ Mojolicious!');
@@ -51,5 +59,8 @@ $t->get_ok('/non-blocking')->status_is(200)->header_is('X-Ref', $ref)
 $t->get_ok('/non-blocking')->status_is(200)->header_is('X-Ref', $ref)
   ->content_is('I ♥ Mojolicious!');
 $t->app->pg->db->query('drop table app_test');
+
+# Clean up once we are done
+$pg->db->query('drop schema mojo_pg_app_test cascade');
 
 done_testing();

@@ -10,9 +10,11 @@ use File::Spec::Functions 'catfile';
 use FindBin;
 use Mojo::Pg;
 
-# Clean up before start
+# Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-$pg->db->query('drop table if exists mojo_migrations');
+$pg->db->query('drop schema if exists mojo_migrations_test cascade');
+$pg->db->query('create schema mojo_migrations_test');
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
@@ -23,7 +25,8 @@ is $pg->migrations->active, 0,            'active version is 0';
 ok !$pg->db->query(
   "select exists(
      select 1 from information_schema.tables
-     where table_schema = 'public' and table_name = 'mojo_migrations'
+     where table_schema = 'mojo_migrations_test'
+       and table_name = 'mojo_migrations'
    )"
   )->array->[0],
   'migrations table does not exist';
@@ -89,7 +92,8 @@ is_deeply $pg->db->query('select * from migration_test_two')->hash,
 is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
 
 # Bad and concurrent migrations
-my $pg2 = Mojo::Pg->new($ENV{TEST_ONLINE});
+my $pg2
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
 $pg2->migrations->name('migrations_test2')
   ->from_file(catfile($FindBin::Bin, 'migrations', 'test.sql'));
 is $pg2->migrations->latest, 4, 'latest version is 4';
@@ -107,7 +111,7 @@ is $pg->migrations->migrate(0)->active,  0, 'active version is 0';
 is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 
 # Migrate automatically
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
 $pg->migrations->name('migrations_test')->from_string(<<EOF);
 -- 5 up
 create table if not exists migration_test_six (foo varchar(255));
@@ -152,6 +156,9 @@ like $@, qr/Active version 2 is greater than the latest version 1/,
   'right error';
 is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
   'active version is 0';
+
+# Clean up once we are done
+$pg->db->query('drop schema mojo_migrations_test cascade');
 
 done_testing();
 

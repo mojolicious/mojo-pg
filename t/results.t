@@ -8,7 +8,12 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::Pg;
 
+# Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg->db->query('drop schema if exists mojo_results_test cascade');
+$pg->db->query('create schema mojo_results_test');
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
+
 my $db = $pg->db;
 $db->query(
   'create table if not exists results_test (
@@ -104,6 +109,7 @@ my $results2 = $db->query('select 1 as one');
 undef $results1;
 is_deeply $results2->hashes, [{one => 1}], 'right structure';
 
-$db->query('drop table results_test');
+# Clean up once we are done
+$pg->db->query('drop schema mojo_results_test cascade');
 
 done_testing();
