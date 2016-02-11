@@ -147,7 +147,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Select all rows non-blocking
   $db->query('select * from names' => sub {
     my ($db, $err, $results) = @_;
-    $results->hashes->map(sub { $_->{name} })->join("\n")->say;
+    say $err and return if $err;
+    say $_->{name} for $results->hashes->each;
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
@@ -160,8 +161,9 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     },
     sub {
       my ($delay, $first_err, $first, $second_err, $second) = @_;
-      $first->hashes->map(sub { $_->{name} })->join("\n")->say;
-      $second->hashes->map(sub { $_->{name} })->join("\n")->say;
+      if (my $err = $first_err || $second_err) { die $err }
+      say $_->{name} for $first->hashes->each;
+      say $_->{name} for $second->hashes->each;
     }
   )->wait;
 
