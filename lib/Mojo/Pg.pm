@@ -162,8 +162,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
     sub {
       my ($delay, $first_err, $first, $second_err, $second) = @_;
       if (my $err = $first_err || $second_err) { die $err }
-      say $_->{name} for $first->hashes->each;
-      say $_->{name} for $second->hashes->each;
+      say $_->{name} for $first->hashes->each, $second->hashes->each;
     }
   )->wait;
 
