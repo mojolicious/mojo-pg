@@ -83,7 +83,7 @@ sub _dequeue {
     $dbh->do("set search_path to $search_path");
   }
   ++$self->{migrated} and $self->migrations->migrate
-    if $self->auto_migrate && !$self->{migrated};
+    if !$self->{migrated} && $self->auto_migrate;
   $self->emit(connection => $dbh);
 
   return $dbh;
