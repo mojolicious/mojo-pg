@@ -1,21 +1,24 @@
 language: perl
 perl:
-  - "5.22"
-  - "5.20"
-  - "5.18"
-  - "5.16"
-  - "5.14"
-  - "5.12"
-  - "5.10"
+  - 5.22
+  - 5.20
+  - 5.18
+  - 5.16
+  - 5.14
+  - 5.12
+  - 5.10
 addons:
-  postgresql: "9.4"
+  postgresql: 9.4
 env:
-  - "HARNESS_OPTIONS=j9 TEST_POD=1 TEST_ONLINE=postgresql://postgres@/mojo_pg_test"
+  global:
+    - HARNESS_OPTIONS=j9
+    - TEST_POD=1
+    - TEST_ONLINE=postgresql://postgres@/mojo_pg_test
 install:
-  - "cpanm -n Test::Pod Test::Pod::Coverage"
-  - "cpanm -n --installdeps ."
+  - cpanm -n Test::Pod Test::Pod::Coverage
+  - cpanm -n --installdeps .
 before_script:
-  - psql -c 'create database mojo_pg_test;' -U postgres
+  - psql -U postgres -c 'create database mojo_pg_test'
 sudo: false
 notifications:
   email: false
