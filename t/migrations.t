@@ -33,7 +33,8 @@ is $pg->migrations->migrate->active, 0, 'active version is 0';
 ok $pg->db->query(
   "select exists(
      select 1 from information_schema.tables
-     where table_schema = 'public' and table_name = 'mojo_migrations'
+     where table_schema = 'mojo_migrations_test'
+       and table_name = 'mojo_migrations'
    )"
 )->array->[0], 'migrations table exists';
 
