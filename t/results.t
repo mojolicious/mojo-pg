@@ -10,9 +10,9 @@ use Mojo::Pg;
 
 # Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-$pg->db->query('drop schema if exists mojo_pg_results_test cascade');
-$pg->db->query('create schema mojo_pg_results_test');
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_pg_results_test']);
+$pg->db->query('drop schema if exists mojo_results_test cascade');
+$pg->db->query('create schema mojo_results_test');
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
 
 my $db = $pg->db;
 $db->query(
@@ -110,6 +110,6 @@ undef $results1;
 is_deeply $results2->hashes, [{one => 1}], 'right structure';
 
 # Clean up once we are done
-$pg->db->query('drop schema mojo_pg_results_test cascade');
+$pg->db->query('drop schema mojo_results_test cascade');
 
 done_testing();
