@@ -141,8 +141,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   }
 
   # Select all rows blocking
-  $db->query('select * from names')
-    ->hashes->map(sub { $_->{name} })->join("\n")->say;
+  say $_->{name} for $db->query('select * from names')->hashes->each;
 
   # Select all rows non-blocking
   $db->query('select * from names' => sub {
