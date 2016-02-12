@@ -152,17 +152,18 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-  # Concurrently select all rows twice non-blocking (synchronized with a delay)
+  # Concurrent non-blocking queries (synchronized with a delay)
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $pg->db->query('select * from names' => $delay->begin);
+      $pg->db->query('select now()'        => $delay->begin);
       $pg->db->query('select * from names' => $delay->begin);
     },
     sub {
-      my ($delay, $first_err, $first, $second_err, $second) = @_;
-      if (my $err = $first_err || $second_err) { die $err }
-      say $_->{name} for $first->hashes->each, $second->hashes->each;
+      my ($delay, $time_err, $time, $names_err, $names) = @_;
+      if (my $err = $time_err || $names_err) { die $err }
+      say $time->array->[0];
+      say $_->{name} for $names->hashes->each;
     }
   )->wait;
 
