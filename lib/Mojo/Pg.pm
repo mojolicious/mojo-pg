@@ -192,7 +192,7 @@ gracefully by holding on to them only for short amounts of time.
   use Mojolicious::Lite;
   use Mojo::Pg;
 
-  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@/db') };
+  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
   get '/' => sub {
     my $c  = shift;
@@ -238,7 +238,7 @@ Which get integrated into your application with helpers.
   use Mojo::Pg;
   use MyApp::Model::Time;
 
-  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@/db') };
+  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
   helper time => sub { state $time = MyApp::Model::Time->new(pg => shift->pg) };
 
   get '/' => sub {
