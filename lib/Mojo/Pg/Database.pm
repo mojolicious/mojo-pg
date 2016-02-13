@@ -92,7 +92,7 @@ sub tables {
   shift->query(
     "select table_schema || '.' || table_name from information_schema.tables
      where table_schema not in ('pg_catalog', 'information_schema')"
-  )->arrays->reduce(sub { push @$a, $b->[0]; $a }, []);
+  )->arrays->map(sub { $_->[0] })->to_array;
 }
 
 sub unlisten {
