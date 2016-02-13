@@ -146,7 +146,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Select all rows non-blocking
   $db->query('select * from names' => sub {
     my ($db, $err, $results) = @_;
-    say $err and return if $err;
+    die $err if $err;
     say $_->{name} for $results->hashes->each;
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
