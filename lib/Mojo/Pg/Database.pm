@@ -90,8 +90,8 @@ sub query {
 
 sub tables {
   shift->query(
-    "select table_schema || '.' || table_name from information_schema.tables
-     where table_schema not in ('pg_catalog', 'information_schema')"
+    "select schemaname || '.' || tablename from pg_catalog.pg_tables
+     where schemaname not in ('pg_catalog', 'information_schema')"
   )->arrays->map(sub { $_->[0] })->to_array;
 }
 

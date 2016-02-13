@@ -1,5 +1,6 @@
 
-2.22  2016-02-14
+2.22  2016-02-13
+  - Fixed bug where views would be included in the list of table names.
 
 2.21  2016-02-13
   - Added tables method to Mojo::Pg::Database.
