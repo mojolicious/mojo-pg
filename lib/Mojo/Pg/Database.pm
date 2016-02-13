@@ -303,7 +303,8 @@ also append a callback to perform operation non-blocking.
 
   my $tables = $db->tables;
 
-Return an array reference with table names for this database.
+Return table names (that are not internal) for this database as an array
+reference.
 
   # Names of all tables
   say for @{$db->tables};
