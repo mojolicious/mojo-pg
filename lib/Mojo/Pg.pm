@@ -185,20 +185,19 @@ L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
 L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
 L<Mojolicious|http://mojolicious.org> real-time web framework.
 
-Database and statement handles are cached automatically, so they can be reused
+Database and statement handles are cached automatically, and will be reused
 transparently to increase performance. And you can handle connection timeouts
 gracefully by holding on to them only for short amounts of time.
 
   use Mojolicious::Lite;
   use Mojo::Pg;
 
-  helper pg =>
-    sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@localhost/db') };
+  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@/db') };
 
   get '/' => sub {
     my $c  = shift;
     my $db = $c->pg->db;
-    $c->render(json => $db->query('select now() as time')->hash);
+    $c->render(json => $db->query('select now() as now')->hash);
   };
 
   app->start;
@@ -219,6 +218,35 @@ to use multiple connections.
 All cached database handles will be reset automatically if a new process has
 been forked, this allows multiple processes to share the same L<Mojo::Pg>
 object safely.
+
+=head1 GROWING
+
+And as your application grows, you can move queries into model classes.
+
+  package MyApp::Model::Time;
+  use Mojo::Base -base;
+
+  has 'pg';
+
+  sub now { shift->pg->db->query('select now() as now')->hash }
+
+  1;
+
+Which get integrated into your application with helpers.
+
+  use Mojolicious::Lite;
+  use Mojo::Pg;
+  use MyApp::Model::Time;
+
+  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://sri:s3cret@/db') };
+  helper time => sub { state $time = MyApp::Model::Time->new(pg => shift->pg) };
+
+  get '/' => sub {
+    my $c  = shift;
+    $c->render(json => $c->time->now);
+  };
+
+  app->start;
 
 =head1 EVENTS
 
