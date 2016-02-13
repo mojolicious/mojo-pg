@@ -23,6 +23,12 @@ $db->query(
 );
 $db->query('insert into results_test (name) values (?)', $_) for qw(foo bar);
 
+# Tables
+ok !!(grep {/^mojo_results_test\.results.test$/} @{$db->tables}),
+  'results table exists';
+ok !(grep {/^information_schema\.tables$/} @{$db->tables}),
+  'internal tables are hidden';
+
 # Result methods
 is_deeply $db->query('select * from results_test')->rows, 2, 'two rows';
 is_deeply $db->query('select * from results_test')->columns, ['id', 'name'],
