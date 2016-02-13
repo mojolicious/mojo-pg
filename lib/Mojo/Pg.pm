@@ -242,7 +242,7 @@ Which get integrated into your application with helpers.
   helper time => sub { state $time = MyApp::Model::Time->new(pg => shift->pg) };
 
   get '/' => sub {
-    my $c  = shift;
+    my $c = shift;
     $c->render(json => $c->time->now);
   };
 
