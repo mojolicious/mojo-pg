@@ -1,5 +1,7 @@
 
-2.23  2016-02-14
+2.23  2016-02-13
+  - Improved tables method in Mojo::Pg::Database to list all tables and views
+    that are visible to the current user and not internal.
 
 2.22  2016-02-13
   - Fixed bug where views would be included in the list of table names.

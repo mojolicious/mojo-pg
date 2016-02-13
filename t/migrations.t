@@ -69,6 +69,10 @@ EOF
 is $pg->migrations->latest, 10, 'latest version is 10';
 is $pg->migrations->active, 0,  'active version is 0';
 is $pg->migrations->migrate->active, 10, 'active version is 10';
+ok !!(grep {/^mojo_migrations_test\.migration_test_one$/} @{$pg->db->tables}),
+  'first table exists';
+ok !!(grep {/^mojo_migrations_test\.migration_test_two$/} @{$pg->db->tables}),
+  'second table exists';
 is_deeply $pg->db->query('select * from migration_test_one')->hash,
   {foo => 'works ♥'}, 'right structure';
 is $pg->migrations->migrate->active, 10, 'active version is 10';

@@ -89,10 +89,8 @@ sub query {
 }
 
 sub tables {
-  shift->query(
-    "select schemaname || '.' || tablename from pg_catalog.pg_tables
-     where schemaname not in ('pg_catalog', 'information_schema')"
-  )->arrays->map(sub { $_->[0] })->to_array;
+  [grep { $_ !~ /^(?:pg_catalog|information_schema)\./ }
+      shift->dbh->tables('', '', '', '')];
 }
 
 sub unlisten {
@@ -303,8 +301,8 @@ also append a callback to perform operation non-blocking.
 
   my $tables = $db->tables;
 
-Return table names (that are not internal) for this database as an array
-reference.
+Return table and view names for this database, that are visible to the current
+user and not internal, as an array reference.
 
   # Names of all tables
   say for @{$db->tables};

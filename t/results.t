@@ -28,6 +28,8 @@ ok !!(grep {/^mojo_results_test\.results.test$/} @{$db->tables}),
   'results table exists';
 ok !(grep {/^information_schema\.tables$/} @{$db->tables}),
   'internal tables are hidden';
+ok !(grep {/^pg_catalog\.pg_tables$/} @{$db->tables}),
+  'internal tables are hidden';
 
 # Result methods
 is_deeply $db->query('select * from results_test')->rows, 2, 'two rows';
