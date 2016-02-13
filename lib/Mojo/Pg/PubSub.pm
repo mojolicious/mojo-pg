@@ -46,7 +46,7 @@ sub _db {
       eval { $self->_db };
     }
   );
-  $db->listen($_) for keys %{$self->{chans}}, 'mojo_pubsub';
+  $db->listen($_) for keys %{$self->{chans}}, 'mojo.pubsub';
   $self->emit(reconnect => $db);
 
   return $db;
