@@ -22,21 +22,11 @@ is $pg->migrations->latest, 0,            'latest version is 0';
 is $pg->migrations->active, 0,            'active version is 0';
 
 # Create migrations table
-ok !$pg->db->query(
-  "select exists(
-     select 1 from information_schema.tables
-     where table_schema = 'mojo_migrations_test'
-       and table_name = 'mojo_migrations'
-   )"
-)->array->[0], 'migrations table does not exist';
+ok !(grep {/mojo_migrations_test.mojo_migrations/} @{$pg->db->tables}),
+  'migrations table does not exist';
 is $pg->migrations->migrate->active, 0, 'active version is 0';
-ok $pg->db->query(
-  "select exists(
-     select 1 from information_schema.tables
-     where table_schema = 'mojo_migrations_test'
-       and table_name = 'mojo_migrations'
-   )"
-)->array->[0], 'migrations table exists';
+ok !!(grep {/mojo_migrations_test.mojo_migrations/} @{$pg->db->tables}),
+  'migrations table does not exist';
 
 # Migrations from DATA section
 is $pg->migrations->from_data->latest, 0, 'latest version is 0';

@@ -88,6 +88,13 @@ sub query {
   $self->_watch;
 }
 
+sub tables {
+  shift->query(
+    "select table_schema || '.' || table_name from information_schema.tables
+     where table_schema not in ('pg_catalog', 'information_schema')"
+  )->arrays->reduce(sub { push @$a, $b->[0]; $a }, []);
+}
+
 sub unlisten {
   my ($self, $name) = @_;
 
@@ -291,6 +298,15 @@ also append a callback to perform operation non-blocking.
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
+=head2 tables
+
+  my $tables = $db->tables;
+
+Return an array reference with table names for this database.
+
+  # Names of all tables
+  say for @{$db->tables};
 
 =head2 unlisten
 

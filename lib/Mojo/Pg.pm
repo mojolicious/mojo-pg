@@ -155,13 +155,13 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $pg->db->query('select now()'        => $delay->begin);
+      $pg->db->query('select now() as now' => $delay->begin);
       $pg->db->query('select * from names' => $delay->begin);
     },
     sub {
       my ($delay, $time_err, $time, $names_err, $names) = @_;
       if (my $err = $time_err || $names_err) { die $err }
-      say $time->array->[0];
+      say $time->hash->{now};
       say $_->{name} for $names->hashes->each;
     }
   )->wait;

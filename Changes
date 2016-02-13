@@ -1,5 +1,6 @@
 
 2.21  2016-02-13
+  - Added tables method to Mojo::Pg::Database.
 
 2.20  2016-02-12
   - Fixed schema bugs in tests.
