@@ -26,7 +26,7 @@ ok !(grep {/^mojo_migrations_test\.mojo_migrations$/} @{$pg->db->tables}),
   'migrations table does not exist';
 is $pg->migrations->migrate->active, 0, 'active version is 0';
 ok !!(grep {/^mojo_migrations_test\.mojo_migrations$/} @{$pg->db->tables}),
-  'migrations table does not exist';
+  'migrations table exists';
 
 # Migrations from DATA section
 is $pg->migrations->from_data->latest, 0, 'latest version is 0';
