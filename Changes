@@ -1,5 +1,5 @@
 
-2.24  2016-02-14
+2.24  2016-03-20
 
 2.23  2016-02-13
   - Improved tables method in Mojo::Pg::Database to list all tables and views
