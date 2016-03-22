@@ -205,8 +205,9 @@ gracefully by holding on to them only for short amounts of time.
 In this example application, we create a C<pg> helper to store a L<Mojo::Pg>
 object. Our action calls that helper and uses the method L<Mojo::Pg/"db"> to
 dequeue a L<Mojo::Pg::Database> object from the connection pool. Then we use the
-method L<Mojo::Pg::Database/"query"> to execute an SQL statement, which returns
-a L<Mojo::Pg::Results> object. And finally we call the method
+method L<Mojo::Pg::Database/"query"> to execute an
+L<SQL|http://www.postgresql.org/docs/current/static/sql.html> statement, which
+returns a L<Mojo::Pg::Results> object. And finally we call the method
 L<Mojo::Pg::Results/"hash"> to retrieve the first row as a hash reference.
 
 While all I/O operations are performed blocking, you can wait for long running

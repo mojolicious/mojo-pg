@@ -286,10 +286,11 @@ Check database connection.
   my $results = $db->query('insert into foo values (?, ?, ?)', @values);
   my $results = $db->query('select ?::json as foo', {json => {bar => 'baz'}});
 
-Execute a blocking statement and return a L<Mojo::Pg::Results> object with the
-results. The L<DBD::Pg> statement handle will be automatically reused when it
-is not active anymore, to increase the performance of future queries. You can
-also append a callback to perform operation non-blocking.
+Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
+statement and return a L<Mojo::Pg::Results> object with the results. The
+L<DBD::Pg> statement handle will be automatically reused when it is not active
+anymore, to increase the performance of future queries. You can also append a
+callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
