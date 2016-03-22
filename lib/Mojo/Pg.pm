@@ -202,6 +202,12 @@ gracefully by holding on to them only for short amounts of time.
 
   app->start;
 
+In the example, we use the controller's C<pg> helper defined here to return
+the C<Mojo::Pg> object, and then get the underlying L<Mojo::Pg::Database>
+object, which we can use to call the L<Mojo::Pg::Database/query> method. That
+method returns a L<Mojo::Pg::Results> object and we use its
+L<Mojo::Pg::Results/hash> method to retrieve the first row as a hash reference.
+
 While all I/O operations are performed blocking, you can wait for long running
 queries asynchronously, allowing the L<Mojo::IOLoop> event loop to perform
 other tasks in the meantime. Since database connections usually have a very low
