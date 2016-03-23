@@ -360,8 +360,11 @@ efficiently, by sharing a single database connection with many consumers.
 Schema search path assigned to all new connections.
 
   # Isolate tests and avoid race conditions when running them in parallel
+  $pg->db->query('drop schema if exists test_one cascade');
+  $pg->db->query('create schema test_one');
   $pg->search_path(['test_one']);
-  $pg->migrations->migrate(0)->migrate;
+  ...
+  $pg->db->query('drop schema test_one cascade');
 
 =head2 username
 
