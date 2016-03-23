@@ -108,9 +108,14 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   use Mojo::Pg;
 
-  # Create a table
+  # Use migrations to create a table
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
-  $pg->db->query('create table names (id serial primary key, name text)');
+  $pg->migrations->name('my_names_app')->from_string(<<EOF)->migrate;
+  -- 1 up
+  create table names (id serial primary key, name text);
+  -- 1 down
+  drop table names;
+  EOF
 
   # Insert a few rows
   my $db = $pg->db;

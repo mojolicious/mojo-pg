@@ -1,5 +1,6 @@
 
-2.24  2016-03-22
+2.24  2016-03-23
+  - Fixed copyright notice.
 
 2.23  2016-02-13
   - Improved tables method in Mojo::Pg::Database to list all tables and views
