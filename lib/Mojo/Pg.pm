@@ -108,8 +108,11 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   use Mojo::Pg;
 
-  # Use migrations to create a table
+  # Select the server version
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
+  say $pg->db->query('select version() as version')->hash->{version};
+
+  # Use migrations to create a table
   $pg->migrations->name('my_names_app')->from_string(<<EOF)->migrate;
   -- 1 up
   create table names (id serial primary key, name text);
