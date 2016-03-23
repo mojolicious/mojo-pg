@@ -198,7 +198,7 @@ L<Mojo::Pg::Database> implements the following attributes.
 =head2 dbh
 
   my $dbh = $db->dbh;
-  $db     = $db->dbh(DBI->new);
+  $db     = $db->dbh($dbh);
 
 L<DBD::Pg> database handle used for all queries.
 
