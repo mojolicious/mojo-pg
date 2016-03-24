@@ -289,8 +289,14 @@ Check database connection.
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
 statement and return a L<Mojo::Pg::Results> object with the results. The
 L<DBD::Pg> statement handle will be automatically reused when it is not active
-anymore, to increase the performance of future queries. You can also append a
-callback to perform operation non-blocking.
+anymore, to increase the performance of future queries.
+
+Any query parameter which is a hash reference containing the key C<json> will
+have its value converted, using L<Mojo::JSON/"to_json">, to JSON text
+acceptable as a PostgreSQL argument. Note the use of the PostgreSQL type cast
+C<::json> to accomplish the reverse.
+
+You can also append a callback to perform operation non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
