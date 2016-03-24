@@ -298,6 +298,15 @@ callback to perform operation non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
+Hash reference arguments containing a value named C<json>, will be encoded to
+JSON text with L<Mojo::JSON/"to_json">. To accomplish the reverse, you can use
+the method L<Mojo::Pg::Results/"expand">, which automatically decodes all fields
+of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
+
+  # "I ♥ Mojolicious!"
+  $db->query('select ?::json as foo', {json => {bar => 'I ♥ Mojolicious!'}})
+    ->expand->hash->{foo}{bar};
+
 =head2 tables
 
   my $tables = $db->tables;
