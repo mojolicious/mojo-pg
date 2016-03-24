@@ -304,7 +304,7 @@ the method L<Mojo::Pg::Results/"expand">, which automatically decodes all fields
 of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
 
   # "I ♥ Mojolicious!"
-  $db->query('select ?::json as foo', {json => {bar => 'I ♥ Mojolicious!'}})
+  $db->query('select ?::jsonb as foo', {json => {bar => 'I ♥ Mojolicious!'}})
     ->expand->hash->{foo}{bar};
 
 =head2 tables
