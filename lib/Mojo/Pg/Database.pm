@@ -202,6 +202,9 @@ L<Mojo::Pg::Database> implements the following attributes.
 
 L<DBD::Pg> database handle used for all queries.
 
+  # Use DBI utility methods
+  my $quoted = $db->dbh->quote_identifier('foo.bar');
+
 =head2 pg
 
   my $pg = $db->pg;
@@ -235,7 +238,7 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   $db->disconnect;
 
-Disconnect L</"dbh"> and prevent it from getting cached again.
+Disconnect L</"dbh"> and prevent it from getting reused.
 
 =head2 dollar_only
 
