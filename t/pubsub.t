@@ -22,10 +22,10 @@ $pg->pubsub->listen(
   }
 );
 $db->on(notification => sub { push @all, [@_[1, 3]] });
-$pg->db->notify(pstest => 'test');
+$pg->db->notify(pstest => '♥test♥');
 Mojo::IOLoop->start;
-is_deeply \@test, ['test', 'stop'], 'right messages';
-is_deeply \@all, [['pstest', 'test'], ['pstest', 'stop']],
+is_deeply \@test, ['♥test♥', 'stop'], 'right messages';
+is_deeply \@all, [['pstest', '♥test♥'], ['pstest', 'stop']],
   'right notifications';
 
 # Unsubscribe
