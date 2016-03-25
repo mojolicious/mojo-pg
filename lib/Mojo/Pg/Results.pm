@@ -42,7 +42,7 @@ sub _collect { Mojo::Collection->new(@_) }
 sub _expand {
   my ($self, @data) = @_;
 
-  return @data unless $data[0] && $self->{expand};
+  return @data unless $self->{expand} && $data[0];
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
