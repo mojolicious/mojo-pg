@@ -120,6 +120,9 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   drop table names;
   EOF
 
+  # Use migrations to drop and recreate the table
+  $pg->migrations->migrate(0)->migrate;
+
   # Insert a few rows
   my $db = $pg->db;
   $db->query('insert into names (name) values (?)', 'Sara');
