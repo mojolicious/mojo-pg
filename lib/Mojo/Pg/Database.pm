@@ -89,8 +89,8 @@ sub query {
 }
 
 sub tables {
-  [grep { $_ !~ /^(?:pg_catalog|information_schema)\./ }
-      shift->dbh->tables('', '', '', '')];
+  my @tables = shift->dbh->tables('', '', '', '');
+  return [grep { $_ !~ /^(?:pg_catalog|information_schema)\./ } @tables];
 }
 
 sub unlisten {
