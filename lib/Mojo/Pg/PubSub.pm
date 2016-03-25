@@ -69,7 +69,7 @@ Mojo::Pg::PubSub - Publish/Subscribe
     my ($pubsub, $payload) = @_;
     say "Received: $payload";
   });
-  $pubsub->notify(foo => 'bar');
+  $pubsub->notify(foo => 'I ♥ Mojolicious!');
   $pubsub->unlisten(foo => $cb);
 
 =head1 DESCRIPTION
@@ -130,7 +130,7 @@ have.
 =head2 notify
 
   $pubsub = $pubsub->notify('foo');
-  $pubsub = $pubsub->notify(foo => 'bar');
+  $pubsub = $pubsub->notify(foo => 'I ♥ Mojolicious!');
 
 Notify a channel.
 
