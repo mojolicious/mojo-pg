@@ -7,6 +7,7 @@ use Test::More;
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::IOLoop;
+use Mojo::JSON 'true';
 use Mojo::Pg;
 
 # Notifications with event loop
@@ -35,7 +36,7 @@ $pg->pubsub->json('pstest')->listen(
   pstest => sub {
     my ($pubsub, $payload) = @_;
     push @json, $payload;
-    Mojo::IOLoop->stop if ref $payload && $payload->{msg} eq 'stop';
+    Mojo::IOLoop->stop if ref $payload eq 'HASH' && $payload->{msg} eq 'stop';
   }
 );
 $pg->pubsub->listen(
@@ -48,11 +49,13 @@ Mojo::IOLoop->next_tick(
   sub {
     $pg->db->notify(pstest => 'fail');
     $pg->pubsub->notify('pstest')->notify(pstest => {msg => '♥works♥'})
+      ->notify(pstest => [1, 2, 3])->notify(pstest => true)
       ->notify(pstest2 => '♥works♥')->notify(pstest => {msg => 'stop'});
   }
 );
 Mojo::IOLoop->start;
-is_deeply \@json, [undef, undef, {msg => '♥works♥'}, {msg => 'stop'}],
+is_deeply \@json,
+  [undef, undef, {msg => '♥works♥'}, [1, 2, 3], true, {msg => 'stop'}],
   'right data structures';
 is_deeply \@raw, ['♥works♥'], 'right messages';
 

@@ -120,8 +120,8 @@ implements the following new ones.
 
   $pubsub = $pubsub->json('foo');
 
-Activate automatic JSON encoding and decoding for a channel with
-L<Mojo::JSON/"to_json"> and L<Mojo::JSON/"from_json">.
+Activate automatic JSON encoding and decoding with L<Mojo::JSON/"to_json"> and
+L<Mojo::JSON/"from_json"> for a channel.
 
   # Send and receive data structures
   $pubsub->json('foo')->listen(foo => sub {
