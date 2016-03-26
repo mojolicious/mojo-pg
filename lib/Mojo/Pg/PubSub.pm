@@ -1,9 +1,12 @@
 package Mojo::Pg::PubSub;
 use Mojo::Base 'Mojo::EventEmitter';
 
+use Mojo::JSON qw(from_json to_json);
 use Scalar::Util 'weaken';
 
 has 'pg';
+
+sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 
 sub listen {
   my ($self, $name, $cb) = @_;
@@ -12,7 +15,7 @@ sub listen {
   return $cb;
 }
 
-sub notify { $_[0]->_db->notify(@_[1, 2]) and return $_[0] }
+sub notify { $_[0]->_db->notify(_json(@_)) and return $_[0] }
 
 sub unlisten {
   my ($self, $name, $cb) = @_;
@@ -37,6 +40,7 @@ sub _db {
   $db->on(
     notification => sub {
       my ($db, $name, $pid, $payload) = @_;
+      $payload = eval { from_json $payload } if $self->{json}{$name};
       for my $cb (@{$self->{chans}{$name}}) { $self->$cb($payload) }
     }
   );
@@ -51,6 +55,8 @@ sub _db {
 
   return $db;
 }
+
+sub _json { $_[1], $_[0]{json}{$_[1]} ? to_json $_[2] : $_[2] }
 
 1;
 
@@ -110,12 +116,26 @@ L<Mojo::Pg> object this publish/subscribe container belongs to.
 L<Mojo::Pg::PubSub> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
 
+=head2 json
+
+  $pubsub = $pubsub->json('foo');
+
+Activate automatic JSON encoding and decoding for a channel with
+L<Mojo::JSON/"to_json"> and L<Mojo::JSON/"from_json">.
+
+  # Send and receive data structures
+  $pubsub->json('foo')->listen(foo => sub {
+    my ($pubsub, $payload) = @_;
+    say $payload->{bar};
+  });
+  $pubsub->notify(foo => {bar => 'I ♥ Mojolicious!'});
+
 =head2 listen
 
   my $cb = $pubsub->listen(foo => sub {...});
 
 Subscribe to a channel, there is no limit on how many subscribers a channel can
-have.
+have. Automatic JSON decoding can be activated with L</"json">.
 
   # Subscribe to the same channel twice
   $pubsub->listen(foo => sub {
@@ -131,8 +151,9 @@ have.
 
   $pubsub = $pubsub->notify('foo');
   $pubsub = $pubsub->notify(foo => 'I ♥ Mojolicious!');
+  $pubsub = $pubsub->notify(foo => {bar => 'baz'});
 
-Notify a channel.
+Notify a channel. Automatic JSON encoding can be activated with L</"json">.
 
 =head2 unlisten
 

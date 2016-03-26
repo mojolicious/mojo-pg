@@ -28,6 +28,34 @@ is_deeply \@test, ['♥test♥', 'stop'], 'right messages';
 is_deeply \@all, [['pstest', '♥test♥'], ['pstest', 'stop']],
   'right notifications';
 
+# JSON
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+my (@json, @raw);
+$pg->pubsub->json('pstest')->listen(
+  pstest => sub {
+    my ($pubsub, $payload) = @_;
+    push @json, $payload;
+    Mojo::IOLoop->stop if ref $payload && $payload->{msg} eq 'stop';
+  }
+);
+$pg->pubsub->listen(
+  pstest2 => sub {
+    my ($pubsub, $payload) = @_;
+    push @raw, $payload;
+  }
+);
+Mojo::IOLoop->next_tick(
+  sub {
+    $pg->db->notify(pstest => 'fail');
+    $pg->pubsub->notify('pstest')->notify(pstest => {msg => '♥works♥'})
+      ->notify(pstest2 => '♥works♥')->notify(pstest => {msg => 'stop'});
+  }
+);
+Mojo::IOLoop->start;
+is_deeply \@json, [undef, undef, {msg => '♥works♥'}, {msg => 'stop'}],
+  'right data structures';
+is_deeply \@raw, ['♥works♥'], 'right messages';
+
 # Unsubscribe
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 $db = undef;

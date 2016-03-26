@@ -1,5 +1,7 @@
 
 2.25  2016-03-26
+  - Added support for encoding and decoding of JSON notifications.
+  - Added json method to Mojo::Pg::PubSub.
 
 2.24  2016-03-23
   - Fixed copyright notice.
