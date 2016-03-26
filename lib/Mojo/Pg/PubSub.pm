@@ -135,7 +135,8 @@ L<Mojo::JSON/"to_json"> and L<Mojo::JSON/"from_json">.
   my $cb = $pubsub->listen(foo => sub {...});
 
 Subscribe to a channel, there is no limit on how many subscribers a channel can
-have. Automatic JSON decoding can be activated with L</"json">.
+have. Automatic decoding of JSON text to Perl values can be activated with
+L</"json">.
 
   # Subscribe to the same channel twice
   $pubsub->listen(foo => sub {
@@ -153,7 +154,8 @@ have. Automatic JSON decoding can be activated with L</"json">.
   $pubsub = $pubsub->notify(foo => 'I ♥ Mojolicious!');
   $pubsub = $pubsub->notify(foo => {bar => 'baz'});
 
-Notify a channel. Automatic JSON encoding can be activated with L</"json">.
+Notify a channel. Automatic encoding of Perl values to JSON text can be
+activated with L</"json">.
 
 =head2 unlisten
 

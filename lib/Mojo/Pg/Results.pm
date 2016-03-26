@@ -133,7 +133,7 @@ Return column names as an array reference.
 
   $results = $results->expand;
 
-Decode C<json> and C<jsonb> fields automatically for all rows.
+Decode C<json> and C<jsonb> fields automatically to Perl values for all rows.
 
   # Expand JSON
   $results->expand->hashes->map(sub { $_->{foo}{bar} })->join("\n")->say;
