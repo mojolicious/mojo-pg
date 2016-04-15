@@ -46,6 +46,26 @@ is_deeply $db->query('select * from results_test')->hashes->to_array,
 is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
   'right text';
 
+# JSON
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
+  ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
+  ->expand->array, [{bar => 'baz'}], 'right structure';
+my $hashes = [{foo => {one => 1}, bar => 'a'}, {foo => {two => 2}, bar => 'b'}];
+is_deeply $db->query(
+  "select 'a' as bar, ?::json as foo
+   union all
+   select 'b' as bar, ?::json as foo", {json => {one => 1}},
+  {json => {two => 2}}
+)->expand->hashes->to_array, $hashes, 'right structure';
+my $arrays = [['a', {one => 1}], ['b', {two => 2}]];
+is_deeply $db->query(
+  "select 'a' as bar, ?::json as foo
+   union all
+   select 'b' as bar, ?::json as foo", {json => {one => 1}},
+  {json => {two => 2}}
+)->expand->arrays->to_array, $arrays, 'right structure';
+
 # Iterate
 my $results = $db->query('select * from results_test');
 is_deeply $results->array, [1, 'foo'], 'right structure';
