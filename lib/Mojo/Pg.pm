@@ -3,6 +3,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 use Carp 'croak';
 use DBI;
+use Mojo::JSON qw(from_json);
 use Mojo::Pg::Database;
 use Mojo::Pg::Migrations;
 use Mojo::Pg::PubSub;
@@ -26,8 +27,13 @@ has pubsub => sub {
   weaken $pubsub->{pg};
   return $pubsub;
 };
+has expanders => sub {
+  {json => \&from_json, jsonb => \&from_json};
+};
 
 our $VERSION = '2.26';
+
+sub add_expander { $_[0]->expanders->{$_[1]} = $_[2] and return $_[0] }
 
 sub db {
   my $self = shift;
@@ -305,6 +311,26 @@ soon as the first database connection has been established.
 
 Data source name, defaults to C<dbi:Pg:>.
 
+=head2 expanders
+
+  my $expanders = $pg->expanders;
+  $pg           = $pg->expanders({});
+
+Return or replace expanders used by by L<Mojo::Pg::Results>.
+Results will have their columns decoded into perl data structures
+and objects based on their column type.
+
+By default two expanders are included:
+
+  $pg->expanders(
+    json  => \&Mojo::JSON::from_json,
+    jsonb => \&Mojo::JSON::from_json,
+  );
+
+These will decode C<json> and C<jsonb> columns into perl data structures.
+
+See L</add_expander>.
+
 =head2 max_connections
 
   my $max = $pg->max_connections;
@@ -383,6 +409,41 @@ Database username, defaults to an empty string.
 
 L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the
 following new ones.
+
+=head2 add_expander
+
+  # Expand the PostgreSQL boolean values into Mojo::JSON boolean objects.
+  use Mojo::JSON qw(true false);
+  $pg = $pg->add_expander(
+    bool => sub { shift && true || false }
+  );
+
+Add an expander which is used by L<Mojo::Pg::Results/expand> to
+expand a PostgreSQL data type into a perl object or data structure
+
+  # Handle bigints
+  use Math::BigInt;
+  $pg->add_expander(
+    int8 => sub { Math::BigInt->new(shift) }
+  );
+
+  my $bigint = $pg->db->query('SELECT 9223372036854775807::bigint')->expand->array->[0];
+
+  # Handle arrays of jsonb (DBD::Pg uses _jsonb as the type for jsonb[]).
+  $pg->add_expander(
+    _jsonb => sub { my $data = shift; return [ map { from_json($_) } @$data ]; }
+  );
+
+Some useful data types are bool, int8 (known more commonly as bigint), json,
+jsonb, timestamp, timestamptz, xml, cidr and inet. For a complete
+list, please look at types.c in L<DBD::Pg>'s source code.
+
+NULL values are not expanded.
+
+  # Will not work!
+  $pg->add_expander(
+    xml => sub { return '<null />' if not defined $_[0] }
+  );
 
 =head2 db
 

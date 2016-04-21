@@ -2,10 +2,10 @@ package Mojo::Pg::Results;
 use Mojo::Base -base;
 
 use Mojo::Collection;
-use Mojo::JSON 'from_json';
 use Mojo::Util 'tablify';
 
 has 'sth';
+has expanders => sub { {} };
 
 sub DESTROY {
   my $self = shift;
@@ -13,19 +13,23 @@ sub DESTROY {
   $sth->finish unless --$sth->{private_mojo_results};
 }
 
-sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
+sub array { ($_[0]->_expand_arrays($_[0]->sth->fetchrow_arrayref))[0] }
 
-sub arrays { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref})) }
+sub arrays {
+  _collect($_[0]->_expand_arrays(@{$_[0]->sth->fetchall_arrayref()}));
+}
 
 sub columns { shift->sth->{NAME} }
 
-sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
+sub hash { ($_[0]->_expand_hashes($_[0]->sth->fetchrow_hashref))[0] }
 
 sub expand { ++$_[0]{expand} and return $_[0] }
 
 sub finish { shift->sth->finish }
 
-sub hashes { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})})) }
+sub hashes {
+  _collect($_[0]->_expand_hashes(@{$_[0]->sth->fetchall_arrayref({})}));
+}
 
 sub new {
   my $self = shift->SUPER::new(@_);
@@ -39,28 +43,57 @@ sub text { tablify shift->arrays }
 
 sub _collect { Mojo::Collection->new(@_) }
 
-sub _expand {
+sub _column_types { shift->sth->{pg_type} }
+
+sub _expand_arrays {
   my ($self, @data) = @_;
-
   return @data unless $self->{expand} && $data[0];
-  my ($idx, $name) = @$self{qw(idx name)};
-  unless ($idx) {
-    my $types = $self->sth->{pg_type};
-    my @idx = grep { $types->[$_] eq 'json' || $types->[$_] eq 'jsonb' }
-      0 .. $#$types;
-    ($idx, $name) = @$self{qw(idx name)} = (\@idx, [@{$self->columns}[@idx]]);
-  }
-  return @data unless @$idx;
-
+  my $mapper = ($self->{_expander_mapper} || $self->_expander_mapper)->{array};
   for my $data (@data) {
-    if   (ref $data eq 'HASH') { $data->{$_} and _json($data->{$_}) for @$name }
-    else                       { $data->[$_] and _json($data->[$_]) for @$idx }
+    while (my ($idx, $expander) = each %$mapper) {
+      $data->[$idx] = $expander->($data->[$idx]) if defined $data->[$idx];
+    }
   }
-
-  return @data;
+  @data;
 }
 
-sub _json { $_[0] = from_json $_[0] }
+sub _expand_hashes {
+  my ($self, @data) = @_;
+  return @data unless $self->{expand} && $data[0];
+  my $mapper = ($self->{_expander_mapper} || $self->_expander_mapper)->{hash};
+  for my $data (@data) {
+    while (my ($col, $expander) = each %$mapper) {
+      $data->{$col} = $expander->($data->{$col}) if defined $data->{$col};
+    }
+  }
+  @data;
+}
+
+sub _expander_mapper {
+  my $self            = shift;
+  my $expander_mapper = {};
+  foreach my $idx (0 .. $#{$self->columns}) {
+    my $type = $self->_column_types->[$idx];
+    if (my $expander = $self->expanders->{$type}) {
+      $expander_mapper->{array}->{$idx} = $expander;
+    }
+  }
+  foreach my $col (keys %{$self->_columns_by_type}) {
+    my $type = $self->_columns_by_type->{$col};
+    if (my $expander = $self->expanders->{$type}) {
+      $expander_mapper->{hash}->{$col} = $expander;
+    }
+  }
+  $self->{_expander_mapper} = $expander_mapper;
+}
+
+sub _columns_by_type {
+  my $self = shift;
+  $self->{columns_by_type}
+    ||= {map { $self->columns->[$_] => $self->_column_types->[$_] }
+      0 .. $#{$self->columns}};
+  return $self->{columns_by_type};
+}
 
 1;
 
@@ -74,7 +107,7 @@ Mojo::Pg::Results - Results
 
   use Mojo::Pg::Results;
 
-  my $results = Mojo::Pg::Results->new(sth => $sth);
+  my $results = Mojo::Pg::Results->new(sth => $sth, expanders => {});
   $results->hashes->map(sub { $_->{foo} })->shuffle->join("\n")->say;
 
 =head1 DESCRIPTION
@@ -92,6 +125,17 @@ L<Mojo::Pg::Results> implements the following attributes.
   $results = $results->sth($sth);
 
 L<DBD::Pg> statement handle results are fetched from.
+
+=head2 expanders
+
+  my $expanders = $results->expanders;
+  $results      = $results->expanders({});
+
+Expanders used to expand strings into perl objects, based on the data type.
+See L<Mojo::Pg/expanders>.
+
+The list of expanders is changeable until the first row is returned, after
+which point any changes are not reflected in the output.
 
 =head1 METHODS
 
@@ -133,10 +177,12 @@ Return column names as an array reference.
 
   $results = $results->expand;
 
-Decode C<json> and C<jsonb> fields automatically to Perl values for all rows.
+Decode fields into perl objects and data structures automatically for all rows.
 
   # Expand JSON
   $results->expand->hashes->map(sub { $_->{foo}{bar} })->join("\n")->say;
+
+See L<Mojo::Pg/expanders> for details on the decoding process.
 
 =head2 finish
 
@@ -170,7 +216,7 @@ containing hash references.
 =head2 new
 
   my $results = Mojo::Pg::Results->new;
-  my $results = Mojo::Pg::Results->new(sth => $sth);
+  my $results = Mojo::Pg::Results->new(sth => $sth, expanders => {});
   my $results = Mojo::Pg::Results->new({sth => $sth});
 
 Construct a new L<Mojo::Pg::Results> object.

@@ -66,8 +66,36 @@ is_deeply $db->query(
   {json => {two => 2}}
 )->expand->arrays->to_array, $arrays, 'right structure';
 
+# Custom expanders
+is_deeply $db->query("select true, false")->expand->array, [1, 0],
+  'Unexpanded boolean';
+$pg->add_expander(
+  bool => sub { shift && 'Good news, everyone' || 'Kill all humans' });
+is_deeply $db->query("select true, false")->expand->array,
+  ['Good news, everyone', 'Kill all humans'];
+is $db->query("select true")->array->[0], 1,
+  'unexpanded boolean with bool expander';
+is_deeply $db->query("select array[true, false]")->expand->array, [[1, 0]],
+  'boolean[] columns not automagically expanded';
+$pg->add_expander(
+  _bool => sub {
+    [map { $_ && 't' || 'f' } @{$_[0]}];
+  }
+);
+is_deeply $db->query("select array[true, false]")->expand->array, [['t', 'f']],
+  'boolean[] columns can be expanded';
+$pg->add_expander(
+  xml => sub { '<expanded value="NULL" />' if not defined $_[0] });
+is $db->query('select NULL::xml')->expand->array->[0], undef,
+  'do not expand NULLs';
+my $results = $db->query('select unnest(array[true,false])')->expand;
+$results->hash;
+$results->expanders({});
+is $results->array->[0], 'Kill all humans', 'expand mappers are cached';
+
+
 # Iterate
-my $results = $db->query('select * from results_test');
+$results = $db->query('select * from results_test');
 is_deeply $results->array, [1, 'foo'], 'right structure';
 is_deeply $results->array, [2, 'bar'], 'right structure';
 is $results->array, undef, 'no more results';

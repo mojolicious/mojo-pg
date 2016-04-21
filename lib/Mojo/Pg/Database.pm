@@ -80,7 +80,8 @@ sub query {
   # Blocking
   unless ($cb) {
     $self->_notifications;
-    return Mojo::Pg::Results->new(sth => $sth);
+    return Mojo::Pg::Results->new(sth => $sth,
+      expanders => $self->pg->expanders);
   }
 
   # Non-blocking
