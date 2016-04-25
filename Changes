@@ -1,5 +1,6 @@
 
-2.26  2016-04-15
+2.26  2016-04-25
+  - Improved expand performance slightly.
 
 2.25  2016-03-26
   - Added support for encoding and decoding of JSON notifications.

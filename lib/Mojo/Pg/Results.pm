@@ -40,9 +40,9 @@ sub text { tablify shift->arrays }
 sub _collect { Mojo::Collection->new(@_) }
 
 sub _expand {
-  my ($self, @data) = @_;
+  my ($self, @rows) = @_;
 
-  return @data unless $self->{expand} && $data[0];
+  return @rows unless $self->{expand} && $rows[0];
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
@@ -50,17 +50,17 @@ sub _expand {
       0 .. $#$types;
     ($idx, $name) = @$self{qw(idx name)} = (\@idx, [@{$self->columns}[@idx]]);
   }
-  return @data unless @$idx;
 
-  for my $data (@data) {
-    if   (ref $data eq 'HASH') { $data->{$_} and _json($data->{$_}) for @$name }
-    else                       { $data->[$_] and _json($data->[$_]) for @$idx }
+  return @rows unless @$idx;
+  if (ref $rows[0] eq 'HASH') {
+    for my $r (@rows) { $r->{$_} && ($r->{$_} = from_json $r->{$_}) for @$name }
+  }
+  else {
+    for my $r (@rows) { $r->[$_] && ($r->[$_] = from_json $r->[$_]) for @$idx }
   }
 
-  return @data;
+  return @rows;
 }
-
-sub _json { $_[0] = from_json $_[0] }
 
 1;
 
