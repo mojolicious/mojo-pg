@@ -292,7 +292,7 @@ undef $db;
 is $fail, 'Premature connection close', 'right error';
 
 # Error context
-eval { $pg->db->query('select * from table_does_not_exist') };
+eval { $pg->db->query('does_not_exist') };
 like $@, qr/database\.t/, 'right error';
 
 done_testing();
