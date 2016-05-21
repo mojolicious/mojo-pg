@@ -1,7 +1,7 @@
 package Mojo::Pg::Database;
 use Mojo::Base 'Mojo::EventEmitter';
 
-use Carp 'croak';
+use Carp qw(croak shortmess);
 use DBD::Pg ':async';
 use Mojo::IOLoop;
 use Mojo::JSON 'to_json';
@@ -75,6 +75,7 @@ sub query {
   $attrs{pg_placeholder_dollaronly} = 1        if delete $self->{dollar_only};
   $attrs{pg_async}                  = PG_ASYNC if $cb;
   my $sth = $self->dbh->prepare_cached($query, \%attrs, 3);
+  local $sth->{HandleError} = sub { $_[0] = shortmess $_[0]; 0 };
   $sth->execute(map { _json($_) ? to_json $_->{json} : $_ } @_);
 
   # Blocking
