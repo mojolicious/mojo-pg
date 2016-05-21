@@ -255,7 +255,7 @@ ok !$db->unlisten('*')->is_listening, 'not listening';
 
 # Blocking error
 eval { $pg->db->query('does_not_exist') };
-like $@, qr/does_not_exist/, 'right error';
+like $@, qr/does_not_exist.*database\.t/s, 'right error';
 
 # Non-blocking error
 ($fail, $result) = ();
@@ -290,9 +290,5 @@ $db->query(
 $db->disconnect;
 undef $db;
 is $fail, 'Premature connection close', 'right error';
-
-# Error context
-eval { $pg->db->query('does_not_exist') };
-like $@, qr/database\.t/, 'right error';
 
 done_testing();
