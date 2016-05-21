@@ -1,4 +1,6 @@
 
+2.28  2016-05-22
+
 2.27  2016-05-21
   - Improved query method in Mojo::Pg::Database to include caller information in
     error messages.
