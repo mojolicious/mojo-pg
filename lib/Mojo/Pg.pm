@@ -47,19 +47,13 @@ sub from_string {
   croak qq{Invalid PostgreSQL connection string "$str"}
     unless $url->protocol eq 'postgresql';
 
-  # Database
+  # Connection information
   my $db = $url->path->parts->[0];
   my $dsn = defined $db ? "dbi:Pg:dbname=$db" : 'dbi:Pg:';
-
-  # Host and port
   if (my $host = $url->host) { $dsn .= ";host=$host" }
   if (my $port = $url->port) { $dsn .= ";port=$port" }
-
-  # Username and password
-  if (($url->userinfo // '') =~ /^([^:]+)(?::([^:]+))?$/) {
-    $self->username($1);
-    $self->password($2) if defined $2;
-  }
+  if (defined(my $username = $url->username)) { $self->username($username) }
+  if (defined(my $password = $url->password)) { $self->password($password) }
 
   # Service
   my $hash = $url->query->to_hash;
@@ -366,9 +360,9 @@ efficiently, by sharing a single database connection with many consumers.
 Schema search path assigned to all new connections.
 
   # Isolate tests and avoid race conditions when running them in parallel
+  my $pg = Mojo::Pg->new('postgresql:///test')->search_path(['test_one']);
   $pg->db->query('drop schema if exists test_one cascade');
   $pg->db->query('create schema test_one');
-  $pg->search_path(['test_one']);
   ...
   $pg->db->query('drop schema test_one cascade');
 

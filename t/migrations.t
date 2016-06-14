@@ -11,10 +11,10 @@ use FindBin;
 use Mojo::Pg;
 
 # Isolate tests
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+my $pg
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
 $pg->db->query('drop schema if exists mojo_migrations_test cascade');
 $pg->db->query('create schema mojo_migrations_test');
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';

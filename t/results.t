@@ -9,10 +9,9 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 use Mojo::Pg;
 
 # Isolate tests
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
 $pg->db->query('drop schema if exists mojo_results_test cascade');
 $pg->db->query('create schema mojo_results_test');
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
 
 my $db = $pg->db;
 $db->query(
