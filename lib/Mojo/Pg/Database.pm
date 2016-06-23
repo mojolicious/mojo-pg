@@ -15,7 +15,12 @@ sub DESTROY {
   my $self = shift;
 
   my $waiting = $self->{waiting};
-  $waiting->{cb}($self, 'Premature connection close', undef) if $waiting->{cb};
+
+  if ($waiting->{cb}) {
+    $waiting->{cb}($self, 'Premature connection close', undef);
+    $self->pg->emit(error => 'Premature connection close')
+      if $self->pg->has_subscribers('error');
+  }
 
   return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
   $pg->_enqueue($dbh);
@@ -140,6 +145,10 @@ sub _watch {
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
+
+      if (defined $err && $self->pg->has_subscribers('error')) {
+        $self->pg->emit(error => $err);
+      }
 
       $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
