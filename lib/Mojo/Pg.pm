@@ -26,6 +26,9 @@ has pubsub => sub {
   weaken $pubsub->{pg};
   return $pubsub;
 };
+has db_class => 'Mojo::Pg::Database';
+has on_connect => sub {[]};
+
 
 our $VERSION = '2.29';
 
@@ -35,7 +38,7 @@ sub db {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  return Mojo::Pg::Database->new(dbh => $self->_dequeue, pg => $self);
+  return $self->db_class->new(dbh => $self->_dequeue, pg => $self);
 }
 
 sub from_string {
@@ -70,12 +73,29 @@ sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 sub _dequeue {
   my $self = shift;
 
-  while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
+  my $queue = $self->{queue} ||= [];
+  
+  for my $i (0..$#$queue) {
+    
+    my $dbh = $queue->[$i];
+    
+    delete $queue->[$i]
+      and next
+      unless $dbh->ping;
+    
+    return (splice(@$queue, $i, 1))[0]
+      unless $dbh->{pg_async_status} > 0;
+  }
+  
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
   if (my $path = $self->search_path) {
     my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
     $dbh->do("set search_path to $search_path");
   }
+  
+  $dbh->do($_)
+    for @{$self->on_connect};
+  
   ++$self->{migrated} and $self->migrations->migrate
     if !$self->{migrated} && $self->auto_migrate;
   $self->emit(connection => $dbh);
@@ -292,6 +312,13 @@ L<Mojo::Pg> implements the following attributes.
 Automatically migrate to the latest database schema with L</"migrations">, as
 soon as the first database connection has been established.
 
+=head2 db_class
+
+Classname for database objects, defaults to 'Mojo::Pg::Database'.
+
+  my $db_class = $pg->db_class;
+  $pg = $pg->db_class('Mojo::Pg::Database');
+
 =head2 dsn
 
   my $dsn = $pg->dsn;
@@ -317,6 +344,14 @@ easily.
 
   # Load migrations from file and migrate to latest version
   $pg->migrations->from_file('/home/sri/migrations.sql')->migrate;
+
+=head2 on_connect
+
+Arrayref for statements $dbh->do() on connection established.
+
+  push @{$pg->on_connect}, '<statement>';
+
+See also events L</"connection">.
 
 =head2 options
 

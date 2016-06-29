@@ -10,6 +10,7 @@ use Mojo::Pg::Transaction;
 use Scalar::Util 'weaken';
 
 has [qw(dbh pg)];
+has result_class => 'Mojo::Pg::Results';
 
 sub DESTROY {
   my $self = shift;
@@ -81,7 +82,7 @@ sub query {
   # Blocking
   unless ($cb) {
     $self->_notifications;
-    return Mojo::Pg::Results->new(sth => $sth);
+    return $self->result_class->new(sth => $sth);
   }
 
   # Non-blocking
@@ -141,7 +142,11 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
+      eval { $self->$cb($err, $self->result_class->new(sth => $sth)); };
+      warn "Non-blocking callback result error: ", $@
+        and $reactor->{cb_error} = $@
+        if $@;
+      
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
@@ -212,6 +217,13 @@ L<DBD::Pg> database handle used for all queries.
   $db    = $db->pg(Mojo::Pg->new);
 
 L<Mojo::Pg> object this database belongs to.
+
+=head2 result_class
+
+Classname for results objects, defaults to 'Mojo::Pg::Results'.
+
+  my $result_class = $db->result_class;
+  $db = $db->result_class('Mojo::Pg::Results');
 
 =head1 METHODS
 
