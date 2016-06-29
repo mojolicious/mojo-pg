@@ -278,6 +278,37 @@ eval {
 };
 like $@, qr/Non-blocking query already in progress/, 'right error';
 
+# Error emit
+$fail = undef;
+$pg->on(
+  error => sub {
+    my ($e, $err) = @_;
+    $fail = $err;
+    Mojo::IOLoop->stop;
+  }
+);
+$pg->db->query('does_not_exist' => sub { });
+Mojo::IOLoop->start;
+like $fail, qr/does_not_exist/, 'right error';
+$pg->unsubscribe('error');
+
+# Error emit in clean up
+$fail = undef;
+$db   = $pg->db;
+$pg->on(
+  error => sub {
+    my ($e, $err) = @_;
+    $fail = $err;
+    Mojo::IOLoop->stop;
+  }
+);
+$db->query('select 1' => sub { });
+$db->disconnect;
+undef $db;
+Mojo::IOLoop->start;
+is $fail, 'Premature connection close', 'right error';
+$pg->unsubscribe('error');
+
 # CLean up non-blocking query
 $fail = undef;
 $db   = $pg->db;
