@@ -301,9 +301,9 @@ Check database connection.
 
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
 statement and return a results object based on L</"results_class"> with the
-results. The L<DBD::Pg> statement handle will be automatically reused when it is
-not active anymore, to increase the performance of future queries. You can also
-append a callback to perform operations non-blocking.
+query results. The L<DBD::Pg> statement handle will be automatically reused when
+it is not active anymore, to increase the performance of future queries. You can
+also append a callback to perform operations non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;

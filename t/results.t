@@ -62,6 +62,7 @@ is ref $db, 'Mojo::Pg::Database', 'right class';
 $pg->database_class('MojoPgTest::Database');
 $db = $pg->db;
 is ref $db, 'MojoPgTest::Database', 'right class';
+is ref $db->query('select 1'), 'MojoPgTest::Results', 'right class';
 is_deeply $db->query('select * from results_test')->array_test, [1, 'foo'],
   'right structure';
 
