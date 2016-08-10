@@ -2,6 +2,7 @@
 2.29  2016-08-10
   - Added database_class attribute to Mojo::Pg.
   - Added results_class attribute to Mojo::Pg::Database.
+  - Fixed a few fork-safety bugs and memory leaks in Mojo::Pg::PubSub.
 
 2.28  2016-06-14
   - Updated for Mojolicious 6.65.

@@ -6,6 +6,8 @@ use Scalar::Util 'weaken';
 
 has 'pg';
 
+sub DESTROY { shift->_cleanup }
+
 sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 
 sub listen {
@@ -25,12 +27,17 @@ sub unlisten {
   return $self;
 }
 
+sub _cleanup {
+  my $self = shift;
+  $self->{db}->_unwatch;
+  delete @$self{qw(chans db pid)};
+}
+
 sub _db {
   my $self = shift;
 
   # Fork-safety
-  delete @$self{qw(chans pid)} and $self->{db} and $self->{db}->disconnect
-    unless ($self->{pid} //= $$) eq $$;
+  $self->_cleanup unless ($self->{pid} //= $$) eq $$;
 
   return $self->{db} if $self->{db};
 
@@ -84,6 +91,10 @@ L<Mojo::Pg::PubSub> is a scalable implementation of the publish/subscribe
 pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and allows
 many consumers to share the same database connection, to avoid many common
 scalability problems.
+
+All subscriptions will be reset automatically and the database connection
+re-established if a new process has been forked, this allows multiple processes
+to share the same L<Mojo::Pg::PubSub> object safely.
 
 =head1 EVENTS
 
