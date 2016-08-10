@@ -10,6 +10,7 @@ use Mojo::Pg::Transaction;
 use Scalar::Util 'weaken';
 
 has [qw(dbh pg)];
+has results_class => 'Mojo::Pg::Results';
 
 sub DESTROY {
   my $self = shift;
@@ -81,7 +82,7 @@ sub query {
   # Blocking
   unless ($cb) {
     $self->_notifications;
-    return Mojo::Pg::Results->new(sth => $sth);
+    return $self->results_class->new(sth => $sth);
   }
 
   # Non-blocking
@@ -141,7 +142,7 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, Mojo::Pg::Results->new(sth => $sth));
+      $self->$cb($err, $self->results_class->new(sth => $sth));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
@@ -212,6 +213,14 @@ L<DBD::Pg> database handle used for all queries.
   $db    = $db->pg(Mojo::Pg->new);
 
 L<Mojo::Pg> object this database belongs to.
+
+=head2 results_class
+
+  my $class = $pg->results_class;
+  $pg       = $pg->results_class('MyApp::Results');
+
+Class to be used by L</"query">, defaults to L<Mojo::Pg::Results>. Note that
+this class needs to have already been loaded before L</"query"> is called.
 
 =head1 METHODS
 
@@ -291,10 +300,10 @@ Check database connection.
   my $results = $db->query('select ?::json as foo', {json => {bar => 'baz'}});
 
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
-statement and return a L<Mojo::Pg::Results> object with the results. The
-L<DBD::Pg> statement handle will be automatically reused when it is not active
-anymore, to increase the performance of future queries. You can also append a
-callback to perform operations non-blocking.
+statement and return a results object based on L</"results_class"> with the
+results. The L<DBD::Pg> statement handle will be automatically reused when it is
+not active anymore, to increase the performance of future queries. You can also
+append a callback to perform operations non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;

@@ -10,6 +10,7 @@ use Mojo::URL;
 use Scalar::Util 'weaken';
 
 has [qw(auto_migrate search_path)];
+has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
 has migrations      => sub {
@@ -35,7 +36,7 @@ sub db {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  return Mojo::Pg::Database->new(dbh => $self->_dequeue, pg => $self);
+  return $self->database_class->new(dbh => $self->_dequeue, pg => $self);
 }
 
 sub from_string {
@@ -292,6 +293,14 @@ L<Mojo::Pg> implements the following attributes.
 Automatically migrate to the latest database schema with L</"migrations">, as
 soon as the first database connection has been established.
 
+=head2 database_class
+
+  my $class = $pg->database_class;
+  $pg       = $pg->database_class('MyApp::Database');
+
+Class to be used by L</"db">, defaults to L<Mojo::Pg::Database>. Note that this
+class needs to have already been loaded before L</"db"> is called.
+
 =head2 dsn
 
   my $dsn = $pg->dsn;
@@ -382,10 +391,11 @@ following new ones.
 
   my $db = $pg->db;
 
-Get L<Mojo::Pg::Database> object for a cached or newly established database
-connection. The L<DBD::Pg> database handle will be automatically cached again
-when that object is destroyed, so you can handle problems like connection
-timeouts gracefully by holding on to it only for short amounts of time.
+Get a database object based on L</"database_class"> for a cached or newly
+established database connection. The L<DBD::Pg> database handle will be
+automatically cached again when that object is destroyed, so you can handle
+problems like connection timeouts gracefully by holding on to it only for short
+amounts of time.
 
   # Add up all the money
   say $pg->db->query('select * from accounts')

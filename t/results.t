@@ -8,6 +8,18 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::Pg;
 
+package MojoPgTest::Database;
+use Mojo::Base 'Mojo::Pg::Database';
+
+sub results_class {'MojoPgTest::Results'}
+
+package MojoPgTest::Results;
+use Mojo::Base 'Mojo::Pg::Results';
+
+sub array_test { shift->array }
+
+package main;
+
 # Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
 $pg->db->query('drop schema if exists mojo_results_test cascade');
@@ -44,6 +56,14 @@ is_deeply $db->query('select * from results_test')->hashes->to_array,
   [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
 is $pg->db->query('select * from results_test')->text, "1  foo\n2  bar\n",
   'right text';
+
+# Custom database and results classes
+is ref $db, 'Mojo::Pg::Database', 'right class';
+$pg->database_class('MojoPgTest::Database');
+$db = $pg->db;
+is ref $db, 'MojoPgTest::Database', 'right class';
+is_deeply $db->query('select * from results_test')->array_test, [1, 'foo'],
+  'right structure';
 
 # JSON
 is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
@@ -88,7 +108,7 @@ Mojo::IOLoop->delay(
   sub {
     my ($delay, $err, $results) = @_;
     $fail ||= $err;
-    push @$result, $results->array;
+    push @$result, $results->array_test;
     $results->finish;
     $db->query('select name from results_test' => $delay->begin);
   },
