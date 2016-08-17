@@ -216,8 +216,8 @@ L<Mojo::Pg> object this database belongs to.
 
 =head2 results_class
 
-  my $class = $pg->results_class;
-  $pg       = $pg->results_class('MyApp::Results');
+  my $class = $db->results_class;
+  $db       = $db->results_class('MyApp::Results');
 
 Class to be used by L</"query">, defaults to L<Mojo::Pg::Results>. Note that
 this class needs to have already been loaded before L</"query"> is called.
