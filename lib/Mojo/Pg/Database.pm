@@ -77,7 +77,18 @@ sub query {
   $attrs{pg_async}                  = PG_ASYNC if $cb;
   my $sth = $self->dbh->prepare_cached($query, \%attrs, 3);
   local $sth->{HandleError} = sub { $_[0] = shortmess $_[0]; 0 };
-  $sth->execute(map { _json($_) ? to_json $_->{json} : $_ } @_);
+
+  for (my $i = 0; $#_ >= $i; $i++) {
+    my ($param, $attrs) = ($_[$i], {});
+    if (ref $param eq 'HASH') {
+      if (exists $param->{json}) { $param = to_json $param->{json} }
+      elsif (exists $param->{type} && exists $param->{value}) {
+        ($attrs->{pg_type}, $param) = @{$param}{qw(type value)};
+      }
+    }
+    $sth->bind_param($i + 1, $param, $attrs);
+  }
+  $sth->execute;
 
   # Blocking
   unless ($cb) {
@@ -105,8 +116,6 @@ sub unlisten {
 
   return $self;
 }
-
-sub _json { ref $_[0] eq 'HASH' && exists $_[0]{json} }
 
 sub _notifications {
   my $self = shift;
@@ -319,6 +328,12 @@ of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
   # "I ♥ Mojolicious!"
   $db->query('select ?::jsonb as foo', {json => {bar => 'I ♥ Mojolicious!'}})
     ->expand->hash->{foo}{bar};
+
+Hash reference arguments containing values named C<type> and C<value>, can be
+used to bind specific L<DBD::Pg> data types to placeholders.
+
+  use DBD::Pg ':pg_types';
+  $db->query('insert into bar values (?)', {type => PG_BYTEA, value => $bytes});
 
 =head2 tables
 

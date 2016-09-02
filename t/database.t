@@ -123,7 +123,7 @@ $db = $pg->db;
 is $db->dollar_only->query('select $1::int as test', 23)->hash->{test}, 23,
   'right result';
 eval { $db->dollar_only->query('select ?::int as test', 23) };
-like $@, qr/called with 1 bind variables when 0 are needed/, 'right error';
+like $@, qr/Statement has no placeholders to bind/, 'right error';
 is $db->query('select ?::int as test', 23)->hash->{test}, 23, 'right result';
 
 # JSON
