@@ -6,7 +6,7 @@ use Scalar::Util 'weaken';
 
 has 'pg';
 
-sub DESTROY { shift->_cleanup }
+sub DESTROY { Mojo::Util::_global_destruction() or shift->_cleanup }
 
 sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 

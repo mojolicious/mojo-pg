@@ -1,5 +1,5 @@
 
-2.30  2016-08-17
+2.30  2016-09-02
 
 2.29  2016-08-10
   - Added database_class attribute to Mojo::Pg.
