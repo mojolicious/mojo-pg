@@ -332,6 +332,7 @@ of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
 Hash reference arguments containing values named C<type> and C<value>, can be
 used to bind specific L<DBD::Pg> data types to placeholders.
 
+  # Insert binary data
   use DBD::Pg ':pg_types';
   $db->query('insert into bar values (?)', {type => PG_BYTEA, value => $bytes});
 
