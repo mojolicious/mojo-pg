@@ -8,6 +8,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use DBD::Pg ':pg_types';
 use Mojo::Pg;
+use Mojo::Util 'encode';
 
 package MojoPgTest::Database;
 use Mojo::Base 'Mojo::Pg::Database';
@@ -158,20 +159,15 @@ my $results2 = $db->query('select 1 as one');
 undef $results1;
 is_deeply $results2->hashes, [{one => 1}], 'right structure';
 
-# Custom type
-$db->query(
-  'create table if not exists results_test2 (
-     id   serial primary key,
-     stuff bytea
-   )'
-);
-my $snowman = '☃';
-utf8::encode $snowman;
+# Custom data types
+$db->query('create table if not exists results_test2 (stuff bytea)');
+my $snowman = encode 'UTF-8', '☃';
 $db->query(
   'insert into results_test2 (stuff) values (?)',
   {value => $snowman, type => PG_BYTEA}
 );
-is $db->query('select * from results_test2')->hash->{stuff}, $snowman;
+is_deeply $db->query('select * from results_test2')->hash, {stuff => $snowman},
+  'right structure';
 
 # Clean up once we are done
 $pg->db->query('drop schema mojo_results_test cascade');
