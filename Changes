@@ -1,4 +1,6 @@
 
+2.31  2016-09-05
+
 2.30  2016-09-02
   - Improved query method in Mojo::Pg::Database to allow binding of specific
     DBD::Pg data types to placeholders.
