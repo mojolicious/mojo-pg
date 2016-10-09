@@ -416,8 +416,8 @@ Parse configuration from connection string.
   # Username and database
   $pg->from_string('postgresql://sri@/db2');
 
-  # Username, password, host and database
-  $pg->from_string('postgresql://sri:s3cret@localhost/db3');
+  # Short scheme, username, password, host and database
+  $pg->from_string('postgres://sri:s3cret@localhost/db3');
 
   # Username, domain socket and database
   $pg->from_string('postgresql://sri@%2ftmp%2fpg.sock/db4');
