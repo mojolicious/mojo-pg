@@ -46,7 +46,7 @@ sub from_string {
   return $self unless $str;
   my $url = Mojo::URL->new($str);
   croak qq{Invalid PostgreSQL connection string "$str"}
-    unless $url->protocol =~ /^(?:postgresql|postgres)$/;
+    unless $url->protocol =~ /^postgres(?:ql)?$/;
 
   # Connection information
   my $db = $url->path->parts->[0];
@@ -470,6 +470,8 @@ In alphabetical order:
 =over 2
 
 Dan Book
+
+Flavio Poletti
 
 Hernan Lopes
 
