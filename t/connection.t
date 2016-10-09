@@ -21,8 +21,8 @@ $options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0,
   RaiseError => 1};
 is_deeply $pg->options, $options, 'right options';
 
-# Minimal connection string with service and option
-$pg = Mojo::Pg->new('postgresql://?service=foo&PrintError=1');
+# Minimal connection string with service and option, shorter protocol
+$pg = Mojo::Pg->new('postgres://?service=foo&PrintError=1');
 is $pg->dsn,      'dbi:Pg:service=foo', 'right data source';
 is $pg->username, '',                   'no username';
 is $pg->password, '',                   'no password';
