@@ -334,8 +334,10 @@ easily.
 
 Options for database handles, defaults to activating C<AutoCommit>,
 C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>.
+
 Note that C<AutoCommit> and C<RaiseError> are considered mandatory, so
-deactivating them would be very dangerous.
+deactivating them would be very dangerous.  Setting C<dbi_connect_method>
+to C<connect_cached> is also likely to cause confusion, so don't do that.
 
 =head2 password
 
