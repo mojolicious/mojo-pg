@@ -2,6 +2,7 @@
 2.31  2016-10-09
   - Improved from_string method in Mojo::Pg to accept the "postgres://" scheme
     as well. (polettix)
+  - Improved examples to use new Mojolicious 7.12 features.
 
 2.30  2016-09-02
   - Improved query method in Mojo::Pg::Database to allow binding of specific
