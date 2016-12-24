@@ -1,4 +1,6 @@
 
+2.32  2016-12-24
+
 2.31  2016-10-09
   - Improved from_string method in Mojo::Pg to accept the "postgres://" scheme
     as well. (polettix)
