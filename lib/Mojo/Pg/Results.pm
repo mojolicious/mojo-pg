@@ -5,7 +5,7 @@ use Mojo::Collection;
 use Mojo::JSON 'from_json';
 use Mojo::Util 'tablify';
 
-has 'sth';
+has [qw(sth db)];
 
 sub DESTROY {
   my $self = shift;
