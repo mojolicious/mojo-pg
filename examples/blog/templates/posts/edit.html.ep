@@ -1,4 +1,4 @@
 % layout 'blog', title => 'Edit post';
 <h2>Edit post</h2>
 %= include 'posts/_form', caption => 'Update', target => 'update_post'
-%= button_to Remove => 'remove_post' => {id => $post->{id}}
+%= button_to Remove => remove_post => {id => $post->{id}}
