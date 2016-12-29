@@ -12,9 +12,7 @@ use Mojo::Pg;
 
 # Isolate tests
 my $pg
-  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
-$pg->db->query('drop schema if exists mojo_migrations_test cascade');
-$pg->db->query('create schema mojo_migrations_test');
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_migrations_test');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
@@ -105,8 +103,9 @@ is $pg->migrations->migrate(0)->active,  0, 'active version is 0';
 is $pg2->migrations->migrate(0)->active, 0, 'active version is 0';
 
 # Migrate automatically
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
-$pg->migrations->name('migrations_test')->from_string(<<EOF);
+my $pg3
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
+$pg3->migrations->name('migrations_test')->from_string(<<EOF);
 -- 5 up
 create table if not exists migration_test_six (foo varchar(255));
 -- 6 up
@@ -116,14 +115,14 @@ drop table if exists migration_test_six;
 -- 6 down
 delete from migration_test_six;
 EOF
-$pg->auto_migrate(1)->db;
-is $pg->migrations->active, 6, 'active version is 6';
-is_deeply $pg->db->query('select * from migration_test_six')->hashes,
+$pg3->auto_migrate(1)->db;
+is $pg3->migrations->active, 6, 'active version is 6';
+is_deeply $pg3->db->query('select * from migration_test_six')->hashes,
   [{foo => 'works!'}], 'right structure';
-is $pg->migrations->migrate(5)->active, 5, 'active version is 5';
-is_deeply $pg->db->query('select * from migration_test_six')->hashes, [],
+is $pg3->migrations->migrate(5)->active, 5, 'active version is 5';
+is_deeply $pg3->db->query('select * from migration_test_six')->hashes, [],
   'right structure';
-is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
+is $pg3->migrations->migrate(0)->active, 0, 'active version is 0';
 
 # Unknown version
 eval { $pg->migrations->migrate(23) };
@@ -150,9 +149,6 @@ like $@, qr/Active version 2 is greater than the latest version 1/,
   'right error';
 is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
   'active version is 0';
-
-# Clean up once we are done
-$pg->db->query('drop schema mojo_migrations_test cascade');
 
 done_testing();
 

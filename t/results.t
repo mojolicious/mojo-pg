@@ -23,9 +23,8 @@ sub array_test { shift->array }
 package main;
 
 # Isolate tests
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_results_test']);
-$pg->db->query('drop schema if exists mojo_results_test cascade');
-$pg->db->query('create schema mojo_results_test');
+my $pg
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_results_test');
 
 my $db = $pg->db;
 $db->query(
@@ -168,8 +167,5 @@ $db->query(
 );
 is_deeply $db->query('select * from results_test2')->hash, {stuff => $snowman},
   'right structure';
-
-# Clean up once we are done
-$pg->db->query('drop schema mojo_results_test cascade');
 
 done_testing();

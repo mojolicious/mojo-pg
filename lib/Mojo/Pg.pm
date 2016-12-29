@@ -30,6 +30,8 @@ has pubsub => sub {
 
 our $VERSION = '2.32';
 
+sub DESTROY { _cleanup($_[0]->db, $_[0]{temp}) if exists $_[0]{temp} }
+
 sub db {
   my $self = shift;
 
@@ -67,6 +69,23 @@ sub from_string {
 }
 
 sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
+
+sub with_temp_schema {
+  my ($self, $schema) = @_;
+
+  my $db = $self->search_path([$schema])->db;
+  $schema = $self->{temp} = $db->dbh->quote_identifier($schema);
+  _cleanup($db, $schema);
+  $db->query("create schema $schema");
+
+  return $self;
+}
+
+sub _cleanup {
+  my ($db, $schema) = @_;
+  local $db->dbh->{Warn} = 0;
+  $db->query("drop schema if exists $schema cascade");
+}
 
 sub _dequeue {
   my $self = shift;
@@ -368,13 +387,6 @@ efficiently, by sharing a single database connection with many consumers.
 
 Schema search path assigned to all new connections.
 
-  # Isolate tests and avoid race conditions when running them in parallel
-  my $pg = Mojo::Pg->new('postgresql:///test')->search_path(['test_one']);
-  $pg->db->query('drop schema if exists test_one cascade');
-  $pg->db->query('create schema test_one');
-  ...
-  $pg->db->query('drop schema test_one cascade');
-
 =head2 username
 
   my $username = $pg->username;
@@ -438,6 +450,18 @@ L</"from_string"> if necessary.
 
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
+
+  # Isolate tests and avoid race conditions when running them in parallel
+  my $pg = Mojo::Pg->new('postgres:///test')->with_temp_schema('test_one');
+
+=head2 with_temp_schema
+
+  $pg = $pg->with_temp_schema('foo');
+
+Temporarily create a schema and set the L</"search_path"> accordingly, the
+schema and all objects contained by it will be dropped automatically as soon as
+this L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
+isolate tests and to avoid race conditions when running them in parallel.
 
 =head1 REFERENCE
 
