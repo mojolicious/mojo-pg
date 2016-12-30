@@ -278,6 +278,38 @@ eval {
 };
 like $@, qr/Non-blocking query already in progress/, 'right error';
 
+my $rows;
+$pg->db->query(
+  'select 1',
+  sub {
+    my ($db, $err, $results) = @_;
+
+    Mojo::IOLoop->timer(
+      1 => sub {
+        $results->rows;
+
+        $pg->db->query(
+          'select 1',
+          sub {
+            my ($db, $err, $results) = @_;
+            $rows = $results->rows;
+            Mojo::IOLoop->stop;
+          }
+        );
+      }
+    );
+
+    Mojo::IOLoop->timer(
+      5 => sub {
+        $rows = 'got event loop freeze';
+        Mojo::IOLoop->stop;
+      }
+    );
+  }
+);
+Mojo::IOLoop->start;
+is $rows, 1, 'got rows';
+
 # CLean up non-blocking query
 $fail = undef;
 $db   = $pg->db;
