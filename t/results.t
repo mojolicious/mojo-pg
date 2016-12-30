@@ -22,12 +22,10 @@ sub array_test { shift->array }
 
 package main;
 
-# Isolate tests
-my $pg
-  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_results_test');
+my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->temp_schema('mojo_results_test');
 
-is_deeply $pg->search_path, ['mojo_results_test'], 'right search path';
 my $db = $pg->db;
+is_deeply $pg->search_path, ['mojo_results_test'], 'right search path';
 $db->query(
   'create table if not exists results_test (
      id   serial primary key,

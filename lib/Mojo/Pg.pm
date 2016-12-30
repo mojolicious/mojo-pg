@@ -9,7 +9,7 @@ use Mojo::Pg::PubSub;
 use Mojo::URL;
 use Scalar::Util 'weaken';
 
-has [qw(auto_migrate search_path)];
+has [qw(auto_migrate search_path temp_schema)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
@@ -30,9 +30,7 @@ has pubsub => sub {
 
 our $VERSION = '2.32';
 
-sub DESTROY { _cleanup($_[0]->db, $_[0]{temp}) if exists $_[0]{temp} }
-
-sub close_idle_connections { ($_[0]->{queue} = []) and return $_[0] }
+sub DESTROY { _cleanup($_[0]->_dequeue, $_[0]{temp}) if $_[0]{temp} }
 
 sub db {
   my $self = shift;
@@ -72,21 +70,10 @@ sub from_string {
 
 sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
-sub with_temp_schema {
-  my ($self, $schema) = @_;
-
-  my $db = $self->search_path([$schema])->db;
-  $schema = $self->{temp} = $db->dbh->quote_identifier($schema);
-  _cleanup($db, $schema);
-  $db->query("create schema $schema");
-
-  return $self;
-}
-
 sub _cleanup {
-  my ($db, $schema) = @_;
-  local $db->dbh->{Warn} = 0;
-  $db->query("drop schema if exists $schema cascade");
+  my ($dbh, $schema) = @_;
+  local $dbh->{Warn} = 0;
+  $dbh->do("drop schema if exists $schema cascade");
 }
 
 sub _dequeue {
@@ -94,10 +81,21 @@ sub _dequeue {
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
+
+  # Temporary schema
+  if ((my $schema = $self->temp_schema) && !$self->{temp}) {
+    $self->search_path([$schema])->{temp} = $dbh->quote_identifier($schema);
+    _cleanup($dbh, $self->{temp});
+    $dbh->do("create schema $self->{temp}");
+  }
+
+  # Search path
   if (my $path = $self->search_path) {
     my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
     $dbh->do("set search_path to $search_path");
   }
+
+  # Automatic migrations
   ++$self->{migrated} and $self->migrations->migrate
     if !$self->{migrated} && $self->auto_migrate;
   $self->emit(connection => $dbh);
@@ -389,6 +387,17 @@ efficiently, by sharing a single database connection with many consumers.
 
 Schema search path assigned to all new connections.
 
+=head2 temp_schema
+
+  my $schema = $pg->temp_schema;
+  $pg        = $pg->temp_schema('foo');
+
+Temporarily create a schema and set L</"search_path"> accordingly, as soon as
+the first database connection has been established. The schema and all objects
+contained by it will be dropped automatically as soon as this L<Mojo::Pg> object
+gets destroyed. This is a pattern that is often used to isolate tests and to
+avoid race conditions, when running them in parallel with a shared database.
+
 =head2 username
 
   my $username = $pg->username;
@@ -400,13 +409,6 @@ Database username, defaults to an empty string.
 
 L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the
 following new ones.
-
-=head2 close_idle_connections
-
-  $pg = $pg->close_idle_connections;
-
-Close all connections that are not currently active. Note that this method is
-EXPERIMENTAL and might change without warning!
 
 =head2 db
 
@@ -461,17 +463,7 @@ L</"from_string"> if necessary.
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
 
   # Isolate tests and avoid race conditions when running them in parallel
-  my $pg = Mojo::Pg->new('postgres:///test')->with_temp_schema('test_one');
-
-=head2 with_temp_schema
-
-  $pg = $pg->with_temp_schema('foo');
-
-Temporarily create a schema and set L</"search_path"> accordingly, the schema
-and all objects contained by it will be dropped automatically as soon as this
-L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
-isolate tests and to avoid race conditions, when running them in parallel with a
-shared database.
+  my $pg = Mojo::Pg->new('postgres:///test')->temp_schema('test_one');
 
 =head1 REFERENCE
 

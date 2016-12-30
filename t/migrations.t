@@ -10,9 +10,7 @@ use File::Spec::Functions 'catfile';
 use FindBin;
 use Mojo::Pg;
 
-# Isolate tests
-my $pg
-  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_migrations_test');
+my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->temp_schema('mojo_migrations_test');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
@@ -155,7 +153,7 @@ done_testing();
 __DATA__
 @@ test1
 -- 7 up
-create table migration_test_four (test int));
+create table migration_test_four (test int);
 
 -- 10 up
 insert into migration_test_four values (10);

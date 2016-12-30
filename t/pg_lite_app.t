@@ -11,11 +11,8 @@ use Mojolicious::Lite;
 use Scalar::Util 'refaddr';
 use Test::Mojo;
 
-# Isolate tests
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_app_test');
-
 helper pg => sub {
-  state $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_app_test']);
+  state $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->temp_schema('$mojo_app_test$');
 };
 
 app->pg->db->query('create table if not exists app_test (stuff text)');

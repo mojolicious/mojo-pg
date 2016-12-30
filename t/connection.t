@@ -43,7 +43,7 @@ is_deeply $pg->options, $options, 'right options';
 # Connection string username but without host
 $pg = Mojo::Pg->new('postgres://postgres@/test3');
 is $pg->dsn,      'dbi:Pg:dbname=test3', 'right data source';
-is $pg->username, 'postgres',             'right username';
+is $pg->username, 'postgres',            'right username';
 is $pg->password, '',                    'no password';
 $options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0,
   RaiseError => 1};

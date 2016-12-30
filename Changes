@@ -1,7 +1,6 @@
 
 2.32  2016-12-30
-  - Added EXPERIMENTAL close_idle_connections method to Mojo::Pg.
-  - Added with_temp_schema method to Mojo::Pg.
+  - Added temp_schema attribute to Mojo::Pg.
 
 2.31  2016-10-09
   - Improved from_string method in Mojo::Pg to accept the "postgres://" scheme
