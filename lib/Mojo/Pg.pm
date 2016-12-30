@@ -470,7 +470,8 @@ L</"from_string"> if necessary.
 Temporarily create a schema and set L</"search_path"> accordingly, the schema
 and all objects contained by it will be dropped automatically as soon as this
 L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
-isolate tests and to avoid race conditions when running them in parallel.
+isolate tests and to avoid race conditions, when running them in parallel with a
+shared database.
 
 =head1 REFERENCE
 
