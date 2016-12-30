@@ -10,7 +10,8 @@ use File::Spec::Functions 'catfile';
 use FindBin;
 use Mojo::Pg;
 
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->temp_schema('mojo_migrations_test');
+my $pg
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_migrations_test');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';

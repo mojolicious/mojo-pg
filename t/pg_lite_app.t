@@ -12,7 +12,8 @@ use Scalar::Util 'refaddr';
 use Test::Mojo;
 
 helper pg => sub {
-  state $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->temp_schema('$mojo_app_test$');
+  state $pg
+    = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('$mojo_app_test$');
 };
 
 app->pg->db->query('create table if not exists app_test (stuff text)');
