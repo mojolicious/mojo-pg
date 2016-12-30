@@ -100,6 +100,9 @@ $dbh = $pg->db->dbh;
 is $pg->db->dbh, $dbh, 'same database handle';
 $pg->db->disconnect;
 isnt $pg->db->dbh, $dbh, 'different database handles';
+$dbh = $pg->db->dbh;
+is $pg->db->dbh, $dbh, 'same database handle';
+isnt $pg->close_idle_connections->db->dbh, $dbh, 'different database handles';
 
 # Statement cache
 $db = $pg->db;

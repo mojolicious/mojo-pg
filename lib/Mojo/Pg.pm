@@ -32,6 +32,8 @@ our $VERSION = '2.32';
 
 sub DESTROY { _cleanup($_[0]->db, $_[0]{temp}) if exists $_[0]{temp} }
 
+sub close_idle_connections { ($_[0]->{queue} = []) and return $_[0] }
+
 sub db {
   my $self = shift;
 
@@ -398,6 +400,13 @@ Database username, defaults to an empty string.
 
 L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the
 following new ones.
+
+=head2 close_idle_connections
+
+  $pg = $pg->close_idle_connections;
+
+Close all connections that are not currently active. Note that this method is
+EXPERIMENTAL and might change without warning!
 
 =head2 db
 
