@@ -467,9 +467,9 @@ L</"from_string"> if necessary.
 
   $pg = $pg->with_temp_schema('foo');
 
-Temporarily create a schema and set the L</"search_path"> accordingly, the
-schema and all objects contained by it will be dropped automatically as soon as
-this L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
+Temporarily create a schema and set L</"search_path"> accordingly, the schema
+and all objects contained by it will be dropped automatically as soon as this
+L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
 isolate tests and to avoid race conditions when running them in parallel.
 
 =head1 REFERENCE

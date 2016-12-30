@@ -26,6 +26,7 @@ package main;
 my $pg
   = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_results_test');
 
+is_deeply $pg->search_path, ['mojo_results_test'], 'right search path';
 my $db = $pg->db;
 $db->query(
   'create table if not exists results_test (
