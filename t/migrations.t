@@ -149,6 +149,23 @@ like $@, qr/Active version 2 is greater than the latest version 1/,
 is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
   'active version is 0';
 
+# Migrate with temporary schema
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+is $pg->migrations->name('test1')->from_data->latest, 10,
+  'latest version is 10';
+is $pg->with_temp_schema('mojo_migrations_test')->migrations->active, 0,
+  'active version is 0';
+is_deeply $pg->search_path, ['mojo_migrations_test'], 'right search path';
+is $pg->migrations->migrate->active, 10, 'active version is 10';
+
+# Migrate automatically with temporary schema
+$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+is $pg->auto_migrate(1)->migrations->name('test1')->from_data->latest, 10,
+  'latest version is 10';
+is $pg->with_temp_schema('mojo_migrations_test')->migrations->active, 10,
+  'active version is 10';
+is_deeply $pg->search_path, ['mojo_migrations_test'], 'right search path';
+
 done_testing();
 
 __DATA__
