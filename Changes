@@ -1,5 +1,6 @@
 
 2.34  2017-01-02
+  - Removed with_temp_schema method from Mojo::Pg.
 
 2.33  2017-01-01
   - Fixed a few fork-safety bugs in Mojo::Pg.

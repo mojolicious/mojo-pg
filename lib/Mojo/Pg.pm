@@ -30,9 +30,14 @@ has pubsub => sub {
 
 our $VERSION = '2.34';
 
-sub DESTROY { _cleanup($_[0]->_dequeue, $_[0]{temp}) if $_[0]{temp} }
+sub db {
+  my $self = shift;
 
-sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
+  # Fork-safety
+  delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
+
+  return $self->database_class->new(dbh => $self->_dequeue, pg => $self);
+}
 
 sub from_string {
   my ($self, $str) = @_;
@@ -63,28 +68,8 @@ sub from_string {
 
 sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
-sub with_temp_schema {
-  my ($self, $schema) = @_;
-
-  local $self->{migrated} = 1;
-  my $dbh = $self->search_path([$schema])->_dequeue;
-  _cleanup($dbh, $self->{temp} = $dbh->quote_identifier($schema));
-  $dbh->do("create schema $self->{temp}");
-
-  return $self;
-}
-
-sub _cleanup {
-  my ($dbh, $schema) = @_;
-  local $dbh->{Warn} = 0;
-  $dbh->do("drop schema if exists $schema cascade") if $schema;
-}
-
 sub _dequeue {
   my $self = shift;
-
-  # Fork-safety
-  delete @$self{qw(pid queue temp)} unless ($self->{pid} //= $$) eq $$;
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
@@ -387,6 +372,13 @@ efficiently, by sharing a single database connection with many consumers.
 
 Schema search path assigned to all new connections.
 
+  # Isolate tests and avoid race conditions when running them in parallel
+  my $pg = Mojo::Pg->new('postgresql:///test')->search_path(['test_one']);
+  $pg->db->query('drop schema if exists test_one cascade');
+  $pg->db->query('create schema test_one');
+  ...
+  $pg->db->query('drop schema test_one cascade');
+
 =head2 username
 
   my $username = $pg->username;
@@ -450,19 +442,6 @@ L</"from_string"> if necessary.
 
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
-
-  # Isolate tests and avoid race conditions when running them in parallel
-  my $pg = Mojo::Pg->new('postgres:///test')->with_temp_schema('test_one');
-
-=head2 with_temp_schema
-
-  $pg = $pg->with_temp_schema('foo');
-
-Temporarily create a schema and set L</"search_path"> accordingly, the schema
-and all objects contained by it will be dropped automatically as soon as this
-L<Mojo::Pg> object gets destroyed. This is a pattern that is often used to
-isolate tests and to avoid race conditions, when running them in parallel with a
-shared database.
 
 =head1 REFERENCE
 

@@ -174,38 +174,6 @@ ok !$connections, 'no new connections';
 };
 $pg->unsubscribe('connection');
 
-# Fork-safety and temporary schemas
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_database_test');
-is_deeply $pg->search_path, ['mojo_database_test'], 'right search path';
-is $pg->db->query(
-  "select * from information_schema.schemata
-   where schema_name = 'mojo_database_test'
-     or schema_name = 'mojo_database_test2'"
-)->rows, 1, 'one result';
-{
-  local $$ = -23;
-  $pg
-    = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_database_test2');
-  is $pg->db->query(
-    "select * from information_schema.schemata
-     where schema_name = 'mojo_database_test'
-       or schema_name = 'mojo_database_test2'"
-  )->rows, 2, 'two results';
-  undef $pg;
-};
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_database_test');
-is $pg->db->query(
-  "select * from information_schema.schemata
-   where schema_name = 'mojo_database_test'
-     or schema_name = 'mojo_database_test2'"
-)->rows, 1, 'one result';
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-is $pg->db->query(
-  "select * from information_schema.schemata
-   where schema_name = 'mojo_database_test'
-     or schema_name = 'mojo_database_test2'"
-)->rows, 0, 'no results';
-
 # Notifications
 $db = $pg->db;
 ok !$db->is_listening, 'not listening';

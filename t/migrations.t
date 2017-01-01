@@ -10,8 +10,11 @@ use File::Spec::Functions 'catfile';
 use FindBin;
 use Mojo::Pg;
 
+# Isolate tests
 my $pg
-  = Mojo::Pg->new($ENV{TEST_ONLINE})->with_temp_schema('mojo_migrations_test');
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
+$pg->db->query('drop schema if exists mojo_migrations_test cascade');
+$pg->db->query('create schema mojo_migrations_test');
 
 # Defaults
 is $pg->migrations->name,   'migrations', 'right name';
@@ -149,22 +152,8 @@ like $@, qr/Active version 2 is greater than the latest version 1/,
 is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
   'active version is 0';
 
-# Migrate with temporary schema
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-is $pg->migrations->name('test1')->from_data->latest, 10,
-  'latest version is 10';
-is $pg->with_temp_schema('mojo_migrations_test')->migrations->active, 0,
-  'active version is 0';
-is_deeply $pg->search_path, ['mojo_migrations_test'], 'right search path';
-is $pg->migrations->migrate->active, 10, 'active version is 10';
-
-# Migrate automatically with temporary schema
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-is $pg->auto_migrate(1)->migrations->name('test1')->from_data->latest, 10,
-  'latest version is 10';
-is $pg->with_temp_schema('mojo_migrations_test')->migrations->active, 10,
-  'active version is 10';
-is_deeply $pg->search_path, ['mojo_migrations_test'], 'right search path';
+# Clean up once we are done
+$pg->db->query('drop schema mojo_migrations_test cascade');
 
 done_testing();
 
