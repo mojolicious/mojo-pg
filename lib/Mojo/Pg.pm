@@ -30,14 +30,7 @@ has pubsub => sub {
 
 our $VERSION = '2.35';
 
-sub db {
-  my $self = shift;
-
-  # Fork-safety
-  delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
-
-  return $self->database_class->new(dbh => $self->_dequeue, pg => $self);
-}
+sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
 
 sub from_string {
   my ($self, $str) = @_;
@@ -70,6 +63,9 @@ sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
 sub _dequeue {
   my $self = shift;
+
+  # Fork-safety
+  delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
