@@ -30,16 +30,9 @@ has pubsub => sub {
 
 our $VERSION = '2.33';
 
-sub DESTROY { _cleanup($_[0]->_dequeue, $_[0]{temp}) if exists $_[0]{temp} }
+sub DESTROY { _cleanup($_[0]->_dequeue, $_[0]{temp}) if $_[0]{temp} }
 
-sub db {
-  my $self = shift;
-
-  # Fork-safety
-  delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
-
-  return $self->database_class->new(dbh => $self->_dequeue, pg => $self);
-}
+sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
 
 sub from_string {
   my ($self, $str) = @_;
@@ -84,11 +77,14 @@ sub with_temp_schema {
 sub _cleanup {
   my ($dbh, $schema) = @_;
   local $dbh->{Warn} = 0;
-  $dbh->do("drop schema if exists $schema cascade");
+  $dbh->do("drop schema if exists $schema cascade") if $schema;
 }
 
 sub _dequeue {
   my $self = shift;
+
+  # Fork-safety
+  delete @$self{qw(pid queue temp)} unless ($self->{pid} //= $$) eq $$;
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
