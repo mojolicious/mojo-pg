@@ -28,7 +28,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '2.33';
+our $VERSION = '2.34';
 
 sub DESTROY { _cleanup($_[0]->_dequeue, $_[0]{temp}) if $_[0]{temp} }
 
