@@ -1,4 +1,6 @@
 
+2.33  2017-01-02
+
 2.32  2017-01-01
   - Added with_temp_schema method to Mojo::Pg.
 
