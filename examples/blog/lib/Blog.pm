@@ -17,7 +17,7 @@ sub startup {
     posts => sub { state $posts = Blog::Model::Posts->new(pg => shift->pg) });
 
   # Migrate to latest version if necessary
-  my $path = $self->home->rel_file('migrations/blog.sql');
+  my $path = $self->home->child('migrations', 'blog.sql');
   $self->pg->migrations->name('blog')->from_file($path)->migrate;
 
   # Controller
