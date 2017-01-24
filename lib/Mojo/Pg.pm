@@ -266,8 +266,11 @@ Which get integrated into your application with helpers.
 
 This distribution also contains two great
 L<example applications|https://github.com/kraih/mojo-pg/tree/master/examples/>
-you can use for inspiration. The minimal chat application will show you how to
-scale WebSockets to multiple servers, and the well-structured blog application
+you can use for inspiration. The minimal
+L<chat|https://github.com/kraih/mojo-pg/tree/master/examples/chat.pl>
+application will show you how to scale WebSockets to multiple servers, and the
+well-structured
+L<blog|https://github.com/kraih/mojo-pg/tree/master/examples/blog> application
 how to apply the MVC design pattern in practice.
 
 =head1 EVENTS
