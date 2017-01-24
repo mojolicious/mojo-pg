@@ -262,6 +262,14 @@ Which get integrated into your application with helpers.
 
   app->start;
 
+=head1 EXAMPLES
+
+This distribution also contains two great
+L<example applications|https://github.com/kraih/mojo-pg/tree/master/examples/>
+you can use for inspiration. The minimal chat application will show you how to
+scale WebSockets to multiple servers, and the well-structured blog application
+how to apply the MVC design pattern in practice.
+
 =head1 EVENTS
 
 L<Mojo::Pg> inherits all events from L<Mojo::EventEmitter> and can emit the
