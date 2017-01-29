@@ -153,6 +153,24 @@ like $@, qr/does_not_exist/, 'right error';
 is_deeply $db->query('select * from results_test where name = ?', 'tx3')
   ->hashes->to_array, [], 'no results';
 
+# Savepoints
+my $id;
+{
+  my $tx = $db->begin;
+  $id
+    = $db->query("insert into results_test (name) values ('sp1') returning id")
+    ->array->[0];
+  $tx->savepoint('s1');
+  eval { $db->query("insert into results_test values (?, 'sp2')", $id); };
+  if ($@) {
+    $tx->rollback_to('s1');
+    $db->query("update results_test set name ='sp2' where id = ?", $id);
+  }
+  $tx->commit;
+};
+is_deeply $db->query("select * from results_test where name ~ '^sp'")
+  ->hashes->to_array, [{id => $id, name => 'sp2'}], 'right structure';
+
 # Long-lived results
 my $results1 = $db->query('select 1 as one');
 is_deeply $results1->hashes, [{one => 1}], 'right structure';
