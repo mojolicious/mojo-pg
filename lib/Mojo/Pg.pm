@@ -8,7 +8,9 @@ use Mojo::Pg::Migrations;
 use Mojo::Pg::PubSub;
 use Mojo::URL;
 use Scalar::Util 'weaken';
+use SQL::Abstract;
 
+has abstract => sub { SQL::Abstract->new };
 has [qw(auto_migrate search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
@@ -28,7 +30,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '2.36';
+our $VERSION = '3.0';
 
 sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
 
@@ -135,6 +137,12 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Insert another row and return the generated id
   say $db->query('insert into names (name) values (?) returning id', 'Daniel')
     ->hash->{id};
+
+  # Use SQL::Abstract to generate queries for you
+  $db->insert('names', {name => 'Isabel'});
+  say $db->select('names', undef, {name => 'Isabel'})->hash->{id};
+  $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
+  $db->delete('names', {name => 'Bel'});
 
   # JSON roundtrip
   say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
@@ -296,6 +304,16 @@ Emitted when a new database connection has been established.
 
 L<Mojo::Pg> implements the following attributes.
 
+=head2 abstract
+
+  my $abstract = $pg->abstract;
+  $pg          = $pg->abstract(SQL::Abstract->new);
+
+L<SQL::Abstract> object used to generate CRUD queries for L<Mojo::Pg::Database>.
+
+  # Generate statements and bind values
+  my($stmt, @bind) = $pg->abstract->select('names');
+
 =head2 auto_migrate
 
   my $bool = $pg->auto_migrate;
@@ -449,6 +467,13 @@ L</"from_string"> if necessary.
 
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
+
+=head1 DEBUGGING
+
+You can set the C<DBI_TRACE> environment variable to get some advanced
+diagnostics information printed to C<STDERR> by L<DBI>.
+
+  DBI_TRACE=1
 
 =head1 REFERENCE
 

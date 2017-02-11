@@ -29,6 +29,7 @@ WriteMakefile(
       x_IRC => 'irc://irc.perl.org/#mojo'
     },
   },
-  PREREQ_PM => {Mojolicious => '7.15', 'DBD::Pg' => 3.005001},
-  test      => {TESTS       => 't/*.t t/*/*.t'}
+  PREREQ_PM =>
+    {'DBD::Pg' => 3.005001, Mojolicious => '7.15', 'SQL::Abstract' => '1.81'},
+  test => {TESTS => 't/*.t t/*/*.t'}
 );

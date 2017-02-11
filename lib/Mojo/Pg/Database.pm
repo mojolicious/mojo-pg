@@ -7,10 +7,19 @@ use Mojo::IOLoop;
 use Mojo::JSON 'to_json';
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
+use Mojo::Util 'monkey_patch';
 use Scalar::Util 'weaken';
 
 has [qw(dbh pg)];
 has results_class => 'Mojo::Pg::Results';
+
+for my $name (qw(delete insert select update)) {
+  monkey_patch __PACKAGE__, lc $name, sub {
+    my $self = shift;
+    my @cb = ref $_[-1] eq 'CODE' ? pop : ();
+    return $self->query($self->pg->abstract->$name(@_), @cb);
+  };
+}
 
 sub DESTROY {
   my $self = shift;
@@ -253,6 +262,20 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
   };
   say $@ if $@;
 
+=head2 delete
+
+  my $results = $db->delete($table, \%where);
+
+Generate a C<DELETE> statement with L<Mojo::Pg/"abstract"> (usually an
+L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
+callback to perform operations non-blocking.
+
+  $db->delete(some_table => sub {
+    my ($db, $err, $results) = @_;
+    ...
+  });
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
 =head2 disconnect
 
   $db->disconnect;
@@ -269,6 +292,20 @@ to be used as an operator.
   # Check for a key in a JSON document
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
     ->expand->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
+
+=head2 insert
+
+  my $results = $db->insert($table, \@values || \%fieldvals, \%options);
+
+Generate an C<INSERT> statement with L<Mojo::Pg/"abstract"> (usually an
+L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
+callback to perform operations non-blocking.
+
+  $db->insert(some_table => {foo => 'bar'} => sub {
+    my ($db, $err, $results) = @_;
+    ...
+  });
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
 =head2 is_listening
 
@@ -336,6 +373,20 @@ used to bind specific L<DBD::Pg> data types to placeholders.
   use DBD::Pg ':pg_types';
   $db->query('insert into bar values (?)', {type => PG_BYTEA, value => $bytes});
 
+=head2 select
+
+  my $results = $db->select($source, $fields, $where, $order);
+
+Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an
+L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
+callback to perform operations non-blocking.
+
+  $db->select(some_table => ['foo'] => sub {
+    my ($db, $err, $results) = @_;
+    ...
+  });
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
 =head2 tables
 
   my $tables = $db->tables;
@@ -352,6 +403,20 @@ user and not internal, as an array reference.
   $db = $db->unlisten('*');
 
 Unsubscribe from a channel, C<*> can be used to unsubscribe from all channels.
+
+=head2 update
+
+  my $results = $db->update($table, \%fieldvals, \%where);
+
+Generate an C<UPDATE> statement with L<Mojo::Pg/"abstract"> (usually an
+L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
+callback to perform operations non-blocking.
+
+  $db->update(some_table => {foo => 'baz'} => {foo => 'bar'} => sub {
+    my ($db, $err, $results) = @_;
+    ...
+  });
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
 =head1 SEE ALSO
 

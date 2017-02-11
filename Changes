@@ -1,5 +1,8 @@
 
-2.36  2017-01-15
+3.0  2017-02-11
+  - Added support for generating queries with SQL::Abstract.
+  - Added abstract attribute to Mojo::Pg.
+  - Added delete, insert, select and update methods to Mojo::Pg::Database.
 
 2.35  2017-01-11
   - Updated for Mojolicious 7.15.
