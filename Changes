@@ -1,4 +1,6 @@
 
+3.01  2017-02-12
+
 3.0  2017-02-11
   - Added support for generating queries with SQL::Abstract.
   - Added abstract attribute to Mojo::Pg.
