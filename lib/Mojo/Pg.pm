@@ -474,6 +474,8 @@ You can set the C<DBI_TRACE> environment variable to get some advanced
 diagnostics information printed by L<DBI>.
 
   DBI_TRACE=1
+  DBI_TRACE=15
+  DBI_TRACE=SQL
 
 =head1 REFERENCE
 
