@@ -127,7 +127,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Use SQL::Abstract to generate simple CRUD queries for you
   $db->insert('names', {name => 'Isabel'});
-  say $db->select('names', undef, {name => 'Isabel'})->hash->{id};
+  say $db->select('names', ['id'], {name => 'Isabel'})->hash->{id};
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
   $db->delete('names', {name => 'Bel'});
 
