@@ -121,13 +121,13 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $pg->migrations->migrate(0)->migrate;
 
   # Use SQL::Abstract to generate simple CRUD queries for you
+  my $db = $pg->db;
   $db->insert('names', {name => 'Isabel'});
   say $db->select('names', undef, {name => 'Isabel'})->hash->{id};
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
   $db->delete('names', {name => 'Bel'});
 
   # Insert a few rows
-  my $db = $pg->db;
   $db->query('insert into names (name) values (?)', 'Sara');
   $db->query('insert into names (name) values (?)', 'Stefan');
 
