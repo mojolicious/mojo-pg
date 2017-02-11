@@ -10,7 +10,7 @@ use Mojo::URL;
 use Scalar::Util 'weaken';
 use SQL::Abstract;
 
-has abstract => sub { SQL::Abstract->new };
+has abstract => sub { SQL::Abstract->new(quote_char => '"') };
 has [qw(auto_migrate search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
