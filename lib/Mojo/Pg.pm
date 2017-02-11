@@ -471,7 +471,7 @@ L</"from_string"> if necessary.
 =head1 DEBUGGING
 
 You can set the C<DBI_TRACE> environment variable to get some advanced
-diagnostics information printed to C<STDERR> by L<DBI>.
+diagnostics information printed by L<DBI>.
 
   DBI_TRACE=1
 
