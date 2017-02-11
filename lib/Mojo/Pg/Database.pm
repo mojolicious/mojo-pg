@@ -15,8 +15,7 @@ has results_class => 'Mojo::Pg::Results';
 
 for my $name (qw(delete insert select update)) {
   monkey_patch __PACKAGE__, lc $name, sub {
-    my $self = shift;
-    my @cb = ref $_[-1] eq 'CODE' ? pop : ();
+    my ($self, @cb) = (shift, ref $_[-1] eq 'CODE' ? pop : ());
     return $self->query($self->pg->abstract->$name(@_), @cb);
   };
 }
