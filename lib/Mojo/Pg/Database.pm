@@ -255,8 +255,8 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
   # Insert rows in a transaction
   eval {
     my $tx = $db->begin;
-    $db->query('insert into frameworks values (?)', 'Catalyst');
-    $db->query('insert into frameworks values (?)', 'Mojolicious');
+    $db->insert('frameworks', {name => 'Catalyst'});
+    $db->insert('frameworks', {name => 'Mojolicious'});
     $tx->commit;
   };
   say $@ if $@;

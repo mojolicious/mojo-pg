@@ -431,7 +431,7 @@ problems like connection timeouts gracefully by holding on to it only for short
 amounts of time.
 
   # Add up all the money
-  say $pg->db->query('select * from accounts')
+  say $pg->db->select('accounts')
     ->hashes->reduce(sub { $a->{money} + $b->{money} });
 
 =head2 from_string
