@@ -380,7 +380,7 @@ Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an
 L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
 callback to perform operations non-blocking.
 
-  $db->select(some_table => ['foo'] => sub {
+  $db->select(some_table => ['foo'] => {bar => 'yada'} => sub {
     my ($db, $err, $results) = @_;
     ...
   });
