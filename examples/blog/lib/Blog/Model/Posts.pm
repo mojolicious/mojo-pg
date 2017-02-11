@@ -12,7 +12,7 @@ sub all { shift->pg->db->select('posts')->hashes->to_array }
 
 sub find {
   my ($self, $id) = @_;
-  return shift->pg->db->select('posts', undef, {id => $id})->hash;
+  return $self->pg->db->select('posts', undef, {id => $id})->hash;
 }
 
 sub remove {
