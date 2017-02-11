@@ -120,7 +120,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Use migrations to drop and recreate the table
   $pg->migrations->migrate(0)->migrate;
 
-  # Use SQL::Abstract to generate simple queries for you
+  # Use SQL::Abstract to generate simple CRUD queries for you
   $db->insert('names', {name => 'Isabel'});
   say $db->select('names', undef, {name => 'Isabel'})->hash->{id};
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
