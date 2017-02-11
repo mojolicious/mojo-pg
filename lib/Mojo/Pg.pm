@@ -105,8 +105,10 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   use Mojo::Pg;
 
-  # Select the server version
+  # Use a PostgreSQL connection string for configuration
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
+
+  # Select the server version
   say $pg->db->query('select version() as version')->hash->{version};
 
   # Use migrations to create a table
@@ -120,8 +122,10 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Use migrations to drop and recreate the table
   $pg->migrations->migrate(0)->migrate;
 
-  # Use SQL::Abstract to generate simple CRUD queries for you
+  # Get a database handle from the cache for multiple queries
   my $db = $pg->db;
+
+  # Use SQL::Abstract to generate simple CRUD queries for you
   $db->insert('names', {name => 'Isabel'});
   say $db->select('names', undef, {name => 'Isabel'})->hash->{id};
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
