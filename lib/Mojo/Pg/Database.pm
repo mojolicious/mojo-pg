@@ -327,6 +327,9 @@ L<SQL::Abstract>.
   # "insert into some_table (foo) values ('bar') returning id"
   $db->insert('some_table', {foo => 'bar'}, {returning => 'id'});
 
+  # "insert into some_table (foo) values ('bar') returning id, foo"
+  $db->insert('some_table', {foo => 'bar'}, {returning => ['id', 'foo']});
+
 =head2 is_listening
 
   my $bool = $db->is_listening;
