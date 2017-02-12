@@ -414,11 +414,11 @@ following new ones.
 
   my $db = $pg->db;
 
-Get a database object based on L</"database_class"> for a cached or newly
-established database connection. The L<DBD::Pg> database handle will be
-automatically cached again when that object is destroyed, so you can handle
-problems like connection timeouts gracefully by holding on to it only for short
-amounts of time.
+Get a database object based on L</"database_class"> (which is usually
+L<Mojo::Pg::Database>) for a cached or newly established database connection.
+The L<DBD::Pg> database handle will be automatically cached again when that
+object is destroyed, so you can handle problems like connection timeouts
+gracefully by holding on to it only for short amounts of time.
 
   # Add up all the money
   say $pg->db->select('accounts')
