@@ -305,7 +305,7 @@ L<Mojo::Pg> implements the following attributes.
 L<SQL::Abstract> object used to generate CRUD queries for L<Mojo::Pg::Database>.
 
   # Generate WHERE clause and bind values
-  my($stmt, @bind) = $pg->abstract->where({foo => 'bar'});
+  my($stmt, @bind) = $pg->abstract->where({foo => 'bar', baz => 'yada'});
 
 =head2 auto_migrate
 
