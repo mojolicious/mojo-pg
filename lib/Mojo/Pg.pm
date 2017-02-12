@@ -131,7 +131,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
   $db->delete('names', {name => 'Bel'});
 
-  # Insert a few rows in a transaction
+  # Insert a few rows in a transaction with SQL and placeholders
   eval {
     my $tx = $db->begin;
     $db->query('insert into names (name) values (?)', 'Sara');
@@ -140,19 +140,18 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   };
   say $@ if $@;
 
-  # Insert another row and return the generated id
-  say $db->query('insert into names (name) values (?) returning id', 'Daniel')
-    ->hash->{id};
+  # Insert another row with SQL::Abstract and return the generated id
+  say $db->insert('names', {name => 'Daniel'}, {returning => 'id'})->hash->{id};
 
   # JSON roundtrip
   say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
     ->expand->hash->{foo}{bar};
 
-  # Select all rows blocking
-  say $_->{name} for $db->query('select * from names')->hashes->each;
+  # Select all rows blocking with SQL::Abstract
+  say $_->{name} for $db->select('names')->hashes->each;
 
-  # Select all rows non-blocking
-  $db->query('select * from names' => sub {
+  # Select all rows non-blocking with SQL::Abstract
+  $db->select('names' => sub {
     my ($db, $err, $results) = @_;
     die $err if $err;
     say $_->{name} for $results->hashes->each;
