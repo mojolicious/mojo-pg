@@ -131,15 +131,11 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
   $db->delete('names', {name => 'Bel'});
 
-  # Insert a few rows
-  $db->query('insert into names (name) values (?)', 'Sara');
-  $db->query('insert into names (name) values (?)', 'Stefan');
-
-  # Insert more rows in a transaction
+  # Insert a few rows in a transaction
   eval {
     my $tx = $db->begin;
-    $db->query('insert into names (name) values (?)', 'Baerbel');
-    $db->query('insert into names (name) values (?)', 'Wolfgang');
+    $db->query('insert into names (name) values (?)', 'Sara');
+    $db->query('insert into names (name) values (?)', 'Stefan');
     $tx->commit;
   };
   say $@ if $@;
@@ -151,12 +147,6 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # JSON roundtrip
   say $db->query('select ?::json as foo', {json => {bar => 'baz'}})
     ->expand->hash->{foo}{bar};
-
-  # Select one row at a time
-  my $results = $db->query('select * from names');
-  while (my $next = $results->hash) {
-    say $next->{name};
-  }
 
   # Select all rows blocking
   say $_->{name} for $db->query('select * from names')->hashes->each;
