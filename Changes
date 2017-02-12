@@ -1,5 +1,6 @@
 
 3.01  2017-02-12
+  - Fixed bug in examples where migrations would not be handled correctly.
 
 3.0  2017-02-11
   - Added support for generating queries with SQL::Abstract.
