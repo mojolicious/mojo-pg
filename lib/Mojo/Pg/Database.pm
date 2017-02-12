@@ -424,7 +424,7 @@ L<SQL::Abstract>.
   $db->select('some_table', undef, {foo => 'bar'}, {-desc => 'id'});
 
   # "select * from some_table where foo like '%test%'"
-  $db->update('some_table', undef, {foo => {-like => '%test%'}});
+  $db->select('some_table', undef, {foo => {-like => '%test%'}});
 
 =head2 tables
 
