@@ -275,6 +275,18 @@ callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
+Use all the same argument variations you would pass to the C<delete> method of
+L<SQL::Abstract>.
+
+  # "delete from some_table"
+  $db->delete('some_table');
+
+  # "delete from some_table where foo = 'bar'"
+  $db->delete('some_table', {foo => 'bar'});
+
+  # "delete from some_table where foo like '%test%'"
+  $db->delete('some_table', {foo => {-like => '%test%'}});
+
 =head2 disconnect
 
   $db->disconnect;
@@ -305,6 +317,15 @@ callback to perform operations non-blocking.
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
+Use all the same argument variations you would pass to the C<insert> method of
+L<SQL::Abstract>.
+
+  # "insert into some_table (foo, baz) values ('bar', 'yada')"
+  $db->insert('some_table', {foo => 'bar', baz => 'yada'});
+
+  # "insert into some_table (foo) values ('bar') returning id"
+  $db->insert('some_table', {foo => 'bar'}, {returning => 'id'});
 
 =head2 is_listening
 
@@ -386,6 +407,24 @@ callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
+Use all the same argument variations you would pass to the C<select> method of
+L<SQL::Abstract>.
+
+  # "select * from some_table"
+  $db->select('some_table');
+
+  # "select id, foo from some_table"
+  $db->select('some_table', ['id', 'foo']);
+
+  # "select * from some_table where foo = 'bar'"
+  $db->select('some_table', undef, {foo => 'bar'});
+
+  # "select * from some_table where foo = 'bar' order by id desc"
+  $db->select('some_table', undef, {foo => 'bar'}, {-desc => 'id'});
+
+  # "select * from some_table where foo like '%test%'"
+  $db->update('some_table', undef, {foo => {-like => '%test%'}});
+
 =head2 tables
 
   my $tables = $db->tables;
@@ -416,6 +455,15 @@ callback to perform operations non-blocking.
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
+Use all the same argument variations you would pass to the C<update> method of
+L<SQL::Abstract>.
+
+  # "update some_table set foo = 'bar' where id = 23"
+  $db->update('some_table', {foo => 'bar'}, {id => 23});
+
+  # "update some_table set foo = 'bar' where foo like '%test%'"
+  $db->update('some_table', {foo => 'bar'}, {foo => {-like => '%test%'}});
 
 =head1 SEE ALSO
 
