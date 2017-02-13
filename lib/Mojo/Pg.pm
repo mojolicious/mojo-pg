@@ -127,8 +127,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
   # Use SQL::Abstract to generate simple CRUD queries for you
   $db->insert('names', {name => 'Isabel'});
-  say $db->select('names', ['id'], {name => 'Isabel'})->hash->{id};
-  $db->update('names', {name => 'Bel'}, {name => 'Isabel'});
+  my $id = $db->select('names', ['id'], {name => 'Isabel'})->hash->{id};
+  $db->update('names', {name => 'Bel'}, {id => $id});
   $db->delete('names', {name => 'Bel'});
 
   # Insert a few rows in a transaction with SQL and placeholders
