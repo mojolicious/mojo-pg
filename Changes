@@ -1,5 +1,5 @@
 
-3.02  2017-02-13
+3.02  2017-02-14
 
 3.01  2017-02-12
   - Fixed bug in examples where migrations would not be handled correctly.
