@@ -1,5 +1,6 @@
 
-3.02  2017-02-14
+3.02  2017-02-18
+  - Fixed quoting bugs in queries generated with SQL::Abstract.
 
 3.01  2017-02-12
   - Fixed bug in examples where migrations would not be handled correctly.

@@ -68,6 +68,19 @@ is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})
 $db->delete('crud_test');
 is_deeply $db->select('crud_test')->hashes->to_array, [], 'right structure';
 
+# Quoting
+$db->query(
+  'create table if not exists crud_test2 (
+     id   serial primary key,
+     "t e s t" text
+   )'
+);
+$db->insert('crud_test2',                {'t e s t' => 'foo'});
+$db->insert('mojo_crud_test.crud_test2', {'t e s t' => 'bar'});
+is_deeply $db->select('mojo_crud_test.crud_test2')->hashes->to_array,
+  [{id => 1, 't e s t' => 'foo'}, {id => 2, 't e s t' => 'bar'}],
+  'right structure';
+
 # Clean up once we are done
 $pg->db->query('drop schema mojo_crud_test cascade');
 

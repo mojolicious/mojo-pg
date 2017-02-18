@@ -10,7 +10,7 @@ use Mojo::URL;
 use Scalar::Util 'weaken';
 use SQL::Abstract;
 
-has abstract => sub { SQL::Abstract->new(quote_char => '"') };
+has abstract => sub { SQL::Abstract->new(name_sep => '.', quote_char => '"') };
 has [qw(auto_migrate search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
@@ -302,7 +302,8 @@ L<Mojo::Pg> implements the following attributes.
   my $abstract = $pg->abstract;
   $pg          = $pg->abstract(SQL::Abstract->new);
 
-L<SQL::Abstract> object used to generate CRUD queries for L<Mojo::Pg::Database>.
+L<SQL::Abstract> object used to generate CRUD queries for L<Mojo::Pg::Database>,
+defaults to setting C<name_sep> to C<.> and C<quote_char> to C<">.
 
   # Generate WHERE clause and bind values
   my($stmt, @bind) = $pg->abstract->where({foo => 'bar', baz => 'yada'});
