@@ -501,6 +501,8 @@ In alphabetical order:
 
 =over 2
 
+Christopher Eveland
+
 Dan Book
 
 Flavio Poletti
