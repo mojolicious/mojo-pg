@@ -8,7 +8,9 @@ perl:
   - "5.12"
   - "5.10"
 addons:
-  postgresql: 9.4
+  postgresql: 9.6
+services:
+    - postgresql
 env:
   global:
     - HARNESS_OPTIONS=j9
@@ -20,5 +22,6 @@ install:
 before_script:
   - psql -U postgres -c 'create database mojo_test'
 sudo: false
+dist: trusty
 notifications:
   email: false
