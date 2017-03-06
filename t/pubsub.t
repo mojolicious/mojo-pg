@@ -125,7 +125,7 @@ is_deeply \@test, [], 'no messages';
   is_deeply \@test, ['works too'], 'right messages';
 };
 
-# Fork-safety
+# Reset
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
@@ -134,14 +134,12 @@ ok $dbhs[0], 'database handle';
 $pg->pubsub->notify(pstest => 'first');
 is_deeply \@test, ['first'], 'right messages';
 {
-  local $$ = -23;
+  $pg->pubsub->reset;
   $pg->pubsub->notify(pstest => 'second');
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
-  is_deeply \@test, ['first'], 'right messages';
   $pg->pubsub->listen(pstest => sub { push @test, pop });
   $pg->pubsub->notify(pstest => 'third');
-  ok !$dbhs[2], 'no database handle';
   is_deeply \@test, ['first', 'third'], 'right messages';
 };
 
