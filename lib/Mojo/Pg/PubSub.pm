@@ -6,7 +6,7 @@ use Scalar::Util 'weaken';
 
 has 'pg';
 
-sub DESTROY { Mojo::Util::_global_destruction() or shift->_cleanup }
+sub DESTROY { Mojo::Util::_global_destruction() or shift->reset }
 
 sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 
@@ -19,6 +19,12 @@ sub listen {
 
 sub notify { $_[0]->_db->notify(_json(@_)) and return $_[0] }
 
+sub reset {
+  my $self = shift;
+  delete @$self{qw(chans json pid)};
+  if (my $db = delete $self->{db}) { $db->disconnect }
+}
+
 sub unlisten {
   my ($self, $name, $cb) = @_;
   my $chan = $self->{chans}{$name};
@@ -27,17 +33,8 @@ sub unlisten {
   return $self;
 }
 
-sub _cleanup {
-  my $self = shift;
-  delete @$self{qw(chans json pid)};
-  if (my $db = delete $self->{db}) { $db->_unwatch }
-}
-
 sub _db {
   my $self = shift;
-
-  # Fork-safety
-  $self->_cleanup unless ($self->{pid} //= $$) eq $$;
 
   return $self->{db} if $self->{db};
 
@@ -47,7 +44,6 @@ sub _db {
   $db->on(
     notification => sub {
       my ($db, $name, $pid, $payload) = @_;
-      $self->_db;
       $payload = eval { from_json $payload } if $self->{json}{$name};
       for my $cb (@{$self->{chans}{$name}}) { $self->$cb($payload) }
     }
@@ -87,10 +83,6 @@ L<Mojo::Pg::PubSub> is a scalable implementation of the publish/subscribe
 pattern used by L<Mojo::Pg>. It is based on PostgreSQL notifications and allows
 many consumers to share the same database connection, to avoid many common
 scalability problems.
-
-All subscriptions will be reset automatically and the database connection
-re-established if a new process has been forked, this allows multiple processes
-to share the same L<Mojo::Pg::PubSub> object safely.
 
 =head1 EVENTS
 
@@ -163,6 +155,12 @@ L</"json">.
 
 Notify a channel. Automatic encoding of Perl values to JSON text can be
 activated with L</"json">.
+
+=head2 reset
+
+  $pubsub->reset;
+
+Reset all subscriptions and the database connection.
 
 =head2 unlisten
 
