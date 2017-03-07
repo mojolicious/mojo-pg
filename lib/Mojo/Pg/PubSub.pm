@@ -23,8 +23,7 @@ sub reset {
   my $self = shift;
   delete @$self{qw(chans json pid)};
   return unless my $db = delete $self->{db};
-  $db->dbh->{private_mojo_no_reuse}++;
-  $db->_unwatch;
+  ++$db->dbh->{private_mojo_no_reuse} and $db->_unwatch;
 }
 
 sub unlisten {
@@ -162,7 +161,9 @@ activated with L</"json">.
 
   $pubsub->reset;
 
-Reset all subscriptions and the database connection.
+Reset all subscriptions and the database connection. This is usually done after
+a new process has been forked, to prevent the child process from stealing
+notifications meant for the parent process.
 
 =head2 unlisten
 
