@@ -27,7 +27,7 @@ sub DESTROY {
   $waiting->{cb}($self, 'Premature connection close', undef) if $waiting->{cb};
 
   return unless (my $pg = $self->pg) && (my $dbh = $self->dbh);
-  $pg->_enqueue($dbh);
+  $pg->_enqueue($dbh) unless $dbh->{private_mojo_no_reuse};
 }
 
 sub begin {

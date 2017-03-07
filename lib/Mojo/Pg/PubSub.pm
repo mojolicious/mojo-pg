@@ -22,7 +22,9 @@ sub notify { $_[0]->_db->notify(_json(@_)) and return $_[0] }
 sub reset {
   my $self = shift;
   delete @$self{qw(chans json pid)};
-  if (my $db = delete $self->{db}) { $db->disconnect }
+  return unless my $db = delete $self->{db};
+  $db->dbh->{private_mojo_no_reuse}++;
+  $db->_unwatch;
 }
 
 sub unlisten {
