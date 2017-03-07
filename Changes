@@ -1,6 +1,6 @@
 
-3.03  2017-03-06
-  - Added reset method to Mojo::Pg::PubSub.
+3.03  2017-03-07
+  - Fixed a few fork-safety bugs in Mojo::Pg::PubSub.
 
 3.02  2017-02-18
   - Fixed quoting bugs in queries generated with SQL::Abstract.
