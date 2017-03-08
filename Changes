@@ -1,5 +1,6 @@
 
 3.04  2017-03-08
+  - Fixed array reference handling in queries generated with SQL::Abstract.
 
 3.03  2017-03-07
   - Added reset method to Mojo::Pg::PubSub.

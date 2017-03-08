@@ -81,6 +81,20 @@ is_deeply $db->select('mojo_crud_test.crud_test2')->hashes->to_array,
   [{id => 1, 't e s t' => 'foo'}, {id => 2, 't e s t' => 'bar'}],
   'right structure';
 
+# Arrays
+$db->query(
+  'create table if not exists crud_test3 (
+     id   serial primary key,
+     names text[]
+   )'
+);
+$db->insert('crud_test3', {names => ['foo', 'bar']});
+is_deeply $db->select('crud_test3')->hashes->to_array,
+  [{id => 1, names => ['foo', 'bar']}], 'right structure';
+$db->update('crud_test3', {names => ['foo', 'bar', 'baz', 'yada']}, {id => 1});
+is_deeply $db->select('crud_test3')->hashes->to_array,
+  [{id => 1, names => ['foo', 'bar', 'baz', 'yada']}], 'right structure';
+
 # Clean up once we are done
 $pg->db->query('drop schema mojo_crud_test cascade');
 

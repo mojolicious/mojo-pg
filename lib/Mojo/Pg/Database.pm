@@ -324,6 +324,9 @@ L<SQL::Abstract>.
   # "insert into some_table (foo, baz) values ('bar', 'yada')"
   $db->insert('some_table', {foo => 'bar', baz => 'yada'});
 
+  # "insert into some_table (foo) values ({1,2,3})"
+  $db->insert('some_table', {foo => [1, 2, 3]});
+
   # "insert into some_table (foo) values ('bar') returning id"
   $db->insert('some_table', {foo => 'bar'}, {returning => 'id'});
 
@@ -465,6 +468,9 @@ L<SQL::Abstract>.
 
   # "update some_table set foo = 'bar' where id = 23"
   $db->update('some_table', {foo => 'bar'}, {id => 23});
+
+  # "update some_table set foo = {1,2,3} where id = 23"
+  $db->update('some_table', {foo => [1, 2, 3]}, {id => 23});
 
   # "update some_table set foo = 'bar' where foo like '%test%'"
   $db->update('some_table', {foo => 'bar'}, {foo => {-like => '%test%'}});

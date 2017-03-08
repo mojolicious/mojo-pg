@@ -10,7 +10,9 @@ use Mojo::URL;
 use Scalar::Util 'weaken';
 use SQL::Abstract;
 
-has abstract => sub { SQL::Abstract->new(name_sep => '.', quote_char => '"') };
+has abstract => sub {
+  SQL::Abstract->new(array_datatypes => 1, name_sep => '.', quote_char => '"');
+};
 has [qw(auto_migrate search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
@@ -128,8 +130,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Use SQL::Abstract to generate simple CRUD queries for you
   $db->insert('names', {name => 'Isabel'});
   my $id = $db->select('names', ['id'], {name => 'Isabel'})->hash->{id};
-  $db->update('names', {name => 'Bel'}, {id => $id});
-  $db->delete('names', {name => 'Bel'});
+  $db->update('names', {name => 'Belle'}, {id => $id});
+  $db->delete('names', {name => 'Belle'});
 
   # Insert a few rows in a transaction with SQL and placeholders
   eval {
@@ -303,7 +305,8 @@ L<Mojo::Pg> implements the following attributes.
   $pg          = $pg->abstract(SQL::Abstract->new);
 
 L<SQL::Abstract> object used to generate CRUD queries for L<Mojo::Pg::Database>,
-defaults to setting C<name_sep> to C<.> and C<quote_char> to C<">.
+defaults to enabling C<array_datatypes> and setting C<name_sep> to C<.> and
+C<quote_char> to C<">.
 
   # Generate WHERE clause and bind values
   my($stmt, @bind) = $pg->abstract->where({foo => 'bar', baz => 'yada'});
