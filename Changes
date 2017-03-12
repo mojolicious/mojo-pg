@@ -1,5 +1,6 @@
 
-3.05  2017-03-09
+3.05  2017-03-12
+  - Improved from_string method in Mojo::Pg with search_path support.
 
 3.04  2017-03-08
   - Fixed array reference handling in queries generated with SQL::Abstract.

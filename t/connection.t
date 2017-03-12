@@ -11,6 +11,7 @@ is $pg->password, '',        'no password';
 my $options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0,
   RaiseError => 1};
 is_deeply $pg->options, $options, 'right options';
+is $pg->search_path, undef, 'no search_path';
 
 # Minimal connection string with database
 $pg = Mojo::Pg->new('postgresql:///test1');
@@ -29,6 +30,26 @@ is $pg->password, '',                   'no password';
 $options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 1,
   RaiseError => 1};
 is_deeply $pg->options, $options, 'right options';
+
+# Connection string with service and search_path
+$pg = Mojo::Pg->new('postgres://?service=foo&search_path=test_schema');
+is $pg->dsn,      'dbi:Pg:service=foo', 'right data source';
+is $pg->username, '',                   'no username';
+is $pg->password, '',                   'no password';
+$options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0,
+  RaiseError => 1};
+is_deeply $pg->options, $options, 'right options';
+is_deeply $pg->search_path, ['test_schema'], 'right search_path';
+
+# Connection string with multiple search_path values
+$pg = Mojo::Pg->new('postgres://a:b@/c?search_path=test1&search_path=test2');
+is $pg->dsn,      'dbi:Pg:dbname=c', 'right data source';
+is $pg->username, 'a',               'no username';
+is $pg->password, 'b',               'no password';
+$options = {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0,
+  RaiseError => 1};
+is_deeply $pg->options, $options, 'right options';
+is_deeply $pg->search_path, ['test1', 'test2'], 'right search_path';
 
 # Connection string with host and port
 $pg = Mojo::Pg->new('postgresql://127.0.0.1:8080/test2');

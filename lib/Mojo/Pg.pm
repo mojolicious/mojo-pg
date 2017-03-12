@@ -53,9 +53,12 @@ sub from_string {
   if (defined(my $username = $url->username)) { $self->username($username) }
   if (defined(my $password = $url->password)) { $self->password($password) }
 
-  # Service
+  # Service and search_path
   my $hash = $url->query->to_hash;
   if (my $service = delete $hash->{service}) { $dsn .= "service=$service" }
+  if (my $path = delete $hash->{search_path}) {
+    $self->search_path(ref $path ? $path : [$path]);
+  }
 
   # Options
   @{$self->options}{keys %$hash} = values %$hash;
@@ -128,8 +131,8 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   my $db = $pg->db;
 
   # Use SQL::Abstract to generate simple CRUD queries for you
-  $db->insert('names', {name => 'Isabel'});
-  my $id = $db->select('names', ['id'], {name => 'Isabel'})->hash->{id};
+  $db->insert('names', {name => 'Isabell'});
+  my $id = $db->select('names', ['id'], {name => 'Isabell'})->hash->{id};
   $db->update('names', {name => 'Belle'}, {id => $id});
   $db->delete('names', {name => 'Belle'});
 
@@ -453,6 +456,9 @@ Parse configuration from connection string.
 
   # Service and additional options
   $pg->from_string('postgresql://?service=foo&PrintError=1&RaiseError=0');
+
+  # Username, database, an option and search_path
+  $pg->from_string('postgres://sri@/db6?&PrintError=1&search_path=test_schema');
 
 =head2 new
 
