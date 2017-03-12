@@ -1,4 +1,6 @@
 
+3.06  2017-03-13
+
 3.05  2017-03-12
   - Improved from_string method in Mojo::Pg with search_path support.
 
