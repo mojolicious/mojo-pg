@@ -263,7 +263,7 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
 =head2 delete
 
-  my $results = $db->delete($table, \%where);
+  my $results = $db->delete($table, \%where, \%options);
 
 Generate a C<DELETE> statement with L<Mojo::Pg/"abstract"> (usually an
 L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
@@ -286,6 +286,9 @@ L<SQL::Abstract>.
 
   # "delete from some_table where foo like '%test%'"
   $db->delete('some_table', {foo => {-like => '%test%'}});
+
+  # "delete from some_table where foo = 'bar' returning id"
+  $db->delete('some_table', {foo => 'bar'}, {returning => 'id'});
 
 =head2 disconnect
 
@@ -451,7 +454,7 @@ Unsubscribe from a channel, C<*> can be used to unsubscribe from all channels.
 
 =head2 update
 
-  my $results = $db->update($table, \%fieldvals, \%where);
+  my $results = $db->update($table, \%fieldvals, \%where, \%options);
 
 Generate an C<UPDATE> statement with L<Mojo::Pg/"abstract"> (usually an
 L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
@@ -474,6 +477,9 @@ L<SQL::Abstract>.
 
   # "update some_table set foo = 'bar' where foo like '%test%'"
   $db->update('some_table', {foo => 'bar'}, {foo => {-like => '%test%'}});
+
+  # "update some_table set foo = 'bar' where id = 23 returning id"
+  $db->update('some_table', {foo => 'bar'}, {id => 23}, {returning => 'id'});
 
 =head1 SEE ALSO
 
