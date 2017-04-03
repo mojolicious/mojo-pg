@@ -54,4 +54,4 @@ drop table visitors;
 ## Want to know more?
 
   Take a look at our excellent
-  [documentation](http://mojolicious.org/perldoc/Mojo/Pg>)!
+  [documentation](http://mojolicious.org/perldoc/Mojo/Pg)!
