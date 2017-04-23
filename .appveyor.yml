@@ -1,0 +1,22 @@
+version: '{build}'
+shallow_clone: true
+
+services:
+  - postgresql
+
+environment:
+  TEST_ONLINE: postgresql://postgres@Password12!/test
+  matrix:
+    - perl_type: system
+    - perl_type: cygwin
+
+install:
+  - 'call .appveyor.cmd perl_setup'
+  - '%perl% -V'
+  - '%cpanm% --installdeps -n --with-develop --with-recommends .'
+  - 'createdb test'
+
+build: off
+
+test_script:
+  - 'prove -l t'
