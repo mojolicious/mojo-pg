@@ -145,12 +145,7 @@ sub _watch {
 
   my $dbh = $self->dbh;
   unless ($self->{handle}) {
-    if ($^O ne 'MSWin32') {
-      open $self->{handle}, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
-    }
-    else {
-      open $self->{handle}, "<&=", $dbh->{pg_socket} or die "Can't open: $!";
-    }
+    open $self->{handle}, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
   }
   Mojo::IOLoop->singleton->reactor->io(
     $self->{handle} => sub {
