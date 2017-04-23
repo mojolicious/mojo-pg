@@ -5,19 +5,23 @@ services:
   - postgresql
 
 environment:
-  TEST_ONLINE: postgres://postgres@Password12!/test
+  PGUSER: postgres
+  PGPASSWORD: Password12!
+  TEST_ONLINE: postgres://postgres@Password12!/mojo_test
   matrix:
     - perl_type: system
     - perl_type: cygwin
 
+init:
+  - 'SET PATH=C:\Program Files\PostgreSQL\9.6\bin\;%PATH%'
+
 install:
-  - 'PATH=C:\Program Files\PostgreSQL\9.6\bin\;%PATH%'
   - 'call .appveyor.cmd perl_setup'
   - '%perl% -V'
   - '%cpanm% --installdeps -n --with-develop --with-recommends .'
-  - 'createdb test'
 
-build: off
+build_script:
+  - 'createdb mojo_test'
 
 test_script:
   - 'prove -l t'
