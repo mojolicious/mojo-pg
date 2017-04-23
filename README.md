@@ -1,5 +1,5 @@
 
-# Mojo::Pg [![Build Status](https://travis-ci.org/kraih/mojo-pg.svg?branch=master)](https://travis-ci.org/kraih/mojo-pg)
+# Mojo::Pg [![Build Status](https://travis-ci.org/kraih/mojo-pg.svg?branch=master)](https://travis-ci.org/kraih/mojo-pg) [![Windows build status](https://ci.appveyor.com/api/projects/status/vptw95h65evbhjdg?svg=true)](https://ci.appveyor.com/project/kraih/mojo-pg)
 
   A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes
   [PostgreSQL](http://www.postgresql.org) a lot of fun to use with the
