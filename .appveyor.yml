@@ -7,7 +7,7 @@ services:
 environment:
   PGUSER: postgres
   PGPASSWORD: Password12!
-  TEST_ONLINE: postgres://postgres@Password12!/mojo_test
+  TEST_ONLINE: postgres://postgres:Password12!@/mojo_test
   matrix:
     - perl_type: system
     - perl_type: cygwin
