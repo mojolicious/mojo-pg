@@ -55,6 +55,12 @@ $delay->wait;
 is_deeply $result, [{id => 2, name => 'bar'}, {id => 1, name => 'foo'}],
   'right structure';
 
+# Limit and offset
+is_deeply $db->select('crud_test', undef, undef, undef, 1)->hashes->to_array,
+  [{id => 1, name => 'foo'}], 'right structure';
+is_deeply $db->select('crud_test', undef, undef, undef, undef, 1)
+  ->hashes->to_array, [{id => 2, name => 'bar'}], 'right structure';
+
 # Update
 $db->update('crud_test', {name => 'baz'}, {name => 'foo'});
 is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})

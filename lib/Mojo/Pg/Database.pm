@@ -13,7 +13,7 @@ use Scalar::Util 'weaken';
 has [qw(dbh pg)];
 has results_class => 'Mojo::Pg::Results';
 
-for my $name (qw(delete insert select update)) {
+for my $name (qw(delete insert update)) {
   monkey_patch __PACKAGE__, $name, sub {
     my ($self, @cb) = (shift, ref $_[-1] eq 'CODE' ? pop : ());
     return $self->query($self->pg->abstract->$name(@_), @cb);
@@ -35,6 +35,23 @@ sub begin {
   my $tx = Mojo::Pg::Transaction->new(db => $self);
   weaken $tx->{db};
   return $tx;
+}
+
+sub build_select {
+  my ($self, $source, $fields, $where, $order, $limit, $offset) = @_;
+
+  my ($sql, @bind)
+    = $self->pg->abstract->select($source, $fields, $where, $order);
+  if (defined $limit) {
+    $sql .= ' LIMIT ?';
+    push @bind, $limit;
+  }
+  if (defined $offset) {
+    $sql .= ' OFFSET ?';
+    push @bind, $offset;
+  }
+
+  return $sql, @bind;
 }
 
 sub disconnect {
@@ -107,6 +124,11 @@ sub query {
   # Non-blocking
   $self->{waiting} = {cb => $cb, sth => $sth};
   $self->_watch;
+}
+
+sub select {
+  my ($self, @cb) = (shift, ref $_[-1] eq 'CODE' ? pop : ());
+  return $self->query($self->build_select(@_), @cb);
 }
 
 sub tables {
@@ -260,6 +282,11 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
     $tx->commit;
   };
   say $@ if $@;
+
+=head2 build_select
+
+  my ($sql, @bind) = $db->build_select(
+    $source, $fields, $where, $order, $limit, $offset);
 
 =head2 delete
 
