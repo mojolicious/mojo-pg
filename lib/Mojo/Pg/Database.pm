@@ -38,17 +38,18 @@ sub begin {
 }
 
 sub build_select {
-  my ($self, $source, $fields, $where, $order, $limit, $offset) = @_;
+  my ($self, $source, $fields, $where, $order, $options) = @_;
 
   my ($sql, @bind)
     = $self->pg->abstract->select($source, $fields, $where, $order);
-  if (defined $limit) {
+  $options ||= {};
+  if (exists $options->{limit}) {
     $sql .= ' LIMIT ?';
-    push @bind, $limit;
+    push @bind, $options->{limit};
   }
-  if (defined $offset) {
+  if (exists $options->{offset}) {
     $sql .= ' OFFSET ?';
-    push @bind, $offset;
+    push @bind, $options->{offset};
   }
 
   return $sql, @bind;
@@ -286,7 +287,7 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 =head2 build_select
 
   my ($sql, @bind) = $db->build_select(
-    $source, $fields, $where, $order, $limit, $offset);
+    $source, $fields, $where, $order, \%options);
 
 =head2 delete
 
