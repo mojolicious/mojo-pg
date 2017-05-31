@@ -1,7 +1,7 @@
 % layout 'blog', title => 'Blog';
 % for my $post (@$posts) {
+  <h2><%= link_to $post->{title} => show_post => {id => $post->{id}} %></h2>
   <p>
-    <h2><%= link_to $post->{title} => show_post => {id => $post->{id}} %></h2>
     %= $post->{body}
   </p>
 % }
