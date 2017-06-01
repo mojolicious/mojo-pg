@@ -2,6 +2,10 @@ use Mojo::Base -strict;
 
 use Test::More;
 
+# This test requires a PostgreSQL connection string for an existing database
+#
+#   TEST_ONLINE=postgres://tester:testing@/test prove -l t/blog.t
+#
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::Pg;
