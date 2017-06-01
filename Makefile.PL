@@ -30,6 +30,6 @@ WriteMakefile(
     },
   },
   PREREQ_PM =>
-    {'DBD::Pg' => 3.005001, Mojolicious => '7.15', 'SQL::Abstract' => '1.81'},
+    {'DBD::Pg' => 3.005001, Mojolicious => '7.32', 'SQL::Abstract' => '1.81'},
   test => {TESTS => 't/*.t t/*/*.t'}
 );
