@@ -9,12 +9,13 @@ use Mojo::URL;
 use Test::Mojo;
 
 # Isolate tests
-my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+my $url
+  = Mojo::URL->new($ENV{TEST_ONLINE})->query([search_path => 'mojo_blog_test']);
+my $pg = Mojo::Pg->new($url);
 $pg->db->query('drop schema if exists mojo_blog_test cascade');
 $pg->db->query('create schema mojo_blog_test');
 
-my $url
-  = Mojo::URL->new($ENV{TEST_ONLINE})->query([search_path => 'mojo_blog_test']);
+# Override configuration for testing
 my $t = Test::Mojo->new(Blog => {pg => $url});
 $t->ua->max_redirects(10);
 
