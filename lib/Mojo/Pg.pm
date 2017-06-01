@@ -23,7 +23,13 @@ has migrations      => sub {
   return $migrations;
 };
 has options => sub {
-  {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0, RaiseError => 1};
+  {
+    AutoCommit          => 1,
+    AutoInactiveDestroy => 1,
+    PrintError          => 0,
+    PrintWarn           => 0,
+    RaiseError          => 1
+  };
 };
 has [qw(password username)] => '';
 has pubsub => sub {
@@ -362,9 +368,9 @@ easily.
   $pg         = $pg->options({AutoCommit => 1, RaiseError => 1});
 
 Options for database handles, defaults to activating C<AutoCommit>,
-C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>.
-Note that C<AutoCommit> and C<RaiseError> are considered mandatory, so
-deactivating them would be very dangerous.
+C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>
+as well as C<PrintWarn>. Note that C<AutoCommit> and C<RaiseError> are
+considered mandatory, so deactivating them would be very dangerous.
 
 =head2 password
 

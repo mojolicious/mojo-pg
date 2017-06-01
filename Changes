@@ -1,6 +1,8 @@
 
-3.06  2017-05-31
+3.06  2017-06-01
   - Updated example application with tests.
+  - Improved Mojo::Pg to be a little less noisy by deactivating PrintWarn by
+    default.
 
 3.05  2017-03-12
   - Improved from_string method in Mojo::Pg with search_path support.
