@@ -38,7 +38,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '3.06';
+our $VERSION = '3.07';
 
 sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
 

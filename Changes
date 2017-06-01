@@ -1,4 +1,6 @@
 
+3.07  2017-06-02
+
 3.06  2017-06-01
   - Updated example application with tests.
   - Improved Mojo::Pg to be a little less noisy by deactivating PrintWarn by
