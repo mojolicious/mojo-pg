@@ -20,7 +20,7 @@ $pg->db->query('drop schema if exists mojo_blog_test cascade');
 $pg->db->query('create schema mojo_blog_test');
 
 # Override configuration for testing
-my $t = Test::Mojo->new(Blog => {pg => $url});
+my $t = Test::Mojo->new(Blog => {pg => $url, secrets => ['test_s3cret']});
 $t->ua->max_redirects(10);
 
 # No posts yet
