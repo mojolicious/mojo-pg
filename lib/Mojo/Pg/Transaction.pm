@@ -1,7 +1,7 @@
 package Mojo::Pg::Transaction;
 use Mojo::Base -base;
 
-has 'db';
+has [qw/db level/];
 
 sub DESTROY {
   my $self = shift;
@@ -18,6 +18,9 @@ sub new {
   my $self = shift->SUPER::new(@_, rollback => 1);
   my $dbh = $self->{dbh} = $self->db->dbh;
   $dbh->begin_work;
+  if (my $level = $self->level) {
+    $dbh->do("set transaction isolation level $level");
+  }
   return $self;
 }
 
@@ -34,6 +37,7 @@ Mojo::Pg::Transaction - Transaction
   use Mojo::Pg::Transaction;
 
   my $tx = Mojo::Pg::Transaction->new(db => $db);
+  my $tx = Mojo::Pg::Transaction->new(db => $db, level => 'serializable');
   $tx->commit;
 
 =head1 DESCRIPTION
@@ -51,6 +55,14 @@ L<Mojo::Pg::Transaction> implements the following attributes.
   $tx    = $tx->db(Mojo::Pg::Database->new);
 
 L<Mojo::Pg::Database> object this transaction belongs to.
+
+=head2 level
+
+  my $level = $tx->level;
+  $tx       = $tx->level($level);
+
+Isolation level for current transaction. One of the C<read commited> (default),
+C<repeatable read> or C<serializable>.
 
 =head1 METHODS
 

@@ -31,8 +31,8 @@ sub DESTROY {
 }
 
 sub begin {
-  my $self = shift;
-  my $tx = Mojo::Pg::Transaction->new(db => $self);
+  my ($self, $level) = @_;
+  my $tx = Mojo::Pg::Transaction->new(db => $self, level => $level);
   weaken $tx->{db};
   return $tx;
 }
@@ -247,10 +247,12 @@ implements the following new ones.
 =head2 begin
 
   my $tx = $db->begin;
+  my $tx = $db->begin('serializable');
 
 Begin transaction and return L<Mojo::Pg::Transaction> object, which will
 automatically roll back the transaction unless
 L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
+You can also pass isolation level for transaction.
 
   # Insert rows in a transaction
   eval {

@@ -152,6 +152,13 @@ eval {
 like $@, qr/does_not_exist/, 'right error';
 is_deeply $db->query('select * from results_test where name = ?', 'tx3')
   ->hashes->to_array, [], 'no results';
+{
+  my $tx = $db->begin('repeatable read');
+  is $db->query('table results_test')->rows, 4, 'right result';
+  $pg->db->query("insert into results_test (name) values ('tx4')");
+  is $db->query('table results_test')->rows, 4, 'right result';
+  $tx->commit;
+}
 
 # Long-lived results
 my $results1 = $db->query('select 1 as one');
