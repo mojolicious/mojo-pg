@@ -159,7 +159,7 @@ sub _watch {
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
       my $err = defined $result ? undef : $dbh->errstr;
 
-      $self->$cb($err, $self->results_class->new(sth => $sth));
+      $self->$cb($err, $self->results_class->new(sth => $sth, db => $self));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
