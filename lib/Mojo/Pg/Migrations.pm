@@ -59,6 +59,8 @@ sub migrate {
   # Newer version
   croak "Active version $active is greater than the latest version $latest"
     if $active > $latest;
+  croak "Target version $target is greater than the latest version $latest"
+    if $target > $latest;
 
   # Up
   my $sql;
