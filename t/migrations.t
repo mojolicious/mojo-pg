@@ -95,7 +95,7 @@ is $pg2->migrations->active, 0, 'active version is 0';
 eval { $pg2->migrations->migrate };
 like $@, qr/does_not_exist/, 'right error';
 is $pg2->migrations->migrate(3)->active, 3, 'active version is 3';
-is $pg2->migrations->migrate(2)->active, 2, 'active version is 3';
+is $pg2->migrations->migrate(2)->active, 2, 'active version is 2';
 is $pg->migrations->active, 0, 'active version is still 0';
 is $pg->migrations->migrate->active, 10, 'active version is 10';
 is_deeply $pg2->db->query('select * from migration_test_three')
