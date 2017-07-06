@@ -1,5 +1,8 @@
 
-3.07  2017-06-02
+4.0  2017-07-06
+  - Added support for sharing the database connection cache between multiple
+    Mojo::Pg objects.
+  - Added parent attribute to Mojo::Pg.
 
 3.06  2017-06-01
   - Updated example application with tests.

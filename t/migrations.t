@@ -126,6 +126,17 @@ is_deeply $pg3->db->query('select * from migration_test_six')->hashes, [],
   'right structure';
 is $pg3->migrations->migrate(0)->active, 0, 'active version is 0';
 
+# Migrate automatically with shared connection cache
+my $pg4
+  = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
+my $pg5 = Mojo::Pg->new($pg4);
+$pg4->auto_migrate(1)->migrations->name('test1')->from_data;
+$pg5->auto_migrate(1)->migrations->name('test3')->from_data;
+is_deeply $pg5->db->query('select * from migration_test_four')
+  ->hashes->to_array, [{test => 10}], 'right structure';
+is_deeply $pg5->db->query('select * from migration_test_six')->hashes->to_array,
+  [], 'right structure';
+
 # Unknown version
 eval { $pg->migrations->migrate(23) };
 like $@, qr/Version 23 has no migration/, 'right error';
@@ -168,3 +179,7 @@ insert into migration_test_four values (10);
 @@ test2
 -- 2 up
 create table migration_test_five (test int);
+
+@@ test3
+-- 2 up
+create table migration_test_six (test int);

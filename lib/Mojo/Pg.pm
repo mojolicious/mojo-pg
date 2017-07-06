@@ -7,13 +7,13 @@ use Mojo::Pg::Database;
 use Mojo::Pg::Migrations;
 use Mojo::Pg::PubSub;
 use Mojo::URL;
-use Scalar::Util 'weaken';
+use Scalar::Util qw(blessed weaken);
 use SQL::Abstract;
 
 has abstract => sub {
   SQL::Abstract->new(array_datatypes => 1, name_sep => '.', quote_char => '"');
 };
-has [qw(auto_migrate search_path)];
+has [qw(auto_migrate parent search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
 has max_connections => 5;
@@ -38,15 +38,18 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '3.07';
+our $VERSION = '4.0';
 
-sub db { $_[0]->database_class->new(dbh => $_[0]->_dequeue, pg => $_[0]) }
+sub db { $_[0]->database_class->new(dbh => $_[0]->_prepare, pg => $_[0]) }
 
 sub from_string {
   my ($self, $str) = @_;
 
-  # Protocol
+  # Parent
   return $self unless $str;
+  return $self->parent($str) if blessed $str && $str->isa('Mojo::Pg');
+
+  # Protocol
   my $url = Mojo::URL->new($str);
   croak qq{Invalid PostgreSQL connection string "$str"}
     unless $url->protocol =~ /^postgres(?:ql)?$/;
@@ -89,9 +92,6 @@ sub _dequeue {
     $dbh->do("set search_path to $search_path");
   }
 
-  # Automatic migrations
-  ++$self->{migrated} and $self->migrations->migrate
-    if !$self->{migrated} && $self->auto_migrate;
   $self->emit(connection => $dbh);
 
   return $dbh;
@@ -99,9 +99,23 @@ sub _dequeue {
 
 sub _enqueue {
   my ($self, $dbh) = @_;
+
+  if (my $parent = $self->parent) { return $parent->_enqueue($dbh) }
+
   my $queue = $self->{queue} ||= [];
   push @$queue, $dbh if $dbh->{Active};
   shift @$queue while @$queue > $self->max_connections;
+}
+
+sub _prepare {
+  my $self = shift;
+
+  # Automatic migrations
+  ++$self->{migrated} and $self->migrations->migrate
+    if !$self->{migrated} && $self->auto_migrate;
+
+  my $parent = $self->parent;
+  return $parent ? $parent->_prepare : $self->_dequeue;
 }
 
 1;
@@ -331,7 +345,7 @@ C<quote_char> to C<">.
   $pg      = $pg->auto_migrate($bool);
 
 Automatically migrate to the latest database schema with L</"migrations">, as
-soon as the first database connection has been established.
+soon as L</"db"> has been called for the first time.
 
 =head2 database_class
 
@@ -376,6 +390,14 @@ Options for database handles, defaults to activating C<AutoCommit>,
 C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>
 as well as C<PrintWarn>. Note that C<AutoCommit> and C<RaiseError> are
 considered mandatory, so deactivating them would be very dangerous.
+
+=head2 parent
+
+  my $parent = $pg->parent;
+  $pg        = $pg->parent(Mojo::Pg->new);
+
+Another L<Mojo::Pg> object to use for connection management, instead of
+establishing and caching our own database connections.
 
 =head2 password
 
@@ -444,8 +466,10 @@ gracefully by holding on to it only for short amounts of time.
 =head2 from_string
 
   $pg = $pg->from_string('postgresql://postgres@/test');
+  $pg = $pg->from_string(Mojo::Pg->new);
 
-Parse configuration from connection string.
+Parse configuration from connection string or use another L<Mojo::Pg> object as
+L</"parent">.
 
   # Just a database
   $pg->from_string('postgresql:///db1');
@@ -475,6 +499,7 @@ Parse configuration from connection string.
 
   my $pg = Mojo::Pg->new;
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
+  my $pg = Mojo::Pg->new(Mojo::Pg->new);
 
 Construct a new L<Mojo::Pg> object and parse connection string with
 L</"from_string"> if necessary.

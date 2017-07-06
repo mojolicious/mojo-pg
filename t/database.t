@@ -174,6 +174,26 @@ ok !$connections, 'no new connections';
 };
 $pg->unsubscribe('connection');
 
+# Shared connection cache
+my $pg2 = Mojo::Pg->new($pg);
+is $pg2->parent, $pg, 'right parent';
+$dbh = $pg->db->dbh;
+is $pg->db->dbh,  $dbh, 'same database handle';
+is $pg2->db->dbh, $dbh, 'same database handle';
+is $pg->db->dbh,  $dbh, 'same database handle';
+is $pg2->db->dbh, $dbh, 'same database handle';
+$db = $pg->db;
+is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}],
+  'right structure';
+$dbh = $db->dbh;
+$db->disconnect;
+$db = $pg2->db;
+is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}],
+  'right structure';
+isnt $db->dbh, $dbh, 'different database handle';
+$db->disconnect;
+isnt $pg->db->dbh, $dbh, 'different database handle';
+
 # Notifications
 $db = $pg->db;
 ok !$db->is_listening, 'not listening';
