@@ -1,4 +1,6 @@
 
+4.01  2017-07-07
+
 4.0  2017-07-06
   - Added support for sharing the database connection cache between multiple
     Mojo::Pg objects.
