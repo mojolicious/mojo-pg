@@ -191,8 +191,6 @@ $db = $pg2->db;
 is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}],
   'right structure';
 isnt $db->dbh, $dbh, 'different database handle';
-$db->disconnect;
-isnt $pg->db->dbh, $dbh, 'different database handle';
 
 # Notifications
 $db = $pg->db;
