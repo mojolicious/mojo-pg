@@ -1,5 +1,6 @@
 
-4.01  2017-07-07
+4.01  2017-07-20
+  - Decreased default max_connections from 5 to 1 in Mojo::Pg.
 
 4.0  2017-07-06
   - Added support for sharing the database connection cache between multiple

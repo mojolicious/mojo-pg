@@ -9,6 +9,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 use Mojo::IOLoop;
 use Mojo::JSON 'true';
 use Mojo::Pg;
+use Scalar::Util 'refaddr';
 
 # Connected
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
@@ -87,9 +88,11 @@ ok !$fail, 'no error';
 is_deeply $result, [{one => 1}, {one => 1}, {two => 2}], 'right structure';
 
 # Connection cache
-is $pg->max_connections, 5, 'right default';
-my @dbhs = map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db;
-is_deeply \@dbhs, [map { $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
+is $pg->max_connections, 1, 'right default';
+$pg->max_connections(5);
+my @dbhs = map { refaddr $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db;
+is_deeply \@dbhs,
+  [reverse map { refaddr $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
   'same database handles';
 @dbhs = ();
 my $dbh = $pg->max_connections(1)->db->dbh;
