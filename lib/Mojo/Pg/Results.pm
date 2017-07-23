@@ -118,7 +118,7 @@ Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
 containing array references.
 
   # Process all rows at once
-  say $results->arrays->reduce(sub { $a->[3] + $b->[3] });
+  say $results->arrays->reduce(sub { $a + $b->[3] }, 0);
 
 =head2 columns
 
@@ -165,7 +165,7 @@ Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
 containing hash references.
 
   # Process all rows at once
-  say $results->hashes->reduce(sub { $a->{money} + $b->{money} });
+  say $results->hashes->reduce(sub { $a + $b->{money} }, 0);
 
 =head2 new
 
