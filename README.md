@@ -6,10 +6,8 @@
   [Mojolicious](http://mojolicious.org) real-time web framework.
 
 ```perl
-use Mojolicious::Lite;
+use Mojolicious::Lite -signatures;
 use Mojo::Pg;
-use 5.20.0;
-use experimental 'signatures';
 
 helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
