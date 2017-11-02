@@ -95,6 +95,43 @@ $db->update('crud_test3', {names => ['foo', 'bar', 'baz', 'yada']}, {id => 1});
 is_deeply $db->select('crud_test3')->hashes->to_array,
   [{id => 1, names => ['foo', 'bar', 'baz', 'yada']}], 'right structure';
 
+# Promises
+$result = undef;
+$pg->db->insert_p('crud_test', {name => 'promise'}, {returning => '*'})
+  ->then(sub { $result = shift->hash })->wait;
+is $result->{name}, 'promise', 'right result';
+$result = undef;
+$db->select_p('crud_test', '*', {name => 'promise'})
+  ->then(sub { $result = shift->hash })->wait;
+is $result->{name}, 'promise', 'right result';
+$result = undef;
+my $first  = $pg->db->query_p("select * from crud_test where name = 'promise'");
+my $second = $pg->db->query_p("select * from crud_test where name = 'promise'");
+$first->all($second)->then(
+  sub {
+    my ($first, $second) = @_;
+    $result = [$first->[0]->hash, $second->[0]->hash];
+  }
+)->wait;
+is $result->[0]{name}, 'promise', 'right result';
+is $result->[1]{name}, 'promise', 'right result';
+$result = undef;
+$db->update_p(
+  'crud_test',
+  {name      => 'promise_two'},
+  {name      => 'promise'},
+  {returning => '*'}
+)->then(sub { $result = shift->hash })->wait;
+is $result->{name}, 'promise_two', 'right result';
+$db->delete_p('crud_test', {name => 'promise_two'}, {returning => '*'})
+  ->then(sub { $result = shift->hash })->wait;
+is $result->{name}, 'promise_two', 'right result';
+
+# Promises (rejected)
+my $fail;
+$db->dollar_only->query_p('does_not_exist')->catch(sub { $fail = shift })->wait;
+like $fail, qr/does_not_exist/, 'right error';
+
 # Clean up once we are done
 $pg->db->query('drop schema mojo_crud_test cascade');
 

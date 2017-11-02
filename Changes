@@ -1,5 +1,7 @@
 
-4.02  2017-07-21
+4.02  2017-11-02
+  - Added delete_p, insert_p, query_p, select_p and update_p methods to
+    Mojo::Pg::Database.
 
 4.01  2017-07-20
   - Decreased default max_connections from 5 to 1 in Mojo::Pg.

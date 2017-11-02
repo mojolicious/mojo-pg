@@ -183,20 +183,17 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-  # Concurrent non-blocking queries (synchronized with a delay)
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $pg->db->query('select now() as now' => $delay->begin);
-      $pg->db->query('select * from names' => $delay->begin);
-    },
-    sub {
-      my ($delay, $time_err, $time, $names_err, $names) = @_;
-      if (my $err = $time_err || $names_err) { die $err }
-      say $time->hash->{now};
-      say $_->{name} for $names->hashes->each;
-    }
-  )->wait;
+  # Concurrent non-blocking queries (synchronized with promises)
+  my $now   = $pg->db->query_p('select now() as now');
+  my $names = $pg->db->query_p('select * from names');
+  $now->all($names)->then(sub {
+    my ($now, $names) = @_;
+    say $now->[0]->hash->{now};
+    say $_->{name} for $names->[0]->hashes->each;
+  })->catch(sub {
+    my $err = shift;
+    warn "Something went wrong: $err";
+  })->wait;
 
   # Send and receive notifications non-blocking
   $pg->pubsub->listen(foo => sub {

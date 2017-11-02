@@ -18,6 +18,10 @@ for my $name (qw(delete insert select update)) {
     my ($self, @cb) = (shift, ref $_[-1] eq 'CODE' ? pop : ());
     return $self->query($self->pg->abstract->$name(@_), @cb);
   };
+  monkey_patch __PACKAGE__, "${name}_p", sub {
+    my $self = shift;
+    return $self->query_p($self->pg->abstract->$name(@_));
+  };
 }
 
 sub DESTROY {
@@ -107,6 +111,14 @@ sub query {
   # Non-blocking
   $self->{waiting} = {cb => $cb, sth => $sth};
   $self->_watch;
+}
+
+sub query_p {
+  my $self    = shift;
+  my $promise = Mojo::IOLoop->delay;
+  $self->query(
+    @_ => sub { $_[1] ? $promise->reject($_[1]) : $promise->resolve($_[2]) });
+  return $promise;
 }
 
 sub tables {
@@ -290,6 +302,22 @@ L<SQL::Abstract>.
   # "delete from some_table where foo = 'bar' returning id"
   $db->delete('some_table', {foo => 'bar'}, {returning => 'id'});
 
+=head2 delete_p
+
+  my $promise = $db->delete_p($table, \%where, \%options);
+
+Same as L</"delete">, but performs all operations non-blocking and returns a
+L<Mojo::IOLoop::Delay> object to be used as a promise instead of accepting a
+callback.
+
+  $db->delete_p('some_table')->then(sub {
+    my $results = shift;
+    ...
+  })->catch(sub {
+    my $err = shift;
+    ...
+  })->wait;
+
 =head2 disconnect
 
   $db->disconnect;
@@ -335,6 +363,22 @@ L<SQL::Abstract>.
 
   # "insert into some_table (foo) values ('bar') returning id, foo"
   $db->insert('some_table', {foo => 'bar'}, {returning => ['id', 'foo']});
+
+=head2 insert_p
+
+  my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);
+
+Same as L</"insert">, but performs all operations non-blocking and returns a
+L<Mojo::IOLoop::Delay> object to be used as a promise instead of accepting a
+callback.
+
+  $db->insert_p(some_table => {foo => 'bar'})->then(sub {
+    my $results = shift;
+    ...
+  })->catch(sub {
+    my $err = shift;
+    ...
+  })->wait;
 
 =head2 is_listening
 
@@ -403,6 +447,22 @@ used to bind specific L<DBD::Pg> data types to placeholders.
   use DBD::Pg ':pg_types';
   $db->query('insert into bar values (?)', {type => PG_BYTEA, value => $bytes});
 
+=head2 query_p
+
+  my $promise = $db->query_p('select * from foo');
+
+Same as L</"query">, but performs all operations non-blocking and returns a
+L<Mojo::IOLoop::Delay> object to be used as a promise instead of accepting a
+callback.
+
+  $db->query_p('insert into foo values (?, ?, ?)' => @values)->then(sub {
+    my $results = shift;
+    ...
+  })->catch(sub {
+    my $err = shift;
+    ...
+  })->wait;
+
 =head2 select
 
   my $results = $db->select($source, $fields, $where, $order);
@@ -434,6 +494,22 @@ L<SQL::Abstract>.
 
   # "select * from some_table where foo like '%test%'"
   $db->select('some_table', undef, {foo => {-like => '%test%'}});
+
+=head2 select_p
+
+  my $promise = $db->select_p($source, $fields, $where, $order);
+
+Same as L</"select">, but performs all operations non-blocking and returns a
+L<Mojo::IOLoop::Delay> object to be used as a promise instead of accepting a
+callback.
+
+  $db->select_p(some_table => ['foo'] => {bar => 'yada'})->then(sub {
+    my $results = shift;
+    ...
+  })->catch(sub {
+    my $err = shift;
+    ...
+  })->wait;
 
 =head2 tables
 
@@ -480,6 +556,22 @@ L<SQL::Abstract>.
 
   # "update some_table set foo = 'bar' where id = 23 returning id"
   $db->update('some_table', {foo => 'bar'}, {id => 23}, {returning => 'id'});
+
+=head2 update_p
+
+  my $promise = $db->update_p($table, \%fieldvals, \%where, \%options);
+
+Same as L</"update">, but performs all operations non-blocking and returns a
+L<Mojo::IOLoop::Delay> object to be used as a promise instead of accepting a
+callback.
+
+  $db->update_p(some_table => {foo => 'baz'} => {foo => 'bar'})->then(sub {
+    my $results = shift;
+    ...
+  })->catch(sub {
+    my $err = shift;
+    ...
+  })->wait;
 
 =head1 SEE ALSO
 
