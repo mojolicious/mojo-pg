@@ -1,4 +1,6 @@
 
+4.04  2017-11-05
+
 4.03  2017-11-04
   - Improved Mojo::Pg::Database to use Mojo::Promise.
 
