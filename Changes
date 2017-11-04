@@ -1,5 +1,6 @@
 
-4.03  2017-11-03
+4.03  2017-11-04
+  - Improved Mojo::Pg::Database to use Mojo::Promise.
 
 4.02  2017-11-02
   - Added delete_p, insert_p, query_p, select_p and update_p methods to
