@@ -308,7 +308,7 @@ L<SQL::Abstract>.
   my $promise = $db->delete_p($table, \%where, \%options);
 
 Same as L</"delete">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object to be used as a promise instead of accepting a callback.
+L<Mojo::Promise> object instead of accepting a callback.
 
   $db->delete_p('some_table')->then(sub {
     my $results = shift;
@@ -369,7 +369,7 @@ L<SQL::Abstract>.
   my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);
 
 Same as L</"insert">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object to be used as a promise instead of accepting a callback.
+L<Mojo::Promise> object instead of accepting a callback.
 
   $db->insert_p(some_table => {foo => 'bar'})->then(sub {
     my $results = shift;
@@ -451,7 +451,7 @@ used to bind specific L<DBD::Pg> data types to placeholders.
   my $promise = $db->query_p('select * from foo');
 
 Same as L</"query">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object to be used as a promise instead of accepting a callback.
+L<Mojo::Promise> object instead of accepting a callback.
 
   $db->query_p('insert into foo values (?, ?, ?)' => @values)->then(sub {
     my $results = shift;
@@ -498,7 +498,7 @@ L<SQL::Abstract>.
   my $promise = $db->select_p($source, $fields, $where, $order);
 
 Same as L</"select">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object to be used as a promise instead of accepting a callback.
+L<Mojo::Promise> object instead of accepting a callback.
 
   $db->select_p(some_table => ['foo'] => {bar => 'yada'})->then(sub {
     my $results = shift;
@@ -559,7 +559,7 @@ L<SQL::Abstract>.
   my $promise = $db->update_p($table, \%fieldvals, \%where, \%options);
 
 Same as L</"update">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object to be used as a promise instead of accepting a
+L<Mojo::Promise> object instead of accepting a
 callback.
 
   $db->update_p(some_table => {foo => 'baz'} => {foo => 'bar'})->then(sub {
