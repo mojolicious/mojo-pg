@@ -186,7 +186,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Concurrent non-blocking queries (synchronized with promises)
   my $now   = $pg->db->query_p('select now() as now');
   my $names = $pg->db->query_p('select * from names');
-  $now->all($names)->then(sub {
+  Mojo::Promise->all($now, $names)->then(sub {
     my ($now, $names) = @_;
     say $now->[0]->hash->{now};
     say $_->{name} for $names->[0]->hashes->each;
