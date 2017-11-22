@@ -219,6 +219,8 @@ PostgreSQL has to offer, generate CRUD queries from data structures, manage your
 database schema with migrations and build scalable real-time web applications
 with the publish/subscribe pattern.
 
+=head1 BASICS
+
 Database and statement handles are cached automatically, and will be reused
 transparently to increase performance. You can handle connection timeouts
 gracefully by holding on to them only for short amounts of time.
