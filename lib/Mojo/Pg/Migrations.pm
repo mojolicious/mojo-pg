@@ -230,9 +230,9 @@ representing an empty database.
 
 =head2 sql_for
 
-  my $sql = $migrations->sql_for(0, 10);
+  my $sql = $migrations->sql_for(5, 10);
 
-Get SQL to migrate from one version to another.
+Get SQL to migrate from one version to another, up or down.
 
 =head1 DEBUGGING
 
