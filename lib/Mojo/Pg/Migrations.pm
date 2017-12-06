@@ -19,6 +19,24 @@ sub from_data {
     data_section($class //= caller, $name // $self->name));
 }
 
+sub from_dir {
+  my ($self, $dir) = @_;
+
+  my $migrations = $self->{migrations} = {up => {}, down => {}};
+  for my $vdir (path($dir)->list({dir => 1})->each) {
+    my $version = $vdir->basename;
+    next unless -d $vdir && $version =~ /^[0-9]+$/;
+    for my $wdir ($vdir->list({dir => 1})->each) {
+      my $way = $wdir->basename;
+      next unless -d $wdir && ($way eq 'up' || $way eq 'down');
+      $migrations->{$way}{int $version} .= decode('UTF-8', $_->slurp) . "\n"
+        for $wdir->list->grep(qr/\.sql$/)->sort->each;
+    }
+  }
+
+  return $self;
+}
+
 sub from_file { shift->from_string(decode 'UTF-8', path(pop)->slurp) }
 
 sub from_string {
@@ -44,8 +62,8 @@ sub migrate {
   # Unknown version
   my $latest = $self->latest;
   $target //= $latest;
-  my ($up, $down) = @{$self->{migrations}}{qw(up down)};
-  croak "Version $target has no migration" if $target != 0 && !$up->{$target};
+  croak "Version $target has no migration"
+    if $target != 0 && !$self->{migrations}{up}{$target};
 
   # Already the right version (make sure migrations table exists)
   my $db = $self->pg->db;
@@ -60,24 +78,32 @@ sub migrate {
   croak "Active version $active is greater than the latest version $latest"
     if $active > $latest;
 
-  # Up
-  my $sql;
-  if ($active < $target) {
-    my @up = grep { $_ <= $target && $_ > $active } keys %$up;
-    $sql = join '', @$up{sort { $a <=> $b } @up};
-  }
-
-  # Down
-  else {
-    my @down = grep { $_ > $target && $_ <= $active } keys %$down;
-    $sql = join '', @$down{reverse sort { $a <=> $b } @down};
-  }
-
+  my $sql = $self->sql_for($active, $target);
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
   $sql .= ';update mojo_migrations set version = $1 where name = $2;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
   return $self;
+}
+
+sub sql_for {
+  my ($self, $from, $to) = @_;
+
+  # Up
+  my ($up, $down) = @{$self->{migrations}}{qw(up down)};
+  my $sql;
+  if ($from < $to) {
+    my @up = grep { $_ <= $to && $_ > $from } keys %$up;
+    $sql = join '', @$up{sort { $a <=> $b } @up};
+  }
+
+  # Down
+  else {
+    my @down = grep { $_ > $to && $_ <= $from } keys %$down;
+    $sql = join '', @$down{reverse sort { $a <=> $b } @down};
+  }
+
+  return $sql;
 }
 
 sub _active {
@@ -116,12 +142,17 @@ Mojo::Pg::Migrations - Migrations
   use Mojo::Pg::Migrations;
 
   my $migrations = Mojo::Pg::Migrations->new(pg => $pg);
-  $migrations->from_file('/home/sri/migrations.sql')->migrate;
+
+  # Migrate to latest version (one SQL file with comments)
+  $migrations->from_file('/home/sri/myapp/migrations/myapp.sql')->migrate;
+
+  # Migrate down and then up again (directory with SQL files)
+  $migrations->from_dir('/home/sri/myapp/migrations')->migrate(0)->migrate;
 
 =head1 DESCRIPTION
 
 L<Mojo::Pg::Migrations> is used by L<Mojo::Pg> to allow database schemas to
-evolve easily over time. A migration file is just a collection of sql blocks,
+evolve easily over time. A migration file is just a collection of SQL blocks,
 with one or more statements, separated by comments of the form
 C<-- VERSION UP/DOWN>.
 
@@ -135,6 +166,22 @@ C<-- VERSION UP/DOWN>.
   create table stuff (whatever int);
   -- 2 down
   drop table stuff;
+
+Alternatively, for bigger applications, you can also use L</"from_dir"> and
+build a directory structure with SQL files for each migration instead of using
+one big file with comments.
+
+  migrations
+  |- 01
+  |  |- up
+  |  |  +- messages.sql
+  |  +- down
+  |     +- messages.sql
+  +- 02
+     |- up
+     |  +- stuff_feature.sql
+     +- down
+        +- stuff_feature.sql
 
 The idea is to let you migrate from any version, to any version, up and down.
 Migrations are very safe, because they are performed in transactions and only
@@ -190,9 +237,15 @@ L</"name">.
   -- 1 down
   drop table messages;
 
+=head2 from_dir
+
+  $migrations = $migrations->from_dir('/home/sri/myapp/migrations');
+
+  Extract migrations from a directory.
+
 =head2 from_file
 
-  $migrations = $migrations->from_file('/home/sri/migrations.sql');
+  $migrations = $migrations->from_file('/home/sri/myapp/migrations/myapp.sql');
 
 Extract migrations from a file.
 
@@ -224,6 +277,12 @@ representing an empty database.
 
   # Reset database
   $migrations->migrate(0)->migrate;
+
+=head2 sql_for
+
+  my $sql = $migrations->sql_for(0, 10);
+
+Get SQL to migrate from one version to another.
 
 =head1 DEBUGGING
 

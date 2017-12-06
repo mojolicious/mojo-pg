@@ -163,6 +163,30 @@ like $@, qr/Active version 2 is greater than the latest version 1/,
 is $pg->migrations->from_string($newer)->migrate(0)->active, 0,
   'active version is 0';
 
+# Migrations from directory
+$pg->migrations->name('migrations_test4')
+  ->from_dir(catfile($FindBin::Bin, 'migrations'));
+is $pg->migrations->sql_for(0, 1),
+  "create table migration_test_seven (test int);\n\n", 'right SQL';
+is $pg->migrations->sql_for(1, 1), '', 'no SQL';
+is $pg->migrations->sql_for(0, 4), <<EOF, 'right SQL';
+create table migration_test_seven (test int);
+
+insert into migration_test_seven values (23);
+
+update migration_test_seven set test = 24 where test = 23;
+
+alter table migration_test_seven add column test2 int;
+
+EOF
+is $pg->migrations->sql_for(4, 0), <<EOF, 'right SQL';
+alter table migration_test_seven drop column test2;
+
+drop table migration_test_seven;
+
+EOF
+is $pg->migrations->migrate->active, 4, 'active version is 4';
+
 # Clean up once we are done
 $pg->db->query('drop schema mojo_migrations_test cascade');
 
