@@ -60,24 +60,27 @@ sub migrate {
   croak "Active version $active is greater than the latest version $latest"
     if $active > $latest;
 
-  # Up
-  my $sql;
-  if ($active < $target) {
-    my @up = grep { $_ <= $target && $_ > $active } keys %$up;
-    $sql = join '', @$up{sort { $a <=> $b } @up};
-  }
-
-  # Down
-  else {
-    my @down = grep { $_ > $target && $_ <= $active } keys %$down;
-    $sql = join '', @$down{reverse sort { $a <=> $b } @down};
-  }
-
+  my $sql = $self->sql_for($active, $target);
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
   $sql .= ';update mojo_migrations set version = $1 where name = $2;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
   return $self;
+}
+
+sub sql_for {
+  my ($self, $from, $to) = @_;
+
+  # Up
+  my ($up, $down) = @{$self->{migrations}}{qw(up down)};
+  if ($from < $to) {
+    my @up = grep { $_ <= $to && $_ > $from } keys %$up;
+    return join '', @$up{sort { $a <=> $b } @up};
+  }
+
+  # Down
+  my @down = grep { $_ > $to && $_ <= $from } keys %$down;
+  return join '', @$down{reverse sort { $a <=> $b } @down};
 }
 
 sub _active {
@@ -224,6 +227,12 @@ representing an empty database.
 
   # Reset database
   $migrations->migrate(0)->migrate;
+
+=head2 sql_for
+
+  my $sql = $migrations->sql_for(0, 10);
+
+Get SQL to migrate from one version to another.
 
 =head1 DEBUGGING
 

@@ -1,5 +1,6 @@
 
-4.04  2017-11-05
+4.04  2017-12-06
+  - Added sql_for method to Mojo::Pg::Migrations.
 
 4.03  2017-11-04
   - Improved Mojo::Pg::Database to use Mojo::Promise.
