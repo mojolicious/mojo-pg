@@ -1,6 +1,8 @@
 
-4.04  2017-12-06
+4.04  2017-12-16
+  - Added db attribute to Mojo::Pg::Results.
   - Added sql_for method to Mojo::Pg::Migrations.
+  - Fixed a bug that could cause connections to be cached for reuse too early.
 
 4.03  2017-11-04
   - Improved Mojo::Pg::Database to use Mojo::Promise.

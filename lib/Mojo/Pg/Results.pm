@@ -5,7 +5,7 @@ use Mojo::Collection;
 use Mojo::JSON 'from_json';
 use Mojo::Util 'tablify';
 
-has 'sth';
+has [qw(db sth)];
 
 sub DESTROY {
   my $self = shift;
@@ -85,6 +85,13 @@ L<Mojo::Pg::Database>.
 =head1 ATTRIBUTES
 
 L<Mojo::Pg::Results> implements the following attributes.
+
+=head2 db
+
+  my $db   = $results->db;
+  $results = $results->db(Mojo::Pg::Database->new);
+
+L<Mojo::Pg::Database> object these results belong to.
 
 =head2 sth
 
