@@ -134,7 +134,9 @@ isnt $db2->dbh, $dbh, 'new database handle';
 undef $results;
 my $db3 = $pg->db;
 is $db3->dbh, $dbh, 'same database handle';
-is $db3->query('select 2')->array->[0], 2, 'right result';
+$results = $db3->query('select 2');
+is $results->db->dbh, $dbh, 'same database handle';
+is $results->array->[0], 2, 'right result';
 
 # Dollar only
 $db = $pg->db;
