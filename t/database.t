@@ -27,16 +27,19 @@ is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash,
 
 # Non-blocking select
 my ($fail, $result);
+my $same;
 my $db = $pg->db;
 $db->query(
   'select 1 as one, 2 as two, 3 as three' => sub {
     my ($db, $err, $results) = @_;
     $fail   = $err;
     $result = $results->hash;
+    $same   = $db->dbh eq $results->db->dbh;
     Mojo::IOLoop->stop;
   }
 );
 Mojo::IOLoop->start;
+ok $same, 'same database handles';
 ok !$fail, 'no error';
 is_deeply $result, {one => 1, two => 2, three => 3}, 'right structure';
 
