@@ -1,4 +1,6 @@
 
+4.05  2017-12-17
+
 4.04  2017-12-16
   - Added db attribute to Mojo::Pg::Results.
   - Added sql_for method to Mojo::Pg::Migrations.
