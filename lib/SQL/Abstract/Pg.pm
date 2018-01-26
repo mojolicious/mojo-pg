@@ -54,6 +54,32 @@ SQL::Abstract::Pg - PostgreSQL Magic
 L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features
 used by L<Mojo::Pg>.
 
+=head2 ORDER BY
+
+  $abstract->select($source, $fields, $where, $order);
+  $abstract->select($source, $fields, $where, \%options);
+
+Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now
+also pass a hash reference with various options. This includes C<order_by>,
+which takes the same values as the C<$order> argument.
+
+  # "select * from some_table order by foo desc"
+  $abstract->select('some_table', undef, undef, {order_by => {-desc => 'foo'}});
+
+=head2 LIMIT/OFFSET
+
+The C<limit> and C<offset> options can be used to generate C<SELECT> queries
+with C<LIMIT> and C<OFFSET> clauses.
+
+  # "select * from some_table limit 10"
+  $abstract->select('some_table', undef, undef, {limit => 10});
+
+  # "select * from some_table offset 5"
+  $abstract->select('some_table', undef, undef, {offset => 5});
+
+  # "select * from some_table limit 10 offset 5"
+  $abstract->select('some_table', undef, undef, {limit => 10, offset => 5});
+
 =head1 METHODS
 
 L<SQL::Abstract::Pg> inherits all methods from L<SQL::Abstract>.
