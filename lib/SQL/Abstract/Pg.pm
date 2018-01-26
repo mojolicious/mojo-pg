@@ -1,6 +1,8 @@
 package SQL::Abstract::Pg;
 use Mojo::Base 'SQL::Abstract';
 
+use Carp 'croak';
+
 sub _order_by {
   my ($self, $arg) = @_;
 
@@ -15,10 +17,17 @@ sub _order_by {
 sub _parse {
   my ($self, $options) = @_;
 
-  # ORDER BY
+  # GROUP BY
   my $sql = '';
   my @bind;
-  if (exists $options->{order_by}) {
+  if (defined $options->{group_by}) {
+    croak qq{Unsupported group_by value "$options->{group_by}"}
+      unless ref $options->{group_by} eq 'SCALAR';
+    $sql .= ' GROUP BY ' . ${$options->{group_by}};
+  }
+
+  # ORDER BY
+  if (defined $options->{order_by}) {
     $sql .= $self->_order_by($options->{order_by});
   }
 
@@ -32,6 +41,13 @@ sub _parse {
   if (defined $options->{offset}) {
     $sql .= ' OFFSET ?';
     push @bind, $options->{offset};
+  }
+
+  # FOR
+  if (defined $options->{for}) {
+    croak qq{Unsupported for value "$options->{for}"}
+      unless ref $options->{for} eq 'SCALAR';
+    $sql .= ' FOR ' . ${$options->{for}};
   }
 
   return $sql, @bind;
@@ -79,6 +95,23 @@ with C<LIMIT> and C<OFFSET> clauses.
 
   # "select * from some_table limit 10 offset 5"
   $abstract->select('some_table', undef, undef, {limit => 10, offset => 5});
+
+=head2 GROUP BY
+
+The C<group_by> option can be used to generate C<SELECT> queries with
+C<GROUP BY> clauses. So far only scalar references to pass literal SQL are
+supported.
+
+  # "select * from some_table group by foo, bar"
+  $abstract->select('some_table', undef, undef, {group_by => \'foo, bar'});
+
+=head2 FOR
+
+The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses.
+So far only scalar references to pass literal SQL are supported.
+
+  # "select * from some_table for update skip locked"
+  $abstract->select('some_table', undef, undef, {for => \'update skip locked'});
 
 =head1 METHODS
 

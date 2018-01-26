@@ -496,6 +496,12 @@ L<SQL::Abstract>.
   # "select * from some_table where foo like '%test%'"
   $db->select('some_table', undef, {foo => {-like => '%test%'}});
 
+  # "select * from some_table where foo = 23 group by foo, bar"
+  $db->select('some_table', '*', {foo => 23}, {group_by => \'foo, bar'});
+
+  # "select * from some_table where id = 1 for update skip locked"
+  $db->select('some_table', '*', {id => 1}, {for => \'update skip locked'});
+
 =head2 select_p
 
   my $promise = $db->select_p($source, $fields, $where, \%options);
