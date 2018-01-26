@@ -23,7 +23,7 @@ sub _parse {
   if (defined $options->{group_by}) {
     croak qq{Unsupported group_by value "$options->{group_by}"}
       unless ref $options->{group_by} eq 'SCALAR';
-    $sql .= ' GROUP BY ' . ${$options->{group_by}};
+    $sql .= $self->_sqlcase(' group by ') . ${$options->{group_by}};
   }
 
   # ORDER BY
@@ -33,13 +33,13 @@ sub _parse {
 
   # LIMIT
   if (defined $options->{limit}) {
-    $sql .= ' LIMIT ?';
+    $sql .= $self->_sqlcase(' limit ') . '?';
     push @bind, $options->{limit};
   }
 
   # OFFSET
   if (defined $options->{offset}) {
-    $sql .= ' OFFSET ?';
+    $sql .= $self->_sqlcase(' offset ') . '?';
     push @bind, $options->{offset};
   }
 
@@ -47,7 +47,7 @@ sub _parse {
   if (defined $options->{for}) {
     croak qq{Unsupported for value "$options->{for}"}
       unless ref $options->{for} eq 'SCALAR';
-    $sql .= ' FOR ' . ${$options->{for}};
+    $sql .= $self->_sqlcase(' for ') . ${$options->{for}};
   }
 
   return $sql, @bind;
