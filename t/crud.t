@@ -40,6 +40,10 @@ is_deeply $db->select('crud_test', ['name'], {name => 'foo'})->hashes->to_array,
   [{name => 'foo'}], 'right structure';
 is_deeply $db->select('crud_test', ['name'], undef, {-desc => 'id'})
   ->hashes->to_array, [{name => 'bar'}, {name => 'foo'}], 'right structure';
+is_deeply $db->select('crud_test', undef, undef, {offset => 1})
+  ->hashes->to_array, [{id => 2, name => 'bar'}], 'right structure';
+is_deeply $db->select('crud_test', undef, undef, {limit => 1})
+  ->hashes->to_array, [{id => 1, name => 'foo'}], 'right structure';
 
 # Non-blocking read
 my $result;
@@ -107,7 +111,7 @@ is $result->{name}, 'promise', 'right result';
 $result = undef;
 my $first  = $pg->db->query_p("select * from crud_test where name = 'promise'");
 my $second = $pg->db->query_p("select * from crud_test where name = 'promise'");
-$first->all($second)->then(
+Mojo::Promise->all($first, $second)->then(
   sub {
     my ($first, $second) = @_;
     $result = [$first->[0]->hash, $second->[0]->hash];

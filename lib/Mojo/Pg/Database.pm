@@ -463,7 +463,7 @@ L<Mojo::Promise> object instead of accepting a callback.
 
 =head2 select
 
-  my $results = $db->select($source, $fields, $where, $order);
+  my $results = $db->select($source, $fields, $where, \%options);
 
 Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an
 L<SQL::Abstract> object) and execute it with L</"query">. You can also append a
@@ -488,14 +488,17 @@ L<SQL::Abstract>.
   $db->select('some_table', undef, {foo => 'bar'});
 
   # "select * from some_table where foo = 'bar' order by id desc"
-  $db->select('some_table', undef, {foo => 'bar'}, {-desc => 'id'});
+  $db->select('some_table', '*', {foo => 'bar'}, {order_by => {-desc => 'id'}});
+
+  # "select * from some_table limit 10 offset 20"
+  $db->select('some_table', undef, undef, {limit => 10, offset => 20});
 
   # "select * from some_table where foo like '%test%'"
   $db->select('some_table', undef, {foo => {-like => '%test%'}});
 
 =head2 select_p
 
-  my $promise = $db->select_p($source, $fields, $where, $order);
+  my $promise = $db->select_p($source, $fields, $where, \%options);
 
 Same as L</"select">, but performs all operations non-blocking and returns a
 L<Mojo::Promise> object instead of accepting a callback.
