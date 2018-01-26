@@ -1,4 +1,6 @@
 
+4.06  2018-01-27
+
 4.05  2018-01-26
   - Added support for for, group_by, limit, offset and order_by options to
     select and select_p methods in Mojo::Pg::Database.
