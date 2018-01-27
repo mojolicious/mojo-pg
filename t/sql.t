@@ -10,6 +10,8 @@ is_deeply [$abstract->insert('foo', {bar => 'baz'})],
   ['INSERT INTO "foo" ( "bar") VALUES ( ? )', 'baz'], 'right query';
 is_deeply [$abstract->select('foo', '*')], ['SELECT * FROM "foo"'],
   'right query';
+is_deeply [$abstract->select(['foo', 'bar', 'baz'])],
+  ['SELECT * FROM "foo", "bar", "baz"'], 'right query';
 
 # ON CONFLICT
 my @sql
@@ -98,5 +100,19 @@ eval { $abstract->select('foo', '*', undef, {for => 'update skip locked'}) };
 like $@, qr/SCALAR value "update skip locked" not allowed/, 'right error';
 eval { $abstract->select('foo', '*', undef, {for => []}) };
 like $@, qr/ARRAYREF/, 'right error';
+
+# JOIN
+@sql = $abstract->select(['foo', ['bar', 'foo_id', 'id']]);
+is_deeply \@sql,
+  ['SELECT * FROM "foo" JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
+  'right query';
+@sql = $abstract->select(
+  ['foo', ['bar', 'foo_id', 'id'], ['baz', 'foo_id', 'id']]);
+$result
+  = [ 'SELECT * FROM "foo"'
+    . ' JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'
+    . ' JOIN "baz" ON ("baz"."foo_id" = "foo"."id")'
+  ];
+is_deeply \@sql, $result, 'right query';
 
 done_testing();

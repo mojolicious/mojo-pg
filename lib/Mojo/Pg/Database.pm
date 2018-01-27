@@ -502,6 +502,9 @@ L<SQL::Abstract>.
 
 As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
+  # "select * from foo join bar on (bar.foo_id = foo.id)"
+  $db->select(['foo', ['bar', 'foo_id', 'id']], '*');
+
   # "select * from some_table where foo = 'bar' order by id desc"
   $db->select('some_table', '*', {foo => 'bar'}, {order_by => {-desc => 'id'}});
 

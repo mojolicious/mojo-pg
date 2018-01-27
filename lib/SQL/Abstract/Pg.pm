@@ -108,6 +108,31 @@ sub _order_by {
   return $sql, @bind;
 }
 
+sub _table {
+  my ($self, $table) = @_;
+
+  return $self->SUPER::_table($table) unless ref $table eq 'ARRAY';
+
+  my (@table, @join);
+  for my $t (@$table) {
+    if   (ref $t eq 'ARRAY') { push @join,  $t }
+    else                     { push @table, $t }
+  }
+
+  $table = $self->SUPER::_table(\@table);
+  for my $join (@join) {
+    my ($name, $pk, $fk) = @$join;
+    $table
+      .= $self->_sqlcase(' join ')
+      . $self->_quote($name)
+      . $self->_sqlcase(' on ') . '('
+      . $self->_quote("$name.$pk") . ' = '
+      . $self->_quote("$table[0].$fk") . ')';
+  }
+
+  return $table;
+}
+
 1;
 
 =encoding utf8
@@ -205,6 +230,15 @@ pass literal SQL are supported.
 
   # "select * from some_table for update skip locked"
   $abstract->select('some_table', '*, undef, {for => \'update skip locked'});
+
+=head2 JOIN
+
+The C<$source> argument now also accepts array references containing not only
+table names, but also array references with tables to generate C<JOIN> clauses
+for.
+
+  # "select * from foo join bar on (bar.foo_id = foo.id)"
+  $abstract->select(['foo', ['bar', 'foo_id', 'id']], '*');
 
 =head1 METHODS
 

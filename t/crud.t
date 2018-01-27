@@ -142,6 +142,25 @@ my $fail;
 $db->dollar_only->query_p('does_not_exist')->catch(sub { $fail = shift })->wait;
 like $fail, qr/does_not_exist/, 'right error';
 
+# Join
+$db->query(
+  'create table if not exists crud_test4 (
+     id    serial primary key,
+     test1 text
+   )'
+);
+$db->query(
+  'create table if not exists crud_test5 (
+     id    serial primary key,
+     test2 text
+   )'
+);
+$db->insert('crud_test4', {test1 => 'hello'});
+$db->insert('crud_test5', {test2 => 'world'});
+is_deeply $db->select(['crud_test4', ['crud_test5', 'id', 'id']])
+  ->hashes->to_array, [{id => 1, test1 => 'hello', test2 => 'world'}],
+  'right structure';
+
 # Clean up once we are done
 $pg->db->query('drop schema mojo_crud_test cascade');
 

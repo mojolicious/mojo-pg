@@ -1,5 +1,7 @@
 
-4.07  2018-01-27
+4.07  2018-01-28
+  - Added support for "INNER JOIN" to select and select_p methods in
+    Mojo::Pg::Database.
   - Improved on_conflict option of insert and insert_p methods in
     Mojo::Pg::Database with shortcuts for "ON CONFLICT DO UPDATE SET" and
     "ON CONFLICT DO NOTHING".
