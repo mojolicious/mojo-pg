@@ -238,7 +238,7 @@ table names, but also array references with tables to generate C<JOIN> clauses
 for.
 
   # "select * from foo join bar on (bar.foo_id = foo.id)"
-  $abstract->select(['foo', ['bar', 'foo_id', 'id']], '*');
+  $abstract->select(['foo', ['bar', 'foo_id', 'id']]);
 
   # "select * from foo left join bar on (bar.foo_id = foo.id)"
   $abstract->select(['foo', ['bar', 'foo_id', 'id', 'left']]);
