@@ -512,6 +512,9 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
   # "select * from some_table where foo = 23 group by foo, bar"
   $db->select('some_table', '*', {foo => 23}, {group_by => ['foo', 'bar']});
 
+  # "select * from some_table where id = 1 for update"
+  $db->select('some_table', '*', {id => 1}, {for => 'update'});
+
   # "select * from some_table where id = 1 for update skip locked"
   $db->select('some_table', '*', {id => 1}, {for => \'update skip locked'});
 

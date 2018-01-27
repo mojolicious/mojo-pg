@@ -21,9 +21,9 @@ sub _insert_returning {
     my ($conflict_sql, @conflict_bind);
     $self->_SWITCH_refkind(
       $conflict => {
-        SCALARREF => sub { $conflict_sql = $$conflict },
         ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
-        UNDEF => sub { $conflict_sql = $self->_sqlcase('do nothing') }
+        SCALARREF => sub { $conflict_sql = $$conflict },
+        UNDEF     => sub { $conflict_sql = $self->_sqlcase('do nothing') }
       }
     );
     $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;
@@ -56,10 +56,10 @@ sub _pg_parse {
     my $group_sql;
     $self->_SWITCH_refkind(
       $group => {
-        SCALARREF => sub { $group_sql = $$group },
         ARRAYREF => sub {
           $group_sql = join ', ', map { $self->_quote($_) } @$group;
-        }
+        },
+        SCALARREF => sub { $group_sql = $$group }
       }
     );
     $sql .= $self->_sqlcase(' group by ') . $group_sql;
@@ -86,6 +86,11 @@ sub _pg_parse {
     my $for_sql;
     $self->_SWITCH_refkind(
       $for => {
+        SCALAR => sub {
+          SQL::Abstract::puke('only the SCALAR value "update" is allowed')
+            unless $for eq 'update';
+          $for_sql = $self->_sqlcase('UPDATE');
+        },
         SCALARREF => sub { $for_sql .= $$for }
       }
     );
@@ -149,7 +154,7 @@ also pass a hash reference with various options. This includes C<order_by>,
 which takes the same values as the C<$order> argument.
 
   # "select * from some_table order by foo desc"
-  $abstract->select('some_table', undef, undef, {order_by => {-desc => 'foo'}});
+  $abstract->select('some_table', '*', undef, {order_by => {-desc => 'foo'}});
 
 =head2 LIMIT/OFFSET
 
@@ -157,13 +162,13 @@ The C<limit> and C<offset> options can be used to generate C<SELECT> queries
 with C<LIMIT> and C<OFFSET> clauses.
 
   # "select * from some_table limit 10"
-  $abstract->select('some_table', undef, undef, {limit => 10});
+  $abstract->select('some_table', '*', undef, {limit => 10});
 
   # "select * from some_table offset 5"
-  $abstract->select('some_table', undef, undef, {offset => 5});
+  $abstract->select('some_table', '*', undef, {offset => 5});
 
   # "select * from some_table limit 10 offset 5"
-  $abstract->select('some_table', undef, undef, {limit => 10, offset => 5});
+  $abstract->select('some_table', '*', undef, {limit => 10, offset => 5});
 
 =head2 GROUP BY
 
@@ -172,18 +177,22 @@ C<GROUP BY> clauses. So far only array references to pass a list of fields and
 scalar references to pass literal SQL are supported.
 
   # "select * from some_table group by foo, bar"
-  $abstract->select('some_table', undef, undef, {group_by => ['foo', 'bar']});
+  $abstract->select('some_table', '*', undef, {group_by => ['foo', 'bar']});
 
   # "select * from some_table group by foo, bar"
-  $abstract->select('some_table', undef, undef, {group_by => \'foo, bar'});
+  $abstract->select('some_table', '*', undef, {group_by => \'foo, bar'});
 
 =head2 FOR
 
 The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses.
-So far only scalar references to pass literal SQL are supported.
+So far only the scalar value C<update> to pass C<UPDATE> and scalar references
+to pass literal SQL are supported.
+
+  # "select * from some_table for update"
+  $abstract->select('some_table', '*', undef, {for => 'update'});
 
   # "select * from some_table for update skip locked"
-  $abstract->select('some_table', undef, undef, {for => \'update skip locked'});
+  $abstract->select('some_table', '*, undef, {for => \'update skip locked'});
 
 =head1 METHODS
 

@@ -73,10 +73,14 @@ eval { $abstract->select('foo', '*', undef, {group_by => {}}) };
 like $@, qr/HASHREF/, 'right error';
 
 # FOR
+@sql = $abstract->select('foo', '*', undef, {for => 'update'});
+is_deeply \@sql, ['SELECT * FROM "foo" FOR UPDATE'], 'right query';
 @sql = $abstract->select('foo', '*', undef, {for => \'update skip locked'});
 is_deeply \@sql, ['SELECT * FROM "foo" FOR update skip locked'], 'right query';
 
 # FOR (unsupported value)
+eval { $abstract->select('foo', '*', undef, {for => 'update skip locked'}) };
+like $@, qr/only the SCALAR value "update" is allowed/, 'right error';
 eval { $abstract->select('foo', '*', undef, {for => []}) };
 like $@, qr/ARRAYREF/, 'right error';
 

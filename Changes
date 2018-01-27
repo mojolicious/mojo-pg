@@ -1,7 +1,9 @@
 
 4.07  2018-01-27
   - Improved on_conflict option of insert and insert_p methods in
-    Mojo::Pg::Database with a shortcut for "DO NOTHING".
+    Mojo::Pg::Database with a shortcut for "ON CONFLICT DO NOTHING".
+  - Improved for option of select and select_p methods in Mojo::Pg::Database
+    with a shortcut for "FOR UPDATE".
 
 4.06  2018-01-27
   - Added support for on_conflict option to insert and insert_p methods in
