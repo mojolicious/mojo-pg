@@ -21,6 +21,20 @@ sub _insert_returning {
     my ($conflict_sql, @conflict_bind);
     $self->_SWITCH_refkind(
       $conflict => {
+        ARRAYREF => sub {
+          my ($fields, $set) = @$conflict;
+          SQL::Abstract::puke(qq{ARRAYREF value "$fields" not allowed})
+            unless ref $fields eq 'ARRAY';
+          SQL::Abstract::puke(qq{ARRAYREF value "$set" not allowed})
+            unless ref $set eq 'HASH';
+
+          $conflict_sql
+            = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
+          $conflict_sql .= $self->_sqlcase(' do update set ');
+          my ($set_sql, @set_bind) = $self->_update_set_values($set);
+          $conflict_sql .= $set_sql;
+          push @conflict_bind, @set_bind;
+        },
         ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
         SCALARREF => sub { $conflict_sql = $$conflict },
         UNDEF     => sub { $conflict_sql = $self->_sqlcase('do nothing') }
@@ -124,7 +138,8 @@ Additional C<INSERT> query features.
 =head2 ON CONFLICT
 
 The C<on_conflict> option can be used to generate C<INSERT> queries with
-C<ON CONFLICT> clauses. So far only C<undef> to pass C<DO NOTHING>, scalar
+C<ON CONFLICT> clauses. So far C<undef> to pass C<DO NOTHING>, array references
+to pass C<DO UPDATE> with conflict targets and a C<SET> expression, scalar
 references to pass literal SQL and array reference references to pass literal
 SQL with bind values are supported.
 
@@ -135,6 +150,9 @@ SQL with bind values are supported.
   $abstract->insert('t', {a => 'b'}, {on_conflict => \'do nothing'});
 
 This includes operations commonly referred to as C<upsert>.
+
+  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a'], {a => 'c'}]);
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert(
@@ -173,8 +191,8 @@ with C<LIMIT> and C<OFFSET> clauses.
 =head2 GROUP BY
 
 The C<group_by> option can be used to generate C<SELECT> queries with
-C<GROUP BY> clauses. So far only array references to pass a list of fields and
-scalar references to pass literal SQL are supported.
+C<GROUP BY> clauses. So far array references to pass a list of fields and scalar
+references to pass literal SQL are supported.
 
   # "select * from some_table group by foo, bar"
   $abstract->select('some_table', '*', undef, {group_by => ['foo', 'bar']});
@@ -185,8 +203,8 @@ scalar references to pass literal SQL are supported.
 =head2 FOR
 
 The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses.
-So far only the scalar value C<update> to pass C<UPDATE> and scalar references
-to pass literal SQL are supported.
+So far the scalar value C<update> to pass C<UPDATE> and scalar references to
+pass literal SQL are supported.
 
   # "select * from some_table for update"
   $abstract->select('some_table', '*', undef, {for => 'update'});
