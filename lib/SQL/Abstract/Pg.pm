@@ -1,6 +1,8 @@
 package SQL::Abstract::Pg;
 use Mojo::Base 'SQL::Abstract';
 
+BEGIN { *puke = \&SQL::Abstract::puke }
+
 sub insert {
   my ($self, $table, $data, $options) = @_;
   local @{$options}{qw(returning _pg_returning)} = (1, 1)
@@ -23,10 +25,9 @@ sub _insert_returning {
       $conflict => {
         ARRAYREF => sub {
           my ($fields, $set) = @$conflict;
-          SQL::Abstract::puke(qq{ARRAYREF value "$fields" not allowed})
+          puke qq{ARRAYREF value "$fields" not allowed}
             unless ref $fields eq 'ARRAY';
-          SQL::Abstract::puke(qq{ARRAYREF value "$set" not allowed})
-            unless ref $set eq 'HASH';
+          puke qq{ARRAYREF value "$set" not allowed} unless ref $set eq 'HASH';
 
           $conflict_sql
             = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
@@ -50,18 +51,12 @@ sub _insert_returning {
 }
 
 sub _order_by {
-  my ($self, $arg) = @_;
+  my ($self, $options) = @_;
 
   # Legacy
-  return $self->SUPER::_order_by($arg)
-    if ref $arg ne 'HASH'
-    or grep {/^-(?:desc|asc)/i} keys %$arg;
-
-  return $self->_pg_parse($arg);
-}
-
-sub _pg_parse {
-  my ($self, $options) = @_;
+  return $self->SUPER::_order_by($options)
+    if ref $options ne 'HASH'
+    or grep {/^-(?:desc|asc)/i} keys %$options;
 
   # GROUP BY
   my $sql = '';
@@ -101,8 +96,7 @@ sub _pg_parse {
     $self->_SWITCH_refkind(
       $for => {
         SCALAR => sub {
-          SQL::Abstract::puke(qq{SCALAR value "$for" not allowed})
-            unless $for eq 'update';
+          puke qq{SCALAR value "$for" not allowed} unless $for eq 'update';
           $for_sql = $self->_sqlcase('UPDATE');
         },
         SCALARREF => sub { $for_sql .= $$for }
