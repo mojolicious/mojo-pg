@@ -12,22 +12,25 @@ sub _insert_returning {
   my ($self, $options) = @_;
 
   delete $options->{returning} if $options->{_pg_returning};
-  my $sql = '';
 
   # ON CONFLICT
+  my $sql = '';
+  my @bind;
   if (defined(my $conflict = $options->{on_conflict})) {
+    my ($conflict_sql, @conflict_bind);
     $self->_SWITCH_refkind(
       $conflict => {
-        SCALARREF => sub {
-          $sql .= $self->_sqlcase(' on conflict ') . $$conflict;
-        }
+        SCALARREF => sub { $conflict_sql = $$conflict },
+        ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict }
       }
     );
+    $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;
+    push @bind, @conflict_bind;
   }
 
   $sql .= $self->SUPER::_insert_returning($options) if $options->{returning};
 
-  return $sql;
+  return $sql, @bind;
 }
 
 sub _order_by {
@@ -102,17 +105,27 @@ used by L<Mojo::Pg>.
 
 =head1 INSERT
 
+Additional C<INSERT> query features.
+
 =head2 ON CONFLICT
 
 The C<on_conflict> option can be used to generate C<INSERT> queries with
-C<ON CONFLICT> clauses. So far only scalar references to pass literal SQL are
-supported.
+C<ON CONFLICT> clauses. So far only scalar references to pass literal SQL and
+array reference references to pass literal SQL with bind values are supported.
 
   # "insert into some_table (foo) values ('bar') on conflict do nothing"
   $abstract->insert(
     'some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
 
+  # "insert into some_table (foo) values ('bar')
+  #  on conflict (foo) do update set foo = 'baz'"
+  $abstract->insert('some_table', {foo => 'bar'}, {
+    on_conflict => \['(foo) do update set foo = ?', 'baz']
+  });
+
 =head1 SELECT
+
+Additional C<SELECT> query features.
 
 =head2 ORDER BY
 

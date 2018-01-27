@@ -27,6 +27,17 @@ my $result = [
   'baz'
 ];
 is_deeply \@sql, $result, 'right query';
+@sql = $abstract->insert(
+  'foo',
+  {bar         => 'baz'},
+  {on_conflict => \['(foo) do update set foo = ?', 'yada']}
+);
+$result = [
+  'INSERT INTO "foo" ( "bar") VALUES ( ? )'
+    . ' ON CONFLICT (foo) do update set foo = ?',
+  'baz', 'yada'
+];
+is_deeply \@sql, $result, 'right query';
 
 # ON CONFLICT (unsupported value)
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => []}) };

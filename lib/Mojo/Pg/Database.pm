@@ -367,6 +367,12 @@ L<SQL::Abstract>.
   # "insert into some_table (foo) values ('bar') on conflict do nothing"
   $db->insert('some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
 
+  # "insert into some_table (foo) values ('bar')
+  #  on conflict (foo) do update set foo = 'baz'"
+  $db->insert('some_table', {foo => 'bar'}, {
+    on_conflict => \['(foo) do update set foo = ?', 'baz']
+  });
+
 =head2 insert_p
 
   my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);

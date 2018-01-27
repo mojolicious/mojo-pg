@@ -35,18 +35,23 @@ $db->insert(
   {id          => 1, name => 'foo'},
   {on_conflict => \'do nothing'}
 );
+$db->insert(
+  'crud_test',
+  {id          => 2,                               name => 'bar'},
+  {on_conflict => \['(id) do update set name = ?', 'baz']}
+);
 
 # Read
 is_deeply $db->select('crud_test')->hashes->to_array,
-  [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
+  [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}], 'right structure';
 is_deeply $db->select('crud_test', ['name'])->hashes->to_array,
-  [{name => 'foo'}, {name => 'bar'}], 'right structure';
+  [{name => 'foo'}, {name => 'baz'}], 'right structure';
 is_deeply $db->select('crud_test', ['name'], {name => 'foo'})->hashes->to_array,
   [{name => 'foo'}], 'right structure';
 is_deeply $db->select('crud_test', ['name'], undef, {-desc => 'id'})
-  ->hashes->to_array, [{name => 'bar'}, {name => 'foo'}], 'right structure';
+  ->hashes->to_array, [{name => 'baz'}, {name => 'foo'}], 'right structure';
 is_deeply $db->select('crud_test', undef, undef, {offset => 1})
-  ->hashes->to_array, [{id => 2, name => 'bar'}], 'right structure';
+  ->hashes->to_array, [{id => 2, name => 'baz'}], 'right structure';
 is_deeply $db->select('crud_test', undef, undef, {limit => 1})
   ->hashes->to_array, [{id => 1, name => 'foo'}], 'right structure';
 
@@ -55,25 +60,25 @@ my $result;
 my $delay = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
 $db->select('crud_test', $delay->begin);
 $delay->wait;
-is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}],
+is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}],
   'right structure';
 $result = undef;
 $delay = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
 $db->select('crud_test', undef, undef, {-desc => 'id'}, $delay->begin);
 $delay->wait;
-is_deeply $result, [{id => 2, name => 'bar'}, {id => 1, name => 'foo'}],
+is_deeply $result, [{id => 2, name => 'baz'}, {id => 1, name => 'foo'}],
   'right structure';
 
 # Update
-$db->update('crud_test', {name => 'baz'}, {name => 'foo'});
+$db->update('crud_test', {name => 'yada'}, {name => 'foo'});
 is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})
-  ->hashes->to_array, [{id => 1, name => 'baz'}, {id => 2, name => 'bar'}],
+  ->hashes->to_array, [{id => 1, name => 'yada'}, {id => 2, name => 'baz'}],
   'right structure';
 
 # Delete
-$db->delete('crud_test', {name => 'baz'});
+$db->delete('crud_test', {name => 'yada'});
 is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})
-  ->hashes->to_array, [{id => 2, name => 'bar'}], 'right structure';
+  ->hashes->to_array, [{id => 2, name => 'baz'}], 'right structure';
 $db->delete('crud_test');
 is_deeply $db->select('crud_test')->hashes->to_array, [], 'right structure';
 
