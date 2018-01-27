@@ -350,8 +350,7 @@ append a callback to perform operations non-blocking.
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
 Use all the same argument variations you would pass to the C<insert> method of
-L <SQL::Abstract>
-.
+L<SQL::Abstract>.
 
   # "insert into some_table (foo, baz) values ('bar', 'yada')"
   $db->insert('some_table', {foo => 'bar', baz => 'yada'});
