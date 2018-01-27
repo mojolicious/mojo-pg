@@ -61,10 +61,12 @@ is_deeply \@sql, ['SELECT * FROM "foo" LIMIT ? OFFSET ?', 10, 5], 'right query';
 # GROUP BY
 @sql = $abstract->select('foo', '*', undef, {group_by => \'bar, baz'});
 is_deeply \@sql, ['SELECT * FROM "foo" GROUP BY bar, baz'], 'right query';
+@sql = $abstract->select('foo', '*', undef, {group_by => ['bar', 'baz']});
+is_deeply \@sql, ['SELECT * FROM "foo" GROUP BY "bar", "baz"'], 'right query';
 
 # GROUP BY (unsupported value)
-eval { $abstract->select('foo', '*', undef, {group_by => []}) };
-like $@, qr/ARRAYREF/, 'right error';
+eval { $abstract->select('foo', '*', undef, {group_by => {}}) };
+like $@, qr/HASHREF/, 'right error';
 
 # FOR
 @sql = $abstract->select('foo', '*', undef, {for => \'update skip locked'});

@@ -51,11 +51,16 @@ sub _pg_parse {
   my $sql = '';
   my @bind;
   if (defined(my $group = $options->{group_by})) {
+    my $group_sql;
     $self->_SWITCH_refkind(
       $group => {
-        SCALARREF => sub { $sql .= $self->_sqlcase(' group by ') . $$group }
+        SCALARREF => sub { $group_sql = $$group },
+        ARRAYREF => sub {
+          $group_sql = join ', ', map { $self->_quote($_) } @$group;
+        }
       }
     );
+    $sql .= $self->_sqlcase(' group by ') . $group_sql;
   }
 
   # ORDER BY
@@ -76,11 +81,13 @@ sub _pg_parse {
 
   # FOR
   if (defined(my $for = $options->{for})) {
+    my $for_sql;
     $self->_SWITCH_refkind(
       $for => {
-        SCALARREF => sub { $sql .= $self->_sqlcase(' for ') . $$for }
+        SCALARREF => sub { $for_sql .= $$for }
       }
     );
+    $sql .= $self->_sqlcase(' for ') . $for_sql;
   }
 
   return $sql, @bind;
@@ -156,8 +163,11 @@ with C<LIMIT> and C<OFFSET> clauses.
 =head2 GROUP BY
 
 The C<group_by> option can be used to generate C<SELECT> queries with
-C<GROUP BY> clauses. So far only scalar references to pass literal SQL are
-supported.
+C<GROUP BY> clauses. So far only array references to pass a list of fields and
+scalar references to pass literal SQL are supported.
+
+  # "select * from some_table group by foo, bar"
+  $abstract->select('some_table', undef, undef, {group_by => ['foo', 'bar']});
 
   # "select * from some_table group by foo, bar"
   $abstract->select('some_table', undef, undef, {group_by => \'foo, bar'});
