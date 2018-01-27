@@ -1,4 +1,6 @@
 
+4.07  2018-01-28
+
 4.06  2018-01-27
   - Added support for on_conflict option to insert and insert_p methods in
     Mojo::Pg::Database.
