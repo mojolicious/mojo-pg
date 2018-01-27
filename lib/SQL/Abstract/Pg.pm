@@ -87,7 +87,7 @@ sub _pg_parse {
     $self->_SWITCH_refkind(
       $for => {
         SCALAR => sub {
-          SQL::Abstract::puke('only the SCALAR value "update" is allowed')
+          SQL::Abstract::puke(qq{SCALAR value "$for" not allowed})
             unless $for eq 'update';
           $for_sql = $self->_sqlcase('UPDATE');
         },

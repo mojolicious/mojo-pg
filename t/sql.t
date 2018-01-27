@@ -80,7 +80,7 @@ is_deeply \@sql, ['SELECT * FROM "foo" FOR update skip locked'], 'right query';
 
 # FOR (unsupported value)
 eval { $abstract->select('foo', '*', undef, {for => 'update skip locked'}) };
-like $@, qr/only the SCALAR value "update" is allowed/, 'right error';
+like $@, qr/SCALAR value "update skip locked" not allowed/, 'right error';
 eval { $abstract->select('foo', '*', undef, {for => []}) };
 like $@, qr/ARRAYREF/, 'right error';
 
