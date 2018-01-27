@@ -30,6 +30,11 @@ is $db->insert('crud_test', {name => 'bar'}, {returning => 'id'})->hash->{id},
   2, 'right value';
 is_deeply $db->select('crud_test')->hashes->to_array,
   [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
+$db->insert(
+  'crud_test',
+  {id          => 1, name => 'foo'},
+  {on_conflict => \'do nothing'}
+);
 
 # Read
 is_deeply $db->select('crud_test')->hashes->to_array,

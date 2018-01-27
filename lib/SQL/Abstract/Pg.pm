@@ -1,7 +1,34 @@
 package SQL::Abstract::Pg;
 use Mojo::Base 'SQL::Abstract';
 
-use Carp 'croak';
+sub insert {
+  my ($self, $table, $data, $options) = @_;
+  local @{$options}{qw(returning _pg_returning)} = (1, 1)
+    if defined $options->{on_conflict} && !$options->{returning};
+  return $self->SUPER::insert($table, $data, $options);
+}
+
+sub _insert_returning {
+  my ($self, $options) = @_;
+
+  delete $options->{returning} if $options->{_pg_returning};
+  my $sql = '';
+
+  # ON CONFLICT
+  if (defined(my $conflict = $options->{on_conflict})) {
+    $self->_SWITCH_refkind(
+      $conflict => {
+        SCALARREF => sub {
+          $sql .= $self->_sqlcase(' on conflict ') . $$conflict;
+        }
+      }
+    );
+  }
+
+  $sql .= $self->SUPER::_insert_returning($options) if $options->{returning};
+
+  return $sql;
+}
 
 sub _order_by {
   my ($self, $arg) = @_;
@@ -11,25 +38,26 @@ sub _order_by {
     if ref $arg ne 'HASH'
     or grep {/^-(?:desc|asc)/i} keys %$arg;
 
-  return $self->_parse($arg);
+  return $self->_pg_parse($arg);
 }
 
-sub _parse {
+sub _pg_parse {
   my ($self, $options) = @_;
 
   # GROUP BY
   my $sql = '';
   my @bind;
-  if (defined $options->{group_by}) {
-    croak qq{Unsupported group_by value "$options->{group_by}"}
-      unless ref $options->{group_by} eq 'SCALAR';
-    $sql .= $self->_sqlcase(' group by ') . ${$options->{group_by}};
+  if (defined(my $group = $options->{group_by})) {
+    $self->_SWITCH_refkind(
+      $group => {
+        SCALARREF => sub { $sql .= $self->_sqlcase(' group by ') . $$group }
+      }
+    );
   }
 
   # ORDER BY
-  if (defined $options->{order_by}) {
-    $sql .= $self->_order_by($options->{order_by});
-  }
+  $sql .= $self->_order_by($options->{order_by})
+    if defined $options->{order_by};
 
   # LIMIT
   if (defined $options->{limit}) {
@@ -44,10 +72,12 @@ sub _parse {
   }
 
   # FOR
-  if (defined $options->{for}) {
-    croak qq{Unsupported for value "$options->{for}"}
-      unless ref $options->{for} eq 'SCALAR';
-    $sql .= $self->_sqlcase(' for ') . ${$options->{for}};
+  if (defined(my $for = $options->{for})) {
+    $self->_SWITCH_refkind(
+      $for => {
+        SCALARREF => sub { $sql .= $self->_sqlcase(' for ') . $$for }
+      }
+    );
   }
 
   return $sql, @bind;
@@ -69,6 +99,20 @@ SQL::Abstract::Pg - PostgreSQL Magic
 
 L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features
 used by L<Mojo::Pg>.
+
+=head1 INSERT
+
+=head2 ON CONFLICT
+
+The C<on_conflict> option can be used to generate C<INSERT> queries with
+C<ON CONFLICT> clauses. So far only scalar references to pass literal SQL are
+supported.
+
+  # "insert into some_table (foo) values ('bar') on conflict do nothing"
+  $abstract->insert(
+    'some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
+
+=head1 SELECT
 
 =head2 ORDER BY
 

@@ -364,6 +364,9 @@ L<SQL::Abstract>.
   # "insert into some_table (foo) values ('bar') returning id, foo"
   $db->insert('some_table', {foo => 'bar'}, {returning => ['id', 'foo']});
 
+  # "insert into some_table (foo) values ('bar') on conflict do nothing"
+  $db->insert('some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
+
 =head2 insert_p
 
   my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);

@@ -6,11 +6,34 @@ use Mojo::Pg;
 # Basics
 my $pg       = Mojo::Pg->new;
 my $abstract = $pg->abstract;
+is_deeply [$abstract->insert('foo', {bar => 'baz'})],
+  ['INSERT INTO "foo" ( "bar") VALUES ( ? )', 'baz'], 'right query';
 is_deeply [$abstract->select('foo', '*')], ['SELECT * FROM "foo"'],
   'right query';
 
+# ON CONFLICT
+my @sql
+  = $abstract->insert('foo', {bar => 'baz'}, {on_conflict => \'do nothing'});
+is_deeply \@sql,
+  ['INSERT INTO "foo" ( "bar") VALUES ( ? ) ON CONFLICT do nothing', 'baz'],
+  'right query';
+@sql = $abstract->insert(
+  'foo',
+  {bar         => 'baz'},
+  {on_conflict => \'do nothing', returning => '*'}
+);
+my $result = [
+  'INSERT INTO "foo" ( "bar") VALUES ( ? ) ON CONFLICT do nothing RETURNING *',
+  'baz'
+];
+is_deeply \@sql, $result, 'right query';
+
+# ON CONFLICT (unsupported value)
+eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => []}) };
+like $@, qr/ARRAYREF/, 'right error';
+
 # ORDER BY
-my @sql = $abstract->select('foo', '*', {bar => 'baz'}, {-desc => 'yada'});
+@sql = $abstract->select('foo', '*', {bar => 'baz'}, {-desc => 'yada'});
 is_deeply \@sql,
   ['SELECT * FROM "foo" WHERE ( "bar" = ? ) ORDER BY "yada" DESC', 'baz'],
   'right query';
@@ -30,7 +53,7 @@ is_deeply \@sql, ['SELECT * FROM "foo" GROUP BY bar, baz'], 'right query';
 
 # GROUP BY (unsupported value)
 eval { $abstract->select('foo', '*', undef, {group_by => []}) };
-like $@, qr/Unsupported group_by value "ARRAY/, 'right error';
+like $@, qr/ARRAYREF/, 'right error';
 
 # FOR
 @sql = $abstract->select('foo', '*', undef, {for => \'update skip locked'});
@@ -38,6 +61,6 @@ is_deeply \@sql, ['SELECT * FROM "foo" FOR update skip locked'], 'right query';
 
 # FOR (unsupported value)
 eval { $abstract->select('foo', '*', undef, {for => []}) };
-like $@, qr/Unsupported for value "ARRAY/, 'right error';
+like $@, qr/ARRAYREF/, 'right error';
 
 done_testing();
