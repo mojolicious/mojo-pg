@@ -114,5 +114,9 @@ $result
     . ' JOIN "baz" ON ("baz"."foo_id" = "foo"."id")'
   ];
 is_deeply \@sql, $result, 'right query';
+@sql = $abstract->select(['foo', ['bar', 'foo_id', 'id', 'left']]);
+is_deeply \@sql,
+  ['SELECT * FROM "foo" LEFT JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
+  'right query';
 
 done_testing();

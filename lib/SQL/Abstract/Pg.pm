@@ -121,13 +121,13 @@ sub _table {
 
   $table = $self->SUPER::_table(\@table);
   for my $join (@join) {
-    my ($name, $pk, $fk) = @$join;
+    my ($name, $fk, $pk, $type) = @$join;
     $table
-      .= $self->_sqlcase(' join ')
+      .= $self->_sqlcase($type ? " $type join " : ' join ')
       . $self->_quote($name)
       . $self->_sqlcase(' on ') . '('
-      . $self->_quote("$name.$pk") . ' = '
-      . $self->_quote("$table[0].$fk") . ')';
+      . $self->_quote("$name.$fk") . ' = '
+      . $self->_quote("$table[0].$pk") . ')';
   }
 
   return $table;
@@ -239,6 +239,9 @@ for.
 
   # "select * from foo join bar on (bar.foo_id = foo.id)"
   $abstract->select(['foo', ['bar', 'foo_id', 'id']], '*');
+
+  # "select * from foo left join bar on (bar.foo_id = foo.id)"
+  $abstract->select(['foo', ['bar', 'foo_id', 'id', 'left']]);
 
 =head1 METHODS
 
