@@ -117,6 +117,8 @@ array reference references to pass literal SQL with bind values are supported.
   $abstract->insert(
     'some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
 
+This includes operations commonly referred to as C<upsert>.
+
   # "insert into some_table (foo) values ('bar')
   #  on conflict (foo) do update set foo = 'baz'"
   $abstract->insert('some_table', {foo => 'bar'}, {
