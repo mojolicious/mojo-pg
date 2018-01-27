@@ -119,11 +119,9 @@ array reference references to pass literal SQL with bind values are supported.
 
 This includes operations commonly referred to as C<upsert>.
 
-  # "insert into some_table (foo) values ('bar')
-  #  on conflict (foo) do update set foo = 'baz'"
-  $abstract->insert('some_table', {foo => 'bar'}, {
-    on_conflict => \['(foo) do update set foo = ?', 'baz']
-  });
+  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  $abstract->insert(
+    't', {a => 'b'}, {on_conflict => \['(a) do update set a = ?', 'c']});
 
 =head1 SELECT
 

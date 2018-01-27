@@ -371,11 +371,9 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
 Including operations commonly referred to as C<upsert>.
 
-  # "insert into some_table (foo) values ('bar')
-  #  on conflict (foo) do update set foo = 'baz'"
-  $db->insert('some_table', {foo => 'bar'}, {
-    on_conflict => \['(foo) do update set foo = ?', 'baz']
-  });
+  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  $db->insert(
+    't', {a => 'b'}, {on_conflict => \['(a) do update set a = ?', 'c']});
 
 =head2 insert_p
 
