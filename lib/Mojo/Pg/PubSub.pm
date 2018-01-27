@@ -46,7 +46,8 @@ sub _db {
     notification => sub {
       my ($db, $name, $pid, $payload) = @_;
       $payload = eval { from_json $payload } if $self->{json}{$name};
-      for my $cb (@{$self->{chans}{$name}}) { $self->$cb($payload) }
+      my @cbs = @{$self->{chans}{$name}};
+      for my $cb (@cbs) { $self->$cb($payload) }
     }
   );
   $db->once(close => sub { $self->{pg} and $self->_db if delete $self->{db} });
