@@ -367,7 +367,7 @@ L<SQL::Abstract>.
 As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
   # "insert into some_table (foo) values ('bar') on conflict do nothing"
-  $db->insert('some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
+  $db->insert('some_table', {foo => 'bar'}, {on_conflict => undef});
 
 Including operations commonly referred to as C<upsert>.
 

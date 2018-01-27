@@ -4,7 +4,7 @@ use Mojo::Base 'SQL::Abstract';
 sub insert {
   my ($self, $table, $data, $options) = @_;
   local @{$options}{qw(returning _pg_returning)} = (1, 1)
-    if defined $options->{on_conflict} && !$options->{returning};
+    if exists $options->{on_conflict} && !$options->{returning};
   return $self->SUPER::insert($table, $data, $options);
 }
 
@@ -16,12 +16,14 @@ sub _insert_returning {
   # ON CONFLICT
   my $sql = '';
   my @bind;
-  if (defined(my $conflict = $options->{on_conflict})) {
+  if (exists $options->{on_conflict}) {
+    my $conflict = $options->{on_conflict};
     my ($conflict_sql, @conflict_bind);
     $self->_SWITCH_refkind(
       $conflict => {
         SCALARREF => sub { $conflict_sql = $$conflict },
-        ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict }
+        ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
+        UNDEF => sub { $conflict_sql = $self->_sqlcase('do nothing') }
       }
     );
     $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;
@@ -117,12 +119,15 @@ Additional C<INSERT> query features.
 =head2 ON CONFLICT
 
 The C<on_conflict> option can be used to generate C<INSERT> queries with
-C<ON CONFLICT> clauses. So far only scalar references to pass literal SQL and
-array reference references to pass literal SQL with bind values are supported.
+C<ON CONFLICT> clauses. So far only C<undef> to pass C<DO NOTHING>, scalar
+references to pass literal SQL and array reference references to pass literal
+SQL with bind values are supported.
 
-  # "insert into some_table (foo) values ('bar') on conflict do nothing"
-  $abstract->insert(
-    'some_table', {foo => 'bar'}, {on_conflict => \'do nothing'});
+  # "insert into t (a) values ('b') on conflict do nothing"
+  $abstract->insert('t', {a => 'b'}, {on_conflict => undef});
+
+  # "insert into t (a) values ('b') on conflict do nothing"
+  $abstract->insert('t', {a => 'b'}, {on_conflict => \'do nothing'});
 
 This includes operations commonly referred to as C<upsert>.
 

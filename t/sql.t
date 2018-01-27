@@ -17,6 +17,10 @@ my @sql
 is_deeply \@sql,
   ['INSERT INTO "foo" ( "bar") VALUES ( ? ) ON CONFLICT do nothing', 'baz'],
   'right query';
+@sql = $abstract->insert('foo', {bar => 'baz'}, {on_conflict => undef});
+is_deeply \@sql,
+  ['INSERT INTO "foo" ( "bar") VALUES ( ? ) ON CONFLICT DO NOTHING', 'baz'],
+  'right query';
 @sql = $abstract->insert(
   'foo',
   {bar         => 'baz'},
