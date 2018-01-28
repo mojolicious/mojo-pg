@@ -175,7 +175,10 @@ SQL::Abstract::Pg - PostgreSQL Magic
 
 =head1 SYNOPSIS
 
+  use SQL::Abstract::Pg;
+
   my $abstract = SQL::Abstract::Pg->new;
+  say $abstract->select('some_table');
 
 =head1 DESCRIPTION
 
