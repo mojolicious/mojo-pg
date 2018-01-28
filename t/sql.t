@@ -58,9 +58,9 @@ is_deeply \@sql, $result, 'right query';
 
 # ON CONFLICT (unsupported value)
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => [{}]}) };
-like $@, qr/ARRAYREF value "HASH/, 'right error';
+like $@, qr/on_conflict value "HASH/, 'right error';
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => [[], []]}) };
-like $@, qr/ARRAYREF value "ARRAY/, 'right error';
+like $@, qr/on_conflict value "ARRAY/, 'right error';
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => {}}) };
 like $@, qr/HASHREF/, 'right error';
 
@@ -97,7 +97,7 @@ is_deeply \@sql, ['SELECT * FROM "foo" FOR update skip locked'], 'right query';
 
 # FOR (unsupported value)
 eval { $abstract->select('foo', '*', undef, {for => 'update skip locked'}) };
-like $@, qr/SCALAR value "update skip locked" not allowed/, 'right error';
+like $@, qr/for value "update skip locked" not allowed/, 'right error';
 eval { $abstract->select('foo', '*', undef, {for => []}) };
 like $@, qr/ARRAYREF/, 'right error';
 
@@ -118,5 +118,9 @@ is_deeply \@sql, $result, 'right query';
 is_deeply \@sql,
   ['SELECT * FROM "foo" LEFT JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
   'right query';
+
+# JOIN (unsupported value)
+eval { $abstract->select(['foo', []]) };
+like $@, qr/join value needs at least 3 elements/, 'right error';
 
 done_testing();

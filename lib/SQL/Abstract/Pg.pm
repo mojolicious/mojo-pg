@@ -25,9 +25,10 @@ sub _insert_returning {
       $conflict => {
         ARRAYREF => sub {
           my ($fields, $set) = @$conflict;
-          puke qq{ARRAYREF value "$fields" not allowed}
+          puke qq{on_conflict value "$fields" not allowed}
             unless ref $fields eq 'ARRAY';
-          puke qq{ARRAYREF value "$set" not allowed} unless ref $set eq 'HASH';
+          puke qq{on_conflict value "$set" not allowed}
+            unless ref $set eq 'HASH';
 
           $conflict_sql
             = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
@@ -96,7 +97,7 @@ sub _order_by {
     $self->_SWITCH_refkind(
       $for => {
         SCALAR => sub {
-          puke qq{SCALAR value "$for" not allowed} unless $for eq 'update';
+          puke qq{for value "$for" not allowed} unless $for eq 'update';
           $for_sql = $self->_sqlcase('UPDATE');
         },
         SCALARREF => sub { $for_sql .= $$for }
@@ -121,6 +122,7 @@ sub _table {
 
   $table = $self->SUPER::_table(\@table);
   for my $join (@join) {
+    puke 'join value needs at least 3 elements' if @$join < 3;
     my $type = @$join > 3 ? shift @$join : '';
     my ($name, $fk, $pk) = @$join;
     $table
