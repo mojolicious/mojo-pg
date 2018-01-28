@@ -123,6 +123,7 @@ sub _table {
   $table = $self->SUPER::_table(\@table);
   for my $join (@join) {
     puke 'join value needs at least 3 elements' if @$join < 3;
+    puke 'join values cannot be undefined' if grep { !defined $_ } @$join;
     my $type = @$join > 3 ? shift @$join : '';
     my ($name, $fk, $pk) = @$join;
     $table

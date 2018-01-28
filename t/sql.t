@@ -122,5 +122,7 @@ is_deeply \@sql,
 # JOIN (unsupported value)
 eval { $abstract->select(['foo', []]) };
 like $@, qr/join value needs at least 3 elements/, 'right error';
+eval { $abstract->select(['foo', [undef, undef, undef]]) };
+like $@, qr/join values cannot be undefined/, 'right error';
 
 done_testing();
