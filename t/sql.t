@@ -85,6 +85,23 @@ is_deeply \@sql, ['SELECT * FROM "foo" GROUP BY bar, baz'], 'right query';
 @sql = $abstract->select('foo', '*', undef, {group_by => ['bar', 'baz']});
 is_deeply \@sql, ['SELECT * FROM "foo" GROUP BY "bar", "baz"'], 'right query';
 
+# HAVING
+@sql = $abstract->select('foo', '*', undef,
+  {group_by => ['bar'], having => {baz => 'yada'}});
+is_deeply \@sql,
+  ['SELECT * FROM "foo" GROUP BY "bar" HAVING "baz" = ?', 'yada'],
+  'right query';
+@sql = $abstract->select(
+  'foo', '*',
+  {bar => {'>' => 'baz'}},
+  {group_by => ['bar'], having => {baz => {'<' => 'bar'}}}
+);
+$result = [
+  'SELECT * FROM "foo" WHERE ( "bar" > ? ) GROUP BY "bar" HAVING "baz" < ?',
+  'baz', 'bar'
+];
+is_deeply \@sql, $result, 'right query';
+
 # GROUP BY (unsupported value)
 eval { $abstract->select('foo', '*', undef, {group_by => {}}) };
 like $@, qr/HASHREF/, 'right error';

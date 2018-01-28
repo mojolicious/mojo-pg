@@ -75,6 +75,13 @@ sub _order_by {
     $sql .= $self->_sqlcase(' group by ') . $group_sql;
   }
 
+  # HAVING
+  if (defined(my $having = $options->{having})) {
+    my ($having_sql, @having_bind) = $self->_recurse_where($having);
+    $sql .= $self->_sqlcase(' having ') . $having_sql;
+    push @bind, @having_bind;
+  }
+
   # ORDER BY
   $sql .= $self->_order_by($options->{order_by})
     if defined $options->{order_by};
@@ -220,6 +227,14 @@ references to pass literal SQL are supported.
 
   # "select * from some_table group by foo, bar"
   $abstract->select('some_table', '*', undef, {group_by => \'foo, bar'});
+
+=head2 HAVING
+
+The C<having> option can be used to generate C<SELECT> queries with C<HAVING>
+clauses. Takes the same arguments as the C<$where> argument.
+
+  # "select * from t group by a having b = 'c'"
+  $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
 
 =head2 FOR
 
