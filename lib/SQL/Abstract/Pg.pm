@@ -150,6 +150,7 @@ sub _table {
   }
 
   $table = $self->SUPER::_table(\@table);
+  my $sep = $self->{name_sep} // '';
   for my $join (@join) {
     puke 'join must be in the form [$table, $fk => $pk]' if @$join < 3;
     my $type = @$join > 3 ? shift @$join : '';
@@ -158,8 +159,8 @@ sub _table {
       .= $self->_sqlcase($type =~ /^-(.+)$/ ? " $1 join " : ' join ')
       . $self->_quote($name)
       . $self->_sqlcase(' on ') . '('
-      . $self->_quote("$name.$fk") . ' = '
-      . $self->_quote("$table[0].$pk") . ')';
+      . $self->_quote(index($fk, $sep) > 0 ? $fk : "$name.$fk") . ' = '
+      . $self->_quote(index($pk, $sep) > 0 ? $pk : "$table[0].$pk") . ')';
   }
 
   return $table;
@@ -240,6 +241,9 @@ for.
 
   # "select * from foo join bar on (bar.foo_id = foo.id)"
   $abstract->select(['foo', ['bar', foo_id => 'id']]);
+
+  # "select * from foo join bar on (foo.id = bar.foo_id)"
+  $abstract->select(['foo', ['bar', 'foo.id' => 'bar.foo_id']]);
 
   # "select * from a join b on (b.a_id = a.id) join c on (c.a_id = a.id)"
   $abstract->select(['a', ['b', a_id => 'id'], ['c', a_id => 'id']]);

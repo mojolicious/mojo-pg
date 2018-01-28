@@ -138,6 +138,10 @@ like $@, qr/field alias must be in the form \[\$name => \$alias\]/,
 is_deeply \@sql,
   ['SELECT * FROM "foo" JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
   'right query';
+@sql = $abstract->select(['foo', ['bar', 'foo.id' => 'bar.foo_id']]);
+is_deeply \@sql,
+  ['SELECT * FROM "foo" JOIN "bar" ON ("foo"."id" = "bar"."foo_id")'],
+  'right query';
 @sql = $abstract->select(
   ['foo', ['bar', foo_id => 'id'], ['baz', foo_id => 'id']]);
 $result
