@@ -502,14 +502,19 @@ L<SQL::Abstract>.
 
 As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
-  # "select foo as bar from some_table"
-  $db->select('some_table', [[foo => 'bar']]);
-
   # "select * from foo join bar on (bar.foo_id = foo.id)"
   $db->select(['foo', ['bar', foo_id => 'id']]);
 
   # "select * from foo left join bar on (bar.foo_id = foo.id)"
   $db->select(['foo', [-left => 'bar', foo_id => 'id']]);
+
+  # "select foo as bar from some_table"
+  $db->select('some_table', [[foo => 'bar']]);
+
+  # "select extract(epoch from foo) as foo, bar from some_table"
+  $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
+
+Including a new last argument to pass many new options.
 
   # "select * from some_table where foo = 'bar' order by id desc"
   $db->select('some_table', '*', {foo => 'bar'}, {order_by => {-desc => 'id'}});
@@ -528,9 +533,6 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
   # "select * from some_table where id = 1 for update skip locked"
   $db->select('some_table', '*', {id => 1}, {for => \'update skip locked'});
-
-  # "select extract(epoch from foo) as foo, bar from some_table"
-  $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 
 =head2 select_p
 
