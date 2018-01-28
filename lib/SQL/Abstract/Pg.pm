@@ -157,8 +157,6 @@ used by L<Mojo::Pg>.
 
   $abstract->insert($table, \@values || \%fieldvals, \%options);
 
-Additional C<INSERT> query features.
-
 =head2 ON CONFLICT
 
 The C<on_conflict> option can be used to generate C<INSERT> queries with
@@ -186,8 +184,6 @@ This includes operations commonly referred to as C<upsert>.
 
   $abstract->select($source, $fields, $where, $order);
   $abstract->select($source, $fields, $where, \%options);
-
-Additional C<SELECT> query features.
 
 =head2 ORDER BY
 
