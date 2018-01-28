@@ -17,7 +17,7 @@ sub select {
     my @fields;
     for my $field (@$fields) {
       if (ref $field eq 'ARRAY') {
-        puke 'as value needs at least 2 elements' if @$field < 2;
+        puke 'field alias must be in the form [$name => $alias]' if @$field < 2;
         push @fields,
             $self->_quote($field->[0])
           . $self->_sqlcase(' as ')
@@ -47,9 +47,9 @@ sub _insert_returning {
       $conflict => {
         ARRAYREF => sub {
           my ($fields, $set) = @$conflict;
-          puke qq{on_conflict value "$fields" not allowed}
+          puke qq{on_conflict value "$fields" is not allowed}
             unless ref $fields eq 'ARRAY';
-          puke qq{on_conflict value "$set" not allowed}
+          puke qq{on_conflict value "$set" is not allowed}
             unless ref $set eq 'HASH';
 
           $conflict_sql
@@ -126,7 +126,7 @@ sub _order_by {
     $self->_SWITCH_refkind(
       $for => {
         SCALAR => sub {
-          puke qq{for value "$for" not allowed} unless $for eq 'update';
+          puke qq{for value "$for" is not allowed} unless $for eq 'update';
           $for_sql = $self->_sqlcase('UPDATE');
         },
         SCALARREF => sub { $for_sql .= $$for }
@@ -151,7 +151,7 @@ sub _table {
 
   $table = $self->SUPER::_table(\@table);
   for my $join (@join) {
-    puke 'join value needs at least 3 elements' if @$join < 3;
+    puke 'join must be in the form [$table, $fk => $pk]' if @$join < 3;
     my $type = @$join > 3 ? shift @$join : '';
     my ($name, $fk, $pk) = @$join;
     $table

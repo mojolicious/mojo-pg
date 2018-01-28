@@ -114,7 +114,7 @@ is_deeply \@sql, ['SELECT * FROM "foo" FOR update skip locked'], 'right query';
 
 # FOR (unsupported value)
 eval { $abstract->select('foo', '*', undef, {for => 'update skip locked'}) };
-like $@, qr/for value "update skip locked" not allowed/, 'right error';
+like $@, qr/for value "update skip locked" is not allowed/, 'right error';
 eval { $abstract->select('foo', '*', undef, {for => []}) };
 like $@, qr/ARRAYREF/, 'right error';
 
@@ -130,7 +130,8 @@ is_deeply \@sql,
 
 # AS (unsupported value)
 eval { $abstract->select('foo', [[]]) };
-like $@, qr/as value needs at least 2 elements/, 'right error';
+like $@, qr/field alias must be in the form \[\$name => \$alias\]/,
+  'right error';
 
 # JOIN
 @sql = $abstract->select(['foo', ['bar', foo_id => 'id']]);
@@ -160,6 +161,6 @@ is_deeply \@sql,
 
 # JOIN (unsupported value)
 eval { $abstract->select(['foo', []]) };
-like $@, qr/join value needs at least 3 elements/, 'right error';
+like $@, qr/join must be in the form \[\$table, \$fk => \$pk\]/, 'right error';
 
 done_testing();
