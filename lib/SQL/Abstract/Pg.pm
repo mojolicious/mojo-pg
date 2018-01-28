@@ -10,6 +10,28 @@ sub insert {
   return $self->SUPER::insert($table, $data, $options);
 }
 
+sub select {
+  my ($self, $table, $fields, @args) = @_;
+
+  if (ref $fields eq 'ARRAY') {
+    my @fields;
+    for my $field (@$fields) {
+      if (ref $field eq 'ARRAY') {
+        puke 'as value needs at least 2 elements' if @$field < 2;
+        push @fields,
+            $self->_quote($field->[0])
+          . $self->_sqlcase(' as ')
+          . $self->_quote($field->[1]);
+      }
+      elsif (ref $field eq 'SCALAR') { push @fields, $$field }
+      else                           { push @fields, $self->_quote($field) }
+    }
+    $fields = join ', ', @fields;
+  }
+
+  return $self->SUPER::select($table, $fields, @args);
+}
+
 sub _insert_returning {
   my ($self, $options) = @_;
 
@@ -130,7 +152,6 @@ sub _table {
   $table = $self->SUPER::_table(\@table);
   for my $join (@join) {
     puke 'join value needs at least 3 elements' if @$join < 3;
-    puke 'join values cannot be undefined' if grep { !defined $_ } @$join;
     my $type = @$join > 3 ? shift @$join : '';
     my ($name, $fk, $pk) = @$join;
     $table
@@ -247,6 +268,21 @@ pass literal SQL are supported.
 
   # "select * from some_table for update skip locked"
   $abstract->select('some_table', '*', undef, {for => \'update skip locked'});
+
+=head2 AS
+
+The C<$fields> argument now also accepts array references containing array
+references with field names and aliases, as well as array references containing
+scalar references with literal SQL.
+
+  # "select foo as bar from some_table"
+  $abstract->select('some_table', [[foo => 'bar']]);
+
+  # "select foo, bar as baz, yada from some_table"
+  $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
+
+  # "select extract(epoch from foo) as foo from some_table"
+  $abstract->select('some_table', [\'extract(epoch from foo) as foo']);
 
 =head2 JOIN
 

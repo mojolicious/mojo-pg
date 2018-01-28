@@ -2,6 +2,8 @@
 4.07  2018-01-28
   - Added support for "JOIN" to select and select_p methods in
     Mojo::Pg::Database.
+  - Added support for field aliases to select and select_p methods in
+    Mojo::Pg::Database.
   - Added support for having option to select and select_p methods in
     Mojo::Pg::Database.
   - Improved on_conflict option of insert and insert_p methods in

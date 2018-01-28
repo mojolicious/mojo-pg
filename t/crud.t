@@ -157,8 +157,10 @@ $db->query(
 );
 $db->insert('crud_test4', {test1 => 'hello'});
 $db->insert('crud_test5', {test2 => 'world'});
-is_deeply $db->select(['crud_test4', ['crud_test5', id => 'id']])
-  ->hashes->to_array, [{id => 1, test1 => 'hello', test2 => 'world'}],
+is_deeply $db->select(['crud_test4', ['crud_test5', id => 'id']],
+  ['crud_test4.id', 'test1', 'test2', ['crud_test4.test1' => 'test3']])
+  ->hashes->to_array,
+  [{id => 1, test1 => 'hello', test2 => 'world', test3 => 'hello'}],
   'right structure';
 
 # Clean up once we are done
