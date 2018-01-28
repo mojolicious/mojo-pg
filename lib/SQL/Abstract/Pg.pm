@@ -171,7 +171,7 @@ sub _table {
 
 =head1 NAME
 
-SQL::Abstract::Pg - PostgreSQL Magic
+SQL::Abstract::Pg - PostgreSQL
 
 =head1 SYNOPSIS
 
@@ -221,7 +221,7 @@ This includes operations commonly referred to as C<upsert>.
 
 The C<$fields> argument now also accepts array references containing array
 references with field names and aliases, as well as array references containing
-scalar references with literal SQL.
+scalar references to pass literal SQL.
 
   # "select foo as bar from some_table"
   $abstract->select('some_table', [[foo => 'bar']]);
@@ -229,8 +229,8 @@ scalar references with literal SQL.
   # "select foo, bar as baz, yada from some_table"
   $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
 
-  # "select extract(epoch from foo) as foo from some_table"
-  $abstract->select('some_table', [\'extract(epoch from foo) as foo']);
+  # "select extract(epoch from foo) as foo, bar from some_table"
+  $abstract->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 
 =head2 JOIN
 
@@ -285,7 +285,7 @@ references to pass literal SQL are supported.
 =head2 HAVING
 
 The C<having> option can be used to generate C<SELECT> queries with C<HAVING>
-clauses. Takes the same arguments as the C<$where> argument.
+clauses, which takes the same values as the C<$where> argument.
 
   # "select * from t group by a having b = 'c'"
   $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
