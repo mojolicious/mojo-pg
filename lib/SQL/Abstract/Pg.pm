@@ -214,6 +214,36 @@ This includes operations commonly referred to as C<upsert>.
   $abstract->select($source, $fields, $where, $order);
   $abstract->select($source, $fields, $where, \%options);
 
+=head2 AS
+
+The C<$fields> argument now also accepts array references containing array
+references with field names and aliases, as well as array references containing
+scalar references with literal SQL.
+
+  # "select foo as bar from some_table"
+  $abstract->select('some_table', [[foo => 'bar']]);
+
+  # "select foo, bar as baz, yada from some_table"
+  $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
+
+  # "select extract(epoch from foo) as foo from some_table"
+  $abstract->select('some_table', [\'extract(epoch from foo) as foo']);
+
+=head2 JOIN
+
+The C<$source> argument now also accepts array references containing not only
+table names, but also array references with tables to generate C<JOIN> clauses
+for.
+
+  # "select * from foo join bar on (bar.foo_id = foo.id)"
+  $abstract->select(['foo', ['bar', foo_id => 'id']]);
+
+  # "select * from a join b on (b.a_id = a.id) join c on (c.a_id = a.id)"
+  $abstract->select(['a', ['b', a_id => 'id'], ['c', a_id => 'id']]);
+
+  # "select * from foo left join bar on (bar.foo_id = foo.id)"
+  $abstract->select(['foo', [-left => 'bar', foo_id => 'id']]);
+
 =head2 ORDER BY
 
 Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now
@@ -268,36 +298,6 @@ pass literal SQL are supported.
 
   # "select * from some_table for update skip locked"
   $abstract->select('some_table', '*', undef, {for => \'update skip locked'});
-
-=head2 AS
-
-The C<$fields> argument now also accepts array references containing array
-references with field names and aliases, as well as array references containing
-scalar references with literal SQL.
-
-  # "select foo as bar from some_table"
-  $abstract->select('some_table', [[foo => 'bar']]);
-
-  # "select foo, bar as baz, yada from some_table"
-  $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
-
-  # "select extract(epoch from foo) as foo from some_table"
-  $abstract->select('some_table', [\'extract(epoch from foo) as foo']);
-
-=head2 JOIN
-
-The C<$source> argument now also accepts array references containing not only
-table names, but also array references with tables to generate C<JOIN> clauses
-for.
-
-  # "select * from foo join bar on (bar.foo_id = foo.id)"
-  $abstract->select(['foo', ['bar', foo_id => 'id']]);
-
-  # "select * from a join b on (b.a_id = a.id) join c on (c.a_id = a.id)"
-  $abstract->select(['a', ['b', a_id => 'id'], ['c', a_id => 'id']]);
-
-  # "select * from foo left join bar on (bar.foo_id = foo.id)"
-  $abstract->select(['foo', [-left => 'bar', foo_id => 'id']]);
 
 =head1 METHODS
 
