@@ -57,10 +57,9 @@ $result = [
 is_deeply \@sql, $result, 'right query';
 
 # ON CONFLICT (unsupported value)
-eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => [{}]}) };
-like $@, qr/on_conflict value "HASH/, 'right error';
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => [[], []]}) };
-like $@, qr/on_conflict value "ARRAY/, 'right error';
+like $@, qr/on_conflict value must be in the form \[\\\@fields, \\\%set\]/,
+  'right error';
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => {}}) };
 like $@, qr/HASHREF/, 'right error';
 

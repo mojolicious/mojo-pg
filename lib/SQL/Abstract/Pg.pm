@@ -47,10 +47,8 @@ sub _insert_returning {
       $conflict => {
         ARRAYREF => sub {
           my ($fields, $set) = @$conflict;
-          puke qq{on_conflict value "$fields" is not allowed}
-            unless ref $fields eq 'ARRAY';
-          puke qq{on_conflict value "$set" is not allowed}
-            unless ref $set eq 'HASH';
+          puke 'on_conflict value must be in the form [\@fields, \%set]'
+            unless ref $fields eq 'ARRAY' && ref $set eq 'HASH';
 
           $conflict_sql
             = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
