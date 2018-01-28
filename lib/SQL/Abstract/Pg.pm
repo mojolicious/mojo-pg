@@ -155,6 +155,8 @@ used by L<Mojo::Pg>.
 
 =head1 INSERT
 
+  $abstract->insert($table, \@values || \%fieldvals, \%options);
+
 Additional C<INSERT> query features.
 
 =head2 ON CONFLICT
@@ -182,12 +184,12 @@ This includes operations commonly referred to as C<upsert>.
 
 =head1 SELECT
 
+  $abstract->select($source, $fields, $where, $order);
+  $abstract->select($source, $fields, $where, \%options);
+
 Additional C<SELECT> query features.
 
 =head2 ORDER BY
-
-  $abstract->select($source, $fields, $where, $order);
-  $abstract->select($source, $fields, $where, \%options);
 
 Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now
 also pass a hash reference with various options. This includes C<order_by>,
