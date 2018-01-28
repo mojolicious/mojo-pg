@@ -118,6 +118,14 @@ is_deeply \@sql, $result, 'right query';
 is_deeply \@sql,
   ['SELECT * FROM "foo" LEFT JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
   'right query';
+@sql = $abstract->select(['foo', [-right => 'bar', foo_id => 'id']]);
+is_deeply \@sql,
+  ['SELECT * FROM "foo" RIGHT JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
+  'right query';
+@sql = $abstract->select(['foo', [-inner => 'bar', foo_id => 'id']]);
+is_deeply \@sql,
+  ['SELECT * FROM "foo" INNER JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
+  'right query';
 
 # JOIN (unsupported value)
 eval { $abstract->select(['foo', []]) };
