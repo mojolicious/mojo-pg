@@ -231,7 +231,7 @@ pass literal SQL are supported.
   $abstract->select('some_table', '*', undef, {for => 'update'});
 
   # "select * from some_table for update skip locked"
-  $abstract->select('some_table', '*, undef, {for => \'update skip locked'});
+  $abstract->select('some_table', '*', undef, {for => \'update skip locked'});
 
 =head2 JOIN
 
