@@ -205,7 +205,7 @@ SQL with bind values are supported.
 This includes operations commonly referred to as C<upsert>.
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
-  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a'], {a => 'c'}]);
+  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a'], {a => 'c'}]});
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert(
