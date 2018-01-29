@@ -46,13 +46,14 @@ sub _insert_returning {
     $self->_SWITCH_refkind(
       $conflict => {
         ARRAYREF => sub {
-          my ($fields, $set) = @$conflict;
-          puke 'on_conflict value must be in the form [\@fields, \%set]'
+          my ($target, $set) = @$conflict;
+          puke 'on_conflict value must be in the form [$target, \%set]'
             unless ref $set eq 'HASH';
 
-          $fields = [$fields] unless ref $fields eq 'ARRAY';
           $conflict_sql
-            = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
+            = ref $target eq 'SCALAR'
+            ? $$target
+            : '(' . $self->_quote($target) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
           my ($set_sql, @set_bind) = $self->_update_set_values($set);
           $conflict_sql .= $set_sql;
@@ -207,9 +208,6 @@ This includes operations commonly referred to as C<upsert>.
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
-
-  # "insert into t (a) values ('b') on conflict (a, b) do update set a = 'c'"
-  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a', 'b'], {a => 'c'}]});
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert(

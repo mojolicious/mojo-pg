@@ -47,17 +47,6 @@ is_deeply \@sql, $result, 'right query';
 @sql = $abstract->insert(
   'foo',
   {bar         => 'baz'},
-  {on_conflict => [['foo'], {foo => 'yada'}]}
-);
-$result = [
-  'INSERT INTO "foo" ( "bar") VALUES ( ? )'
-    . ' ON CONFLICT ("foo") DO UPDATE SET "foo" = ?',
-  'baz', 'yada'
-];
-is_deeply \@sql, $result, 'right query';
-@sql = $abstract->insert(
-  'foo',
-  {bar         => 'baz'},
   {on_conflict => [foo => {foo => 'yada'}]}
 );
 $result = [
@@ -69,7 +58,7 @@ is_deeply \@sql, $result, 'right query';
 
 # ON CONFLICT (unsupported value)
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => [[], []]}) };
-like $@, qr/on_conflict value must be in the form \[\\\@fields, \\\%set\]/,
+like $@, qr/on_conflict value must be in the form \[\$target, \\\%set\]/,
   'right error';
 eval { $abstract->insert('foo', {bar => 'baz'}, {on_conflict => {}}) };
 like $@, qr/HASHREF/, 'right error';
