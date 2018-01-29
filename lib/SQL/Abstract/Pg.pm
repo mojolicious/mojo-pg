@@ -48,8 +48,9 @@ sub _insert_returning {
         ARRAYREF => sub {
           my ($fields, $set) = @$conflict;
           puke 'on_conflict value must be in the form [\@fields, \%set]'
-            unless ref $fields eq 'ARRAY' && ref $set eq 'HASH';
+            unless ref $set eq 'HASH';
 
+          $fields = [$fields] unless ref $fields eq 'ARRAY';
           $conflict_sql
             = '(' . join(', ', map { $self->_quote($_) } @$fields) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
@@ -205,7 +206,10 @@ SQL with bind values are supported.
 This includes operations commonly referred to as C<upsert>.
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
-  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a'], {a => 'c'}]});
+  $abstract->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
+
+  # "insert into t (a) values ('b') on conflict (a, b) do update set a = 'c'"
+  $abstract->insert('t', {a => 'b'}, {on_conflict => [['a', 'b'], {a => 'c'}]});
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert(

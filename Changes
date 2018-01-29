@@ -1,5 +1,7 @@
 
 4.08  2018-01-29
+  - Improved on_conflict option of insert and insert_p methods in
+    Mojo::Pg::Database with a shortcut for simple conflict targets.
 
 4.07  2018-01-28
   - Added support for "JOIN" to select and select_p methods in
