@@ -50,10 +50,7 @@ sub _insert_returning {
           puke 'on_conflict value must be in the form [$target, \%set]'
             unless ref $set eq 'HASH';
 
-          $conflict_sql
-            = ref $target eq 'SCALAR'
-            ? $$target
-            : '(' . $self->_quote($target) . ')';
+          $conflict_sql = '(' . $self->_quote($target) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
           my ($set_sql, @set_bind) = $self->_update_set_values($set);
           $conflict_sql .= $set_sql;
