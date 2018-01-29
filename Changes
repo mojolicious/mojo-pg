@@ -1,4 +1,6 @@
 
+4.09  2018-01-30
+
 4.08  2018-01-29
   - Improved on_conflict option of insert and insert_p methods in
     Mojo::Pg::Database with a shortcut for simple conflict targets.
