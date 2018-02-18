@@ -92,7 +92,7 @@ is_deeply \@sql,
   'right query';
 @sql = $abstract->select(
   'foo', '*',
-  {bar => {'>' => 'baz'}},
+  {bar      => {'>' => 'baz'}},
   {group_by => ['bar'], having => {baz => {'<' => 'bar'}}}
 );
 $result = [
@@ -141,8 +141,9 @@ is_deeply \@sql,
 is_deeply \@sql,
   ['SELECT * FROM "foo" JOIN "bar" ON ("foo"."id" = "bar"."foo_id")'],
   'right query';
-@sql = $abstract->select(
-  ['foo', ['bar', foo_id => 'id'], ['baz', foo_id => 'id']]);
+@sql
+  = $abstract->select(['foo', ['bar', foo_id => 'id'], ['baz', foo_id => 'id']
+  ]);
 $result
   = [ 'SELECT * FROM "foo"'
     . ' JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'

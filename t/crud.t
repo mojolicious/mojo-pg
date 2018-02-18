@@ -33,7 +33,7 @@ is_deeply $db->select('crud_test')->hashes->to_array,
 $db->insert('crud_test', {id => 1, name => 'foo'}, {on_conflict => undef});
 $db->insert(
   'crud_test',
-  {id => 2, name => 'bar'},
+  {id          => 2, name => 'bar'},
   {on_conflict => [id => {name => 'baz'}]}
 );
 
@@ -117,12 +117,10 @@ is $result->{name}, 'promise', 'right result';
 $result = undef;
 my $first  = $pg->db->query_p("select * from crud_test where name = 'promise'");
 my $second = $pg->db->query_p("select * from crud_test where name = 'promise'");
-Mojo::Promise->all($first, $second)->then(
-  sub {
-    my ($first, $second) = @_;
-    $result = [$first->[0]->hash, $second->[0]->hash];
-  }
-)->wait;
+Mojo::Promise->all($first, $second)->then(sub {
+  my ($first, $second) = @_;
+  $result = [$first->[0]->hash, $second->[0]->hash];
+})->wait;
 is $result->[0]{name}, 'promise', 'right result';
 is $result->[1]{name}, 'promise', 'right result';
 $result = undef;

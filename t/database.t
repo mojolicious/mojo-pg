@@ -243,12 +243,10 @@ Mojo::IOLoop->delay(
     push @notifications, [$name, $pid, $payload];
     $db2->once(notification => $delay->begin);
     my $tx = $db2->begin;
-    Mojo::IOLoop->next_tick(
-      sub {
-        $db2->notify(dbtest2 => 'baz');
-        $tx->commit;
-      }
-    );
+    Mojo::IOLoop->next_tick(sub {
+      $db2->notify(dbtest2 => 'baz');
+      $tx->commit;
+    });
   },
   sub {
     my ($delay, $name, $pid, $payload) = @_;
