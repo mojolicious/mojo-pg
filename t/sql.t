@@ -132,6 +132,11 @@ eval { $abstract->select('foo', [[]]) };
 like $@, qr/field alias must be in the form \[\$name => \$alias\]/,
   'right error';
 
+# JSON
+@sql = $abstract->update('foo', {bar => {-json => [1, 2, 3]}});
+is_deeply \@sql, ['UPDATE "foo" SET "bar" = ?', {json => [1, 2, 3]}],
+  'right query';
+
 # JOIN
 @sql = $abstract->select(['foo', ['bar', foo_id => 'id']]);
 is_deeply \@sql,

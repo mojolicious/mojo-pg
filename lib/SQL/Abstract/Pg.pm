@@ -10,6 +10,18 @@ sub insert {
   return $self->SUPER::insert($table, $data, $options);
 }
 
+sub new {
+  my $self = shift->SUPER::new(@_);
+
+  # -json op
+  push @{$self->{unary_ops}}, {
+    regex   => qr/^json$/,
+    handler => sub { '?', {json => $_[2]} }
+  };
+
+  return $self;
+}
+
 sub select {
   my ($self, $table, $fields, @args) = @_;
 
@@ -290,6 +302,14 @@ clauses, which takes the same values as the C<$where> argument.
 
   # "select * from t group by a having b = 'c'"
   $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
+
+=head2 JSON
+
+In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary
+op to encode JSON from Perl data structures.
+
+  # "update some_table set foo = '[1,2,3]' where bar = 23"
+  $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
 
 =head2 FOR
 

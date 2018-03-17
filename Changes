@@ -1,5 +1,6 @@
 
-4.09  2018-01-30
+4.09  2018-03-17
+  - Added support for -json unary op to SQL::Abstract::Pg.
 
 4.08  2018-01-29
   - Improved on_conflict option of insert and insert_p methods in

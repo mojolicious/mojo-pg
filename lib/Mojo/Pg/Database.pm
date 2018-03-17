@@ -595,6 +595,9 @@ L<SQL::Abstract>.
   # "update some_table set foo = 'bar' where id = 23 returning id"
   $db->update('some_table', {foo => 'bar'}, {id => 23}, {returning => 'id'});
 
+  # "update some_table set foo = '[1,2,3]' where bar = 23"
+  $db->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
+
 =head2 update_p
 
   my $promise = $db->update_p($table, \%fieldvals, \%where, \%options);
