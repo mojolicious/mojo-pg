@@ -195,6 +195,14 @@ SQL::Abstract::Pg - PostgreSQL
 L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features
 used by L<Mojo::Pg>.
 
+=head2 JSON
+
+In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary
+op to encode JSON from Perl data structures.
+
+  # "update some_table set foo = '[1,2,3]' where bar = 23"
+  $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
+
 =head1 INSERT
 
   $abstract->insert($table, \@values || \%fieldvals, \%options);
@@ -302,14 +310,6 @@ clauses, which takes the same values as the C<$where> argument.
 
   # "select * from t group by a having b = 'c'"
   $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
-
-=head2 JSON
-
-In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary
-op to encode JSON from Perl data structures.
-
-  # "update some_table set foo = '[1,2,3]' where bar = 23"
-  $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
 
 =head2 FOR
 
