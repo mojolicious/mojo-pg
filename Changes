@@ -1,6 +1,8 @@
 
-4.09  2018-03-17
+4.09  2018-03-24
   - Added support for -json unary op to SQL::Abstract::Pg.
+  - Added support for multi-column unique constraints in upserts to
+    SQL::Abstract::Pg.
 
 4.08  2018-01-29
   - Improved on_conflict option of insert and insert_p methods in

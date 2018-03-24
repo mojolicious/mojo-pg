@@ -61,8 +61,10 @@ sub _insert_returning {
           my ($target, $set) = @$conflict;
           puke 'on_conflict value must be in the form [$target, \%set]'
             unless ref $set eq 'HASH';
+          $target = [$target] unless ref $target eq 'ARRAY';
 
-          $conflict_sql = '(' . $self->_quote($target) . ')';
+          $conflict_sql
+            = '(' . join(', ', map { $self->_quote($_) } @$target) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
           my ($set_sql, @set_bind) = $self->_update_set_values($set);
           $conflict_sql .= $set_sql;
@@ -225,6 +227,11 @@ This includes operations commonly referred to as C<upsert>.
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
+
+  # "insert into t (a, b) values ('c', 'd')
+  #  on conflict (a, b) do update set a = 'e'"
+  $abstract->insert(
+    't', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $abstract->insert(

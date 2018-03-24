@@ -374,6 +374,11 @@ Including operations commonly referred to as C<upsert>.
   # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
   $db->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
 
+  # "insert into t (a, b) values ('c', 'd')
+  #  on conflict (a, b) do update set a = 'e'"
+  $db->insert(
+    't', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
+
 =head2 insert_p
 
   my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);
