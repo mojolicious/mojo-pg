@@ -147,6 +147,10 @@ like $@, qr/field alias must be in the form \[\$name => \$alias\]/,
 @sql = $abstract->update('foo', {bar => {-json => [1, 2, 3]}});
 is_deeply \@sql, ['UPDATE "foo" SET "bar" = ?', {json => [1, 2, 3]}],
   'right query';
+@sql = $abstract->select('foo', '*', {bar => {'=' => {-json => [1, 2, 3]}}});
+is_deeply \@sql,
+  ['SELECT * FROM "foo" WHERE ( "bar" = ? )', {json => [1, 2, 3]}],
+  'right query';
 
 # JOIN
 @sql = $abstract->select(['foo', ['bar', foo_id => 'id']]);

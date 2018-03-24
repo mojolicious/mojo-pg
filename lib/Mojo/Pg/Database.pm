@@ -516,6 +516,9 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
   # "select foo as bar from some_table"
   $db->select('some_table', [[foo => 'bar']]);
 
+  # "select * from some_table where foo = '[1,2,3]'"
+  $db->select('some_table', '*', {foo => {'=' => {-json => [1, 2, 3]}}});
+
   # "select extract(epoch from foo) as foo, bar from some_table"
   $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 

@@ -205,6 +205,9 @@ op to encode JSON from Perl data structures.
   # "update some_table set foo = '[1,2,3]' where bar = 23"
   $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
 
+  # "select * from some_table where foo = '[1,2,3]'"
+  $abstract->select('some_table', '*', {foo => {'=' => {-json => [1, 2, 3]}}});
+
 =head1 INSERT
 
   $abstract->insert($table, \@values || \%fieldvals, \%options);
