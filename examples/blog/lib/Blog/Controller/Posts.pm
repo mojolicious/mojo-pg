@@ -27,33 +27,32 @@ sub show {
 sub store {
   my $self = shift;
 
-  my $validation = $self->_validation;
-  return $self->render(action => 'create', post => {})
-    if $validation->has_error;
+  my $v = $self->_validation;
+  return $self->render(action => 'create', post => {}) if $v->has_error;
 
-  my $id = $self->posts->add($validation->output);
+  my $id = $self->posts->add($v->output);
   $self->redirect_to('show_post', id => $id);
 }
 
 sub update {
   my $self = shift;
 
-  my $validation = $self->_validation;
-  return $self->render(action => 'edit', post => {}) if $validation->has_error;
+  my $v = $self->_validation;
+  return $self->render(action => 'edit', post => {}) if $v->has_error;
 
   my $id = $self->param('id');
-  $self->posts->save($id, $validation->output);
+  $self->posts->save($id, $v->output);
   $self->redirect_to('show_post', id => $id);
 }
 
 sub _validation {
   my $self = shift;
 
-  my $validation = $self->validation;
-  $validation->required('title');
-  $validation->required('body');
+  my $v = $self->validation;
+  $v->required('title');
+  $v->required('body');
 
-  return $validation;
+  return $v;
 }
 
 1;
