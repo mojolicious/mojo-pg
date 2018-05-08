@@ -624,6 +624,6 @@ callback.
 
 =head1 SEE ALSO
 
-L<Mojo::Pg>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
+L<Mojo::Pg>, L<Mojolicious::Guides>, L<https://mojolicious.org>.
 
 =cut
