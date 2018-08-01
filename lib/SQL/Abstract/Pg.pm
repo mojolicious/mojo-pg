@@ -22,28 +22,6 @@ sub new {
   return $self;
 }
 
-sub select {
-  my ($self, $table, $fields, @args) = @_;
-
-  if (ref $fields eq 'ARRAY') {
-    my @fields;
-    for my $field (@$fields) {
-      if (ref $field eq 'ARRAY') {
-        puke 'field alias must be in the form [$name => $alias]' if @$field < 2;
-        push @fields,
-            $self->_quote($field->[0])
-          . $self->_sqlcase(' as ')
-          . $self->_quote($field->[1]);
-      }
-      elsif (ref $field eq 'SCALAR') { push @fields, $$field }
-      else                           { push @fields, $self->_quote($field) }
-    }
-    $fields = join ', ', @fields;
-  }
-
-  return $self->SUPER::select($table, $fields, @args);
-}
-
 sub _insert_returning {
   my ($self, $options) = @_;
 
@@ -149,6 +127,36 @@ sub _order_by {
   return $sql, @bind;
 }
 
+sub _select_fields {
+  my ($self, $fields) = @_;
+
+  return $fields unless ref $fields eq 'ARRAY';
+
+  my (@fields, @bind);
+  for my $field (@$fields) {
+    $self->_SWITCH_refkind(
+      $field => {
+        ARRAYREF => sub {
+          puke 'field alias must be in the form [$name => $alias]'
+            if @$field < 2;
+          push @fields,
+              $self->_quote($field->[0])
+            . $self->_sqlcase(' as ')
+            . $self->_quote($field->[1]);
+        },
+        ARRAYREFREF => sub {
+          push @fields, shift @$$field;
+          push @bind,   @$$field;
+        },
+        SCALARREF => sub { push @fields, $$field },
+        FALLBACK  => sub { push @fields, $self->_quote($field) }
+      }
+    );
+  }
+
+  return join(', ', @fields), @bind;
+}
+
 sub _table {
   my ($self, $table) = @_;
 
@@ -249,7 +257,8 @@ This includes operations commonly referred to as C<upsert>.
 
 The C<$fields> argument now also accepts array references containing array
 references with field names and aliases, as well as array references containing
-scalar references to pass literal SQL.
+scalar references to pass literal SQL and array reference references to pass
+literal SQL with bind values.
 
   # "select foo as bar from some_table"
   $abstract->select('some_table', [[foo => 'bar']]);
@@ -259,6 +268,9 @@ scalar references to pass literal SQL.
 
   # "select extract(epoch from foo) as foo, bar from some_table"
   $abstract->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
+
+  # "select 'test' as foo, bar from some_table"
+  $abstract->select('some_table', [\['? as foo', 'test'], 'bar']);
 
 =head2 JOIN
 

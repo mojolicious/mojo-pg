@@ -137,6 +137,9 @@ is_deeply \@sql, ['SELECT "bar", "bar" AS "baz", "yada" FROM "foo"'],
 is_deeply \@sql,
   ['SELECT "bar", extract(epoch from baz) as baz, "yada" FROM "foo"'],
   'right query';
+@sql = $abstract->select('foo', ['bar', \['? as baz', 'test'], 'yada']);
+is_deeply \@sql, ['SELECT "bar", ? as baz, "yada" FROM "foo"', 'test'],
+  'right query';
 
 # AS (unsupported value)
 eval { $abstract->select('foo', [[]]) };

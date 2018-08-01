@@ -522,6 +522,9 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
   # "select extract(epoch from foo) as foo, bar from some_table"
   $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 
+  # "select 'test' as foo, bar from some_table"
+  $db->select('some_table', [\['? as foo', 'test'], 'bar']);
+
 Including a new last argument to pass many new options.
 
   # "select * from some_table where foo = 'bar' order by id desc"
