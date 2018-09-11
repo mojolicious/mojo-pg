@@ -1,5 +1,5 @@
 
-# Mojo::Pg [![Build Status](https://travis-ci.com/kraih/mojo-pg.svg?branch=master)](https://travis-ci.com/kraih/mojo-pg)
+# Mojo::Pg [![Build Status](https://travis-ci.com/mojolicious/mojo-pg.svg?branch=master)](https://travis-ci.com/mojolicious/mojo-pg)
 
   A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes
   [PostgreSQL](https://www.postgresql.org) a lot of fun to use with the

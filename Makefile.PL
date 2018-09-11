@@ -18,13 +18,13 @@ WriteMakefile(
     no_index       => {directory => ['examples', 't']},
     prereqs        => {runtime => {requires => {perl => '5.010001'}}},
     resources      => {
-      bugtracker => {web => 'https://github.com/kraih/mojo-pg/issues'},
+      bugtracker => {web => 'https://github.com/mojolicious/mojo-pg/issues'},
       homepage   => 'https://mojolicious.org',
       license    => ['http://www.opensource.org/licenses/artistic-license-2.0'],
       repository => {
         type => 'git',
-        url  => 'https://github.com/kraih/mojo-pg.git',
-        web  => 'https://github.com/kraih/mojo-pg',
+        url  => 'https://github.com/mojolicious/mojo-pg.git',
+        web  => 'https://github.com/mojolicious/mojo-pg',
       },
       x_IRC => 'irc://irc.perl.org/#mojo'
     },

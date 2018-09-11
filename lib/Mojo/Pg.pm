@@ -299,13 +299,14 @@ Which get integrated into your application with helpers.
 =head1 EXAMPLES
 
 This distribution also contains two great
-L<example applications|https://github.com/kraih/mojo-pg/tree/master/examples/>
+L<example
+applications|https://github.com/mojolicious/mojo-pg/tree/master/examples/>
 you can use for inspiration. The minimal
-L<chat|https://github.com/kraih/mojo-pg/tree/master/examples/chat.pl>
+L<chat|https://github.com/mojolicious/mojo-pg/tree/master/examples/chat.pl>
 application will show you how to scale WebSockets to multiple servers, and the
 well-structured
-L<blog|https://github.com/kraih/mojo-pg/tree/master/examples/blog> application
-how to apply the MVC design pattern in practice.
+L<blog|https://github.com/mojolicious/mojo-pg/tree/master/examples/blog>
+application how to apply the MVC design pattern in practice.
 
 =head1 EVENTS
 
@@ -576,7 +577,7 @@ the terms of the Artistic License version 2.0.
 
 =head1 SEE ALSO
 
-L<https://github.com/kraih/mojo-pg>, L<Mojolicious::Guides>,
+L<https://github.com/mojolicious/mojo-pg>, L<Mojolicious::Guides>,
 L<https://mojolicious.org>.
 
 =cut
