@@ -26,7 +26,7 @@ WriteMakefile(
         url  => 'https://github.com/mojolicious/mojo-pg.git',
         web  => 'https://github.com/mojolicious/mojo-pg',
       },
-      x_IRC => 'irc://irc.perl.org/#mojo'
+      x_IRC => 'irc://irc.freenode.net/#mojo'
     },
   },
   PREREQ_PM =>
