@@ -42,7 +42,7 @@ has pubsub => sub {
   return $pubsub;
 };
 
-our $VERSION = '4.10';
+our $VERSION = '4.11';
 
 sub db { $_[0]->database_class->new(dbh => $_[0]->_prepare, pg => $_[0]) }
 
