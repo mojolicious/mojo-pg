@@ -9,7 +9,7 @@ use Mojo::Util 'decode';
 use constant DEBUG => $ENV{MOJO_MIGRATIONS_DEBUG} || 0;
 
 has name => 'migrations';
-has 'pg';
+has pg => undef, weak => 1;
 
 sub active { $_[0]->_active($_[0]->pg->db) }
 
@@ -162,7 +162,8 @@ Name for this set of migrations, defaults to C<migrations>.
   my $pg      = $migrations->pg;
   $migrations = $migrations->pg(Mojo::Pg->new);
 
-L<Mojo::Pg> object these migrations belong to.
+L<Mojo::Pg> object these migrations belong to. Note that this attribute is
+weakened.
 
 =head1 METHODS
 

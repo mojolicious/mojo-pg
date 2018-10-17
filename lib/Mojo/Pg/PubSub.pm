@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::JSON qw(from_json to_json);
 use Scalar::Util 'weaken';
 
-has 'pg';
+has pg => undef, weak => 1;
 
 sub DESTROY { Mojo::Util::_global_destruction() or shift->reset }
 
@@ -40,7 +40,6 @@ sub _db {
   return $self->{db} if $self->{db};
 
   my $db = $self->{db} = $self->pg->db;
-  weaken $db->{pg};
   weaken $self;
   $db->on(
     notification => sub {
@@ -110,7 +109,8 @@ L<Mojo::Pg::PubSub> implements the following attributes.
   my $pg  = $pubsub->pg;
   $pubsub = $pubsub->pg(Mojo::Pg->new);
 
-L<Mojo::Pg> object this publish/subscribe container belongs to.
+L<Mojo::Pg> object this publish/subscribe container belongs to. Note that this
+attribute is weakened.
 
 =head1 METHODS
 

@@ -1,7 +1,7 @@
 package Mojo::Pg::Transaction;
 use Mojo::Base -base;
 
-has 'db';
+has db => undef, weak => 1;
 
 sub DESTROY {
   my $self = shift;
@@ -50,7 +50,8 @@ L<Mojo::Pg::Transaction> implements the following attributes.
   my $db = $tx->db;
   $tx    = $tx->db(Mojo::Pg::Database->new);
 
-L<Mojo::Pg::Database> object this transaction belongs to.
+L<Mojo::Pg::Database> object this transaction belongs to. Note that this
+attribute is weakened.
 
 =head1 METHODS
 

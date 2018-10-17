@@ -1,5 +1,7 @@
 
-4.11  2018-09-16
+4.11  2018-10-18
+  - Improved various attributes to use new Mojolicious 8.03 features to avoid
+    memory leaks.
 
 4.10  2018-09-15
   - Updated project metadata.

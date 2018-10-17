@@ -7,7 +7,7 @@ use Mojo::Pg::Database;
 use Mojo::Pg::Migrations;
 use Mojo::Pg::PubSub;
 use Mojo::URL;
-use Scalar::Util qw(blessed weaken);
+use Scalar::Util 'blessed';
 use SQL::Abstract::Pg;
 
 has abstract => sub {
@@ -21,12 +21,8 @@ has [qw(auto_migrate parent search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
 has max_connections => 1;
-has migrations      => sub {
-  my $migrations = Mojo::Pg::Migrations->new(pg => shift);
-  weaken $migrations->{pg};
-  return $migrations;
-};
-has options => sub {
+has migrations      => sub { Mojo::Pg::Migrations->new(pg => shift) };
+has options         => sub {
   {
     AutoCommit          => 1,
     AutoInactiveDestroy => 1,
@@ -36,11 +32,7 @@ has options => sub {
   };
 };
 has [qw(password username)] => '';
-has pubsub => sub {
-  my $pubsub = Mojo::Pg::PubSub->new(pg => shift);
-  weaken $pubsub->{pg};
-  return $pubsub;
-};
+has pubsub => sub { Mojo::Pg::PubSub->new(pg => shift) };
 
 our $VERSION = '4.11';
 

@@ -9,9 +9,9 @@ use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
 use Mojo::Promise;
 use Mojo::Util 'monkey_patch';
-use Scalar::Util 'weaken';
 
-has [qw(dbh pg)];
+has 'dbh';
+has pg => undef, weak => 1;
 has results_class => 'Mojo::Pg::Results';
 
 for my $name (qw(delete insert select update)) {
@@ -35,12 +35,7 @@ sub DESTROY {
   $pg->_enqueue($dbh) unless $dbh->{private_mojo_no_reuse};
 }
 
-sub begin {
-  my $self = shift;
-  my $tx = Mojo::Pg::Transaction->new(db => $self);
-  weaken $tx->{db};
-  return $tx;
-}
+sub begin { Mojo::Pg::Transaction->new(db => shift) }
 
 sub disconnect {
   my $self = shift;
@@ -242,7 +237,8 @@ L<DBD::Pg> database handle used for all queries.
   my $pg = $db->pg;
   $db    = $db->pg(Mojo::Pg->new);
 
-L<Mojo::Pg> object this database belongs to.
+L<Mojo::Pg> object this database belongs to. Note that this attribute is
+weakened.
 
 =head2 results_class
 
