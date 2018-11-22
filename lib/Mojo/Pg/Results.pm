@@ -46,7 +46,7 @@ sub _expand {
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
-    my @idx = grep { $types->[$_] eq 'json' || $types->[$_] eq 'jsonb' }
+    my @idx   = grep { $types->[$_] eq 'json' || $types->[$_] eq 'jsonb' }
       0 .. $#$types;
     ($idx, $name) = @$self{qw(idx name)} = (\@idx, [@{$self->columns}[@idx]]);
   }

@@ -9,7 +9,7 @@ use Mojo::Util 'decode';
 use constant DEBUG => $ENV{MOJO_MIGRATIONS_DEBUG} || 0;
 
 has name => 'migrations';
-has pg => undef, weak => 1;
+has pg   => undef, weak => 1;
 
 sub active { $_[0]->_active($_[0]->pg->db) }
 

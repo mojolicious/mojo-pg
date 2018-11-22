@@ -105,7 +105,7 @@ is_deeply \@test, [], 'no messages';
 };
 
 # Reconnect while not listening
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 $pg->pubsub->notify(pstest => 'fail');
@@ -124,7 +124,7 @@ is_deeply \@test, [], 'no messages';
 };
 
 # Reset
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });

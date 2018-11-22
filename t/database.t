@@ -54,7 +54,7 @@ Mojo::IOLoop->delay(
   },
   sub {
     my ($delay, $err_one, $one, $err_two, $two, $err_again, $again) = @_;
-    $fail = $err_one || $err_two || $err_again;
+    $fail   = $err_one || $err_two || $err_again;
     $result = [$one->hashes->first, $two->hashes->first, $again->hashes->first];
   }
 )->wait;

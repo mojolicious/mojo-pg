@@ -59,7 +59,7 @@ $delay->wait;
 is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}],
   'right structure';
 $result = undef;
-$delay = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
+$delay  = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
 $db->select('crud_test', undef, undef, {-desc => 'id'}, $delay->begin);
 $delay->wait;
 is_deeply $result, [{id => 2, name => 'baz'}, {id => 1, name => 'foo'}],

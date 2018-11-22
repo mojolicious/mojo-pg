@@ -11,7 +11,7 @@ use Mojo::Promise;
 use Mojo::Util 'monkey_patch';
 
 has 'dbh';
-has pg => undef, weak => 1;
+has pg            => undef, weak => 1;
 has results_class => 'Mojo::Pg::Results';
 
 for my $name (qw(delete insert select update)) {

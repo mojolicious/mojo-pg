@@ -51,7 +51,7 @@ sub from_string {
     unless $url->protocol =~ /^postgres(?:ql)?$/;
 
   # Connection information
-  my $db = $url->path->parts->[0];
+  my $db  = $url->path->parts->[0];
   my $dsn = defined $db ? "dbi:Pg:dbname=$db" : 'dbi:Pg:';
   if (my $host = $url->host) { $dsn .= ";host=$host" }
   if (my $port = $url->port) { $dsn .= ";port=$port" }
