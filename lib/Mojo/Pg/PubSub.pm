@@ -67,6 +67,11 @@ sub _json { $_[1], $_[0]{json}{$_[1]} ? to_json $_[2] : $_[2] }
 
 Mojo::Pg::PubSub - Publish/Subscribe
 
+=head1 WARNING
+
+THIS MODULE CAN CURRENTLY STOP WORKING DUE TO A RECONNECT ISSUE.
+UNTIL THIS HAS BEEN RESOLVED WE CANNOT RECOMMEND PRODUCTION USAGE.
+
 =head1 SYNOPSIS
 
   use Mojo::Pg::PubSub;
