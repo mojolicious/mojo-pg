@@ -105,7 +105,7 @@ is_deeply \@test, [], 'no messages';
 };
 
 # Reconnect while listening multiple retries
-$pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+$pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->reconnect_interval(0.1);
 $pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
@@ -117,7 +117,11 @@ is_deeply \@test, [], 'no messages';
   $pg->pubsub->on(
     reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
   my $dsn = $pg->dsn;
-  $pg->pubsub->on(disconnect => sub { Mojo::IOLoop->timer(0.2 => sub{ $pg->dsn($dsn) }) });
+  $pg->pubsub->on(
+    disconnect => sub {
+      Mojo::IOLoop->timer(0.2 => sub { $pg->dsn($dsn) });
+    }
+  );
   $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
   $pg->dsn('dbi:Pg:badoption=1');
   Mojo::IOLoop->start;
