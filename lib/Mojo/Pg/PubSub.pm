@@ -5,36 +5,9 @@ use Mojo::JSON qw(from_json to_json);
 use Scalar::Util 'weaken';
 
 has pg => undef, weak => 1;
+has reconnect_interval => 1;
 
-sub DESTROY { Mojo::Util::_global_destruction() or shift->reset }
-
-sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
-
-sub listen {
-  my ($self, $name, $cb) = @_;
-  $self->_db->listen($name) unless @{$self->{chans}{$name} ||= []};
-  push @{$self->{chans}{$name}}, $cb;
-  return $cb;
-}
-
-sub notify { $_[0]->_db->notify(_json(@_)) and return $_[0] }
-
-sub reset {
-  my $self = shift;
-  delete @$self{qw(chans json pid)};
-  return unless my $db = delete $self->{db};
-  ++$db->dbh->{private_mojo_no_reuse} and $db->_unwatch;
-}
-
-sub unlisten {
-  my ($self, $name, $cb) = @_;
-  my $chan = $self->{chans}{$name};
-  @$chan = $cb ? grep { $cb ne $_ } @$chan : ();
-  $self->_db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
-  return $self;
-}
-
-sub _db {
+sub db {
   my $self = shift;
 
   return $self->{db} if $self->{db};
@@ -49,11 +22,55 @@ sub _db {
       for my $cb (@cbs) { $self->$cb($payload) }
     }
   );
-  $db->once(close => sub { $self->{pg} and $self->_db if delete $self->{db} });
+  # not sure if the disconnect argument is necessary but it seemed symmetric with reconnect
+  $db->once(close => sub { $self->emit(disconnect => delete $self->{db}) });
   $db->listen($_) for keys %{$self->{chans}}, 'mojo.pubsub';
   $self->emit(reconnect => $db);
 
   return $db;
+}
+
+sub DESTROY { Mojo::Util::_global_destruction() or shift->reset }
+
+sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
+
+sub listen {
+  my ($self, $name, $cb) = @_;
+  $self->db->listen($name) unless @{$self->{chans}{$name} ||= []};
+  push @{$self->{chans}{$name}}, $cb;
+  return $cb;
+}
+
+sub new {
+  my $self = shift->SUPER::new(@_);
+  $self->on(disconnect => sub {
+    my $self = shift;
+    return unless $self->{chans}
+      && (my $interval = $self->reconnect_interval) >= 0;
+    weaken $self;
+    my $r;
+    $r = Mojo::IOLoop->recurring($interval => sub {
+      Mojo::IOLoop->remove($r) if eval { $self->db };
+    });
+  });
+  return $self;
+}
+
+sub notify { $_[0]->db->notify(_json(@_)) and return $_[0] }
+
+sub reset {
+  my $self = shift;
+  delete @$self{qw(chans json pid)};
+  return unless my $db = delete $self->{db};
+  ++$db->dbh->{private_mojo_no_reuse} and $db->_unwatch;
+}
+
+sub unlisten {
+  my ($self, $name, $cb) = @_;
+  my $chan = $self->{chans}{$name};
+  @$chan = $cb ? grep { $cb ne $_ } @$chan : ();
+  $self->db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
+  return $self;
 }
 
 sub _json { $_[1], $_[0]{json}{$_[1]} ? to_json $_[2] : $_[2] }
@@ -90,6 +107,15 @@ scalability problems.
 L<Mojo::Pg::PubSub> inherits all events from L<Mojo::EventEmitter> and can
 emit the following new ones.
 
+=head2 disconnect
+
+  $pubsub->on(disconnect => sub {
+    my ($pubsub, $db) = @_;
+    ...
+  });
+
+Emitted after the current database connection is lost.
+
 =head2 reconnect
 
   $pubsub->on(reconnect => sub {
@@ -112,10 +138,28 @@ L<Mojo::Pg::PubSub> implements the following attributes.
 L<Mojo::Pg> object this publish/subscribe container belongs to. Note that this
 attribute is weakened.
 
+=head2 reconnect_interval
+
+  my $interval = $pubsub->reconnect_interval;
+  $pubsub      = $pubsub->reconnect_interval(0.1);
+
+The amount of time in seconds to wait to reconnect after disconnecting. If zero
+reconnects immediately, if negative, no reconnect is attempted. Default is 1.
+
 =head1 METHODS
 
 L<Mojo::Pg::PubSub> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
+
+=head2 db
+
+  my $db = $pubsub->db;
+
+Build and cache or get cached L<Mojo::Pg::Database> connection from L</pg>.
+Used to reconnect if disconnected.
+
+  # reconnect immediately
+  $pubsub->unsubscribe('disconnect')->on(disconnect => sub { shift->db });
 
 =head2 json
 
@@ -148,6 +192,15 @@ L</"json">.
     my ($pubsub, $payload) = @_;
     say "Two: $payload";
   });
+
+=head2 new
+
+  my $pubsub = Mojo::Pg::PubSub->new;
+  my $pubsub = Mojo::Pg::PubSub->new(pg => Mojo::Pg->new);
+  my $pubsub = Mojo::Pg::PubSub->new({pg => Mojo::Pg->new});
+
+Construct a new L<Mojo::Pg::PubSub> object and subscribe to the L</disconnect>
+event with default reconnect logic.
 
 =head2 notify
 
