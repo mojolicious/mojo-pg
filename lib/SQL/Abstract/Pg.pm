@@ -172,17 +172,18 @@ sub _table {
   my $sep = $self->{name_sep} // '';
   for my $join (@join) {
     puke 'join must be in the form [$table, $fk => $pk]' if @$join < 3;
-    my $type = @$join%2 == 0 ? shift @$join : '';
+    my $type = @$join % 2 == 0 ? shift @$join : '';
     my ($name, $fk, $pk, @morekeys) = @$join;
     $table
       .= $self->_sqlcase($type =~ /^-(.+)$/ ? " $1 join " : ' join ')
       . $self->_quote($name)
       . $self->_sqlcase(' on ') . '(';
     do {
-      $table .= $self->_quote(index($fk, $sep) > 0 ? $fk : "$name.$fk") . ' = '
-             . $self->_quote(index($pk, $sep) > 0 ? $pk : "$table[0].$pk")
-             . (@morekeys ? $self->_sqlcase(' and ') : ')');
-      } while ($fk, $pk, @morekeys) = @morekeys;
+      $table
+        .= $self->_quote(index($fk, $sep) > 0 ? $fk : "$name.$fk") . ' = '
+        . $self->_quote(index($pk, $sep) > 0 ? $pk : "$table[0].$pk")
+        . (@morekeys ? $self->_sqlcase(' and ') : ')');
+    } while ($fk, $pk, @morekeys) = @morekeys;
   }
 
   return $table;
