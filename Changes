@@ -1,5 +1,6 @@
 
-4.13  2018-11-25
+4.13  2019-01-20
+  - Added support for multi-column joins to SQL::Abstract::Pg. (rsindlin)
 
 4.12  2018-11-24
   - Added reconnect_interval attribute to Mojo::Pg::PubSub. (jberger)

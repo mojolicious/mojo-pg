@@ -294,8 +294,8 @@ for.
   # "select * from foo left join bar on (bar.foo_id = foo.id)"
   $abstract->select(['foo', [-left => 'bar', foo_id => 'id']]);
 
-  # "select * from foo left join bar on (bar.foo_id = foo.id and bar.foo_id2 = foo.id2)"
-  $abstract->select(['foo', [-left => 'bar', foo_id => 'id', foo_id2 => 'id2']]);
+  # "select * from a left join b on (b.a_id = a.id and b.a_id2 = a.id2)"
+  $abstract->select(['a', [-left => 'b', a_id => 'id', a_id2 => 'id2']]);
 
 =head2 ORDER BY
 
