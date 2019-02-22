@@ -193,15 +193,16 @@ is_deeply \@sql,
 is_deeply \@sql,
   ['SELECT * FROM "foo" INNER JOIN "bar" ON ("bar"."foo_id" = "foo"."id")'],
   'right query';
-@sql
-  = $abstract->select([
+my $leftjoin_inputs = [
   'foo', [-left => 'bar', foo_id => 'id', foo_id2 => 'id2', foo_id3 => 'id3']
-  ]);
-is_deeply \@sql,
+  ];
+my $leftjoin_outputs =
   [   'SELECT * FROM "foo" LEFT JOIN "bar" ON ("bar"."foo_id" = "foo"."id"'
     . ' AND "bar"."foo_id2" = "foo"."id2"'
     . ' AND "bar"."foo_id3" = "foo"."id3"' . ')'
-  ], 'right query';
+  ];
+@sql = $abstract->select($leftjoin_inputs);
+is_deeply \@sql, $leftjoin_outputs, 'right query';
 
 # JOIN (unsupported value)
 eval { $abstract->select(['foo', []]) };
