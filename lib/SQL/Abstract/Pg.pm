@@ -172,8 +172,9 @@ sub _table {
   my $sep = $self->{name_sep} // '';
   for my $join (@join) {
     puke 'join must be in the form [$table, $fk => $pk]' if @$join < 3;
-    my $type = @$join % 2 == 0 ? shift @$join : '';
-    my ($name, $fk, $pk, @morekeys) = @$join;
+    my @thisjoin = @$join;
+    my $type = @thisjoin % 2 == 0 ? shift @thisjoin : '';
+    my ($name, $fk, $pk, @morekeys) = @thisjoin;
     $table
       .= $self->_sqlcase($type =~ /^-(.+)$/ ? " $1 join " : ' join ')
       . $self->_quote($name)

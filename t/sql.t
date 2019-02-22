@@ -203,6 +203,8 @@ my $leftjoin_outputs =
   ];
 @sql = $abstract->select($leftjoin_inputs);
 is_deeply \@sql, $leftjoin_outputs, 'right query';
+@sql = $abstract->select($leftjoin_inputs);
+is_deeply \@sql, $leftjoin_outputs, 'right query second time';
 
 # JOIN (unsupported value)
 eval { $abstract->select(['foo', []]) };
