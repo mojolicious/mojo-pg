@@ -103,7 +103,7 @@ is_deeply \@sql,
   'right query';
 @sql = $abstract->select(
   'foo', '*',
-  {bar      => {'>' => 'baz'}},
+  {bar => {'>' => 'baz'}},
   {group_by => ['bar'], having => {baz => {'<' => 'bar'}}}
 );
 $result = [

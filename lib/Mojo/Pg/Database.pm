@@ -165,7 +165,7 @@ sub _watch {
 
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
-      my $err = defined $result ? undef : $dbh->errstr;
+      my $err    = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, $self->results_class->new(db => $self, sth => $sth));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;

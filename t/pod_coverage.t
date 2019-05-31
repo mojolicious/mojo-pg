@@ -8,7 +8,7 @@ plan skip_all => 'Test::Pod::Coverage 1.04+ required for this test!'
   unless eval 'use Test::Pod::Coverage 1.04; 1';
 
 my $private = ['insert', 'new', 'puke', 'select'];
-my %RULES = ('SQL::Abstract::Pg' => {also_private => $private},);
+my %RULES   = ('SQL::Abstract::Pg' => {also_private => $private},);
 pod_coverage_ok($_, $RULES{$_} || {}) for all_modules();
 
 done_testing();

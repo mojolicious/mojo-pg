@@ -48,7 +48,7 @@ $pg->pubsub->listen(
 Mojo::IOLoop->next_tick(sub {
   $pg->db->notify(pstest => 'fail');
   $pg->pubsub->notify('pstest')->notify(pstest => {msg => '♥works♥'})
-    ->notify(pstest => [1, 2, 3])->notify(pstest => true)
+    ->notify(pstest  => [1, 2, 3])->notify(pstest => true)
     ->notify(pstest2 => '♥works♥')->notify(pstest => {msg => 'stop'});
 });
 Mojo::IOLoop->start;
@@ -89,7 +89,7 @@ is_deeply \@test, ['first', 'first', 'second', 'second'], 'right messages';
 # Reconnect while listening
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my @dbhs = @test = ();
-$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
@@ -108,7 +108,7 @@ is_deeply \@test, [], 'no messages';
 $pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
 $pg->pubsub->reconnect_interval(0.1);
-$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
@@ -152,7 +152,7 @@ is_deeply \@test, [], 'no messages';
 # Reset
 $pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
-$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 $pg->pubsub->notify(pstest => 'first');

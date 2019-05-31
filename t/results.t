@@ -79,14 +79,14 @@ is_deeply $db->query(
   "select 'a' as bar, ?::json as foo
    union all
    select 'b' as bar, ?::json as foo", {json => {one => 1}},
-  {json => {two => 2}}
+  {json => {two                                      => 2}}
 )->expand->hashes->to_array, $hashes, 'right structure';
 my $arrays = [['a', {one => 1}], ['b', {two => 2}]];
 is_deeply $db->query(
   "select 'a' as bar, ?::json as foo
    union all
    select 'b' as bar, ?::json as foo", {json => {one => 1}},
-  {json => {two => 2}}
+  {json => {two                                      => 2}}
 )->expand->arrays->to_array, $arrays, 'right structure';
 
 # Iterate

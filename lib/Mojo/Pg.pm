@@ -32,7 +32,7 @@ has options         => sub {
   };
 };
 has [qw(password username)] => '';
-has pubsub => sub { Mojo::Pg::PubSub->new(pg => shift) };
+has pubsub                  => sub { Mojo::Pg::PubSub->new(pg => shift) };
 
 our $VERSION = '4.14';
 
@@ -61,7 +61,7 @@ sub from_string {
   # Service and search_path
   my $hash = $url->query->to_hash;
   if (my $service = delete $hash->{service}) { $dsn .= "service=$service" }
-  if (my $path = delete $hash->{search_path}) {
+  if (my $path    = delete $hash->{search_path}) {
     $self->search_path(ref $path ? $path : [$path]);
   }
 
