@@ -107,19 +107,29 @@ is_deeply \@test, [], 'no messages';
 # Reconnect while listening multiple retries
 $pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
+my (@test3, @test4);
 $pg->pubsub->reconnect_interval(0.1);
-$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
-$pg->pubsub->listen(pstest => sub { push @test, pop });
+$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
+$pg->pubsub->listen(pstest  => sub { push @test,  pop });
+$pg->pubsub->listen(pstest4 => sub { push @test4, pop });
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
   local $dbhs[0]{Warn} = 0;
   $pg->pubsub->on(
-    reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
+    reconnect => sub {
+      shift->notify(pstest => 'works')->notify(pstest3 => 'works too')
+        ->notify(pstest4 => 'failed');
+      Mojo::IOLoop->stop;
+    }
+  );
   my $dsn = $pg->dsn;
   $pg->pubsub->on(
     disconnect => sub {
+      my $pubsub = shift;
       Mojo::IOLoop->timer(0.2 => sub { $pg->dsn($dsn) });
+      $pubsub->listen(pstest3 => sub { push @test3, pop });
+      $pubsub->unlisten('pstest4');
     }
   );
   $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
@@ -127,7 +137,9 @@ is_deeply \@test, [], 'no messages';
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
   isnt $dbhs[0], $dbhs[1], 'different database handles';
-  is_deeply \@test, ['works'], 'right messages';
+  is_deeply \@test,  ['works'],     'right messages';
+  is_deeply \@test3, ['works too'], 'right messages';
+  is_deeply \@test4, [], 'no messages';
 };
 
 # Reconnect while not listening

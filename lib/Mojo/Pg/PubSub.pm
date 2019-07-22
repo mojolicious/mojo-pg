@@ -25,6 +25,7 @@ sub db {
 
   $db->once(close => sub { $self->emit(disconnect => delete $self->{db}) });
   $db->listen($_) for keys %{$self->{chans}}, 'mojo.pubsub';
+  delete $self->{reconnecting};
   $self->emit(reconnect => $db);
 
   return $db;
@@ -36,7 +37,8 @@ sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 
 sub listen {
   my ($self, $name, $cb) = @_;
-  $self->db->listen($name) unless @{$self->{chans}{$name} ||= []};
+  $self->db->listen($name)
+    if !@{$self->{chans}{$name} ||= []} && !$self->{reconnecting};
   push @{$self->{chans}{$name}}, $cb;
   return $cb;
 }
@@ -58,14 +60,20 @@ sub reset {
 
 sub unlisten {
   my ($self, $name, $cb) = @_;
+
   my $chan = $self->{chans}{$name};
-  @$chan = $cb ? grep { $cb ne $_ } @$chan : ();
-  $self->db->unlisten($name) and delete $self->{chans}{$name} unless @$chan;
+  unless (@$chan = $cb ? grep { $cb ne $_ } @$chan : ()) {
+    $self->db->unlisten($name) unless $self->{reconnecting};
+    delete $self->{chans}{$name};
+  }
+
   return $self;
 }
 
 sub _disconnect {
   my $self = shift;
+
+  $self->{reconnecting} = 1;
 
   weaken $self;
   my $r;
