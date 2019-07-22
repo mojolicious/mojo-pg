@@ -79,7 +79,9 @@ sub _dequeue {
   # Fork-safety
   delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
 
-  while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
+  while (my $dbh = shift @{$self->{queue} || []}) {
+    return $dbh if $dbh->{Active};
+  }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));
 
   # Search path
@@ -98,8 +100,10 @@ sub _enqueue {
 
   if (my $parent = $self->parent) { return $parent->_enqueue($dbh) }
 
+  # Async connections need to be checked more carefully
   my $queue = $self->{queue} ||= [];
-  push @$queue, $dbh if $dbh->{Active};
+  push @$queue, $dbh
+    if delete $dbh->{private_mojo_async} ? $dbh->ping : $dbh->{Active};
   shift @$queue while @$queue > $self->max_connections;
 }
 
