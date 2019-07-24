@@ -102,8 +102,8 @@ sub _enqueue {
 
   # Async connections need to be checked more carefully
   my $queue = $self->{queue} ||= [];
-  push @$queue, $dbh
-    if $dbh->{Active} && (delete $dbh->{private_mojo_async} ? $dbh->ping : 1);
+  $dbh->{private_mojo_async} = undef if my $async = $dbh->{private_mojo_async};
+  push @$queue, $dbh if $dbh->{Active} && ($async ? $dbh->ping : 1);
   shift @$queue while @$queue > $self->max_connections;
 }
 
