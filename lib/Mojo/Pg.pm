@@ -34,7 +34,7 @@ has options         => sub {
 has [qw(password username)] => '';
 has pubsub                  => sub { Mojo::Pg::PubSub->new(pg => shift) };
 
-our $VERSION = '4.15';
+our $VERSION = '4.16';
 
 sub db { $_[0]->database_class->new(dbh => $_[0]->_prepare, pg => $_[0]) }
 
