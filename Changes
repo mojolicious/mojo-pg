@@ -1,4 +1,6 @@
 
+4.17  2019-09-05
+
 4.16  2019-09-04
   - Updated DBD::Pg requirement to 3.7.4 due to certain JSON features not
     working with older versions.
