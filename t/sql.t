@@ -8,6 +8,7 @@ sub is_query {
   my ($got, $want, $msg) = @_;
   my $got_sql = shift @$got;
   my $want_sql = shift @$want;
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
   is_same_sql_bind $got_sql, $got, $want_sql, $want, $msg;
 }
 
