@@ -1,5 +1,7 @@
 
-4.17  2019-09-05
+4.17  2019-10-08
+  - Updated mojo_migrations table created by Mojo::Pg::Migrations to use a
+    primary key.
 
 4.16  2019-09-04
   - Updated DBD::Pg requirement to 3.7.4 due to certain JSON features not
