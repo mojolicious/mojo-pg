@@ -160,7 +160,6 @@ sub _watch {
   return if $self->{watching} || $self->{watching}++;
 
   my $dbh = $self->dbh;
-  $dbh->{private_mojo_async} = 1;
   unless ($self->{handle}) {
     open $self->{handle}, '<&', $dbh->{pg_socket} or die "Can't dup: $!";
   }
@@ -175,7 +174,7 @@ sub _watch {
 
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
-      my $err    = defined $result ? undef : $dbh->errstr;
+      my $err = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, $self->results_class->new(db => $self, sth => $sth));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
