@@ -1,12 +1,12 @@
 use Mojo::Base -strict;
 
 use Test::More;
-use SQL::Abstract::Test import => [qw(is_same_sql_bind) ];
+use SQL::Abstract::Test import => [qw(is_same_sql_bind)];
 use Mojo::Pg;
 
 sub is_query {
   my ($got, $want, $msg) = @_;
-  my $got_sql = shift @$got;
+  my $got_sql  = shift @$got;
   my $want_sql = shift @$want;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
   is_same_sql_bind $got_sql, $got, $want_sql, $want, $msg;
@@ -107,8 +107,7 @@ is_query \@sql, ['SELECT * FROM "foo" GROUP BY "bar", "baz"'], 'right query';
 # HAVING
 @sql = $abstract->select('foo', '*', undef,
   {group_by => ['bar'], having => {baz => 'yada'}});
-is_query \@sql,
-  ['SELECT * FROM "foo" GROUP BY "bar" HAVING "baz" = ?', 'yada'],
+is_query \@sql, ['SELECT * FROM "foo" GROUP BY "bar" HAVING "baz" = ?', 'yada'],
   'right query';
 @sql = $abstract->select(
   'foo', '*',
