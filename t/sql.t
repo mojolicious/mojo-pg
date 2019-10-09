@@ -1,8 +1,8 @@
 use Mojo::Base -strict;
 
 use Test::More;
-use SQL::Abstract::Test import => [qw(is_same_sql_bind)];
 use Mojo::Pg;
+use SQL::Abstract::Test import => ['is_same_sql_bind'];
 
 sub is_query {
   my ($got, $want, $msg) = @_;
