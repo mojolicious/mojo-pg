@@ -89,7 +89,8 @@ sub query {
   for (my $i = 0; $#_ >= $i; $i++) {
     my ($param, $attrs) = ($_[$i], {});
     if (ref $param eq 'HASH') {
-      if (exists $param->{json}) { $param = to_json $param->{json} }
+      if    (exists $param->{-json}) { $param = to_json $param->{-json} }
+      elsif (exists $param->{json})  { $param = to_json $param->{json} }
       elsif (exists $param->{type} && exists $param->{value}) {
         ($attrs->{pg_type}, $param) = @{$param}{qw(type value)};
       }
@@ -435,7 +436,7 @@ Check database connection.
 
   my $results = $db->query('select * from foo');
   my $results = $db->query('insert into foo values (?, ?, ?)', @values);
-  my $results = $db->query('select ?::json as foo', {json => {bar => 'baz'}});
+  my $results = $db->query('select ?::json as foo', {-json => {bar => 'baz'}});
 
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
 statement and return a results object based on L</"results_class"> (which is
@@ -450,16 +451,17 @@ operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Hash reference arguments containing a value named C<json>, will be encoded to
-JSON text with L<Mojo::JSON/"to_json">. To accomplish the reverse, you can use
-the method L<Mojo::Pg::Results/"expand">, which automatically decodes all fields
-of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
+Hash reference arguments containing a value named C<-json> or C<json> will be
+encoded to JSON text with L<Mojo::JSON/"to_json">. To accomplish the reverse,
+you can use the method L<Mojo::Pg::Results/"expand">, which automatically
+decodes all fields of the types C<json> and C<jsonb> with
+L<Mojo::JSON/"from_json"> to Perl values.
 
   # "I ♥ Mojolicious!"
-  $db->query('select ?::jsonb as foo', {json => {bar => 'I ♥ Mojolicious!'}})
+  $db->query('select ?::jsonb as foo', {-json => {bar => 'I ♥ Mojolicious!'}})
     ->expand->hash->{foo}{bar};
 
-Hash reference arguments containing values named C<type> and C<value>, can be
+Hash reference arguments containing values named C<type> and C<value> can be
 used to bind specific L<DBD::Pg> data types to placeholders.
 
   # Insert binary data
