@@ -33,7 +33,7 @@ is_deeply $db->select('crud_test')->hashes->to_array,
 $db->insert('crud_test', {id => 1, name => 'foo'}, {on_conflict => undef});
 $db->insert(
   'crud_test',
-  {id          => 2, name => 'bar'},
+  {id => 2, name => 'bar'},
   {on_conflict => [id => {name => 'baz'}]}
 );
 

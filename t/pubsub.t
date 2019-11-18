@@ -89,7 +89,7 @@ is_deeply \@test, ['first', 'first', 'second', 'second'], 'right messages';
 # Reconnect while listening
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 my @dbhs = @test = ();
-$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
+$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
@@ -164,7 +164,7 @@ is_deeply \@test, [], 'no messages';
 # Reset
 $pg   = Mojo::Pg->new($ENV{TEST_ONLINE});
 @dbhs = @test = ();
-$pg->pubsub->on(reconnect => sub  { push @dbhs, pop->dbh });
+$pg->pubsub->on(reconnect => sub { push @dbhs, pop->dbh });
 $pg->pubsub->listen(pstest => sub { push @test, pop });
 ok $dbhs[0], 'database handle';
 $pg->pubsub->notify(pstest => 'first');

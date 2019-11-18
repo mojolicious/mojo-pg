@@ -181,7 +181,7 @@ sub _table {
     do {
       $table
         .= $self->_quote(index($fk, $sep) > 0 ? $fk : "$name.$fk") . ' = '
-        . $self->_quote(index($pk, $sep) > 0 ? $pk : "$table[0].$pk")
+        . $self->_quote(index($pk, $sep) > 0  ? $pk : "$table[0].$pk")
         . (@morekeys ? $self->_sqlcase(' and ') : ')');
     } while ($fk, $pk, @morekeys) = @morekeys;
   }
