@@ -32,7 +32,7 @@ has options         => sub {
   };
 };
 has [qw(password username)] => '';
-has pubsub => sub { Mojo::Pg::PubSub->new(pg => shift) };
+has pubsub                  => sub { Mojo::Pg::PubSub->new(pg => shift) };
 
 our $VERSION = '4.18';
 
@@ -564,7 +564,7 @@ William Lindley
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2019, Sebastian Riedel and others.
+Copyright (C) 2014-2020, Sebastian Riedel and others.
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
