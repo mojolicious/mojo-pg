@@ -7,9 +7,9 @@ use Test::More;
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::IOLoop;
-use Mojo::JSON 'true';
+use Mojo::JSON qw(true);
 use Mojo::Pg;
-use Scalar::Util 'refaddr';
+use Scalar::Util qw(refaddr);
 
 # Connected
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});

@@ -6,9 +6,9 @@ use Test::More;
 
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
-use DBD::Pg ':pg_types';
+use DBD::Pg qw(:pg_types);
 use Mojo::Pg;
-use Mojo::Util 'encode';
+use Mojo::Util qw(encode);
 
 package MojoPgTest::Database;
 use Mojo::Base 'Mojo::Pg::Database';

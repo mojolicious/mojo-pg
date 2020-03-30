@@ -2,8 +2,8 @@ package Mojo::Pg::Results;
 use Mojo::Base -base;
 
 use Mojo::Collection;
-use Mojo::JSON 'from_json';
-use Mojo::Util 'tablify';
+use Mojo::JSON qw(from_json);
+use Mojo::Util qw(tablify);
 
 has [qw(db sth)];
 

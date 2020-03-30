@@ -6,7 +6,7 @@ use Test::More;
 
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
-use File::Spec::Functions 'catfile';
+use File::Spec::Functions qw(catfile);
 use FindBin;
 use Mojo::Pg;
 

@@ -1,13 +1,13 @@
 package Mojo::Pg;
 use Mojo::Base 'Mojo::EventEmitter';
 
-use Carp 'croak';
+use Carp qw(croak);
 use DBI;
 use Mojo::Pg::Database;
 use Mojo::Pg::Migrations;
 use Mojo::Pg::PubSub;
 use Mojo::URL;
-use Scalar::Util 'blessed';
+use Scalar::Util qw(blessed);
 use SQL::Abstract::Pg;
 
 has abstract => sub {

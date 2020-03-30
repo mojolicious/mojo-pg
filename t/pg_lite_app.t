@@ -8,7 +8,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::Pg;
 use Mojolicious::Lite;
-use Scalar::Util 'refaddr';
+use Scalar::Util qw(refaddr);
 use Test::Mojo;
 
 # Isolate tests

@@ -1,10 +1,10 @@
 package Mojo::Pg::Migrations;
 use Mojo::Base -base;
 
-use Carp 'croak';
-use Mojo::File 'path';
-use Mojo::Loader 'data_section';
-use Mojo::Util 'decode';
+use Carp qw(croak);
+use Mojo::File qw(path);
+use Mojo::Loader qw(data_section);
+use Mojo::Util qw(decode);
 
 use constant DEBUG => $ENV{MOJO_MIGRATIONS_DEBUG} || 0;
 

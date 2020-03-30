@@ -2,13 +2,13 @@ package Mojo::Pg::Database;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Carp qw(croak shortmess);
-use DBD::Pg ':async';
+use DBD::Pg qw(:async);
 use Mojo::IOLoop;
-use Mojo::JSON 'to_json';
+use Mojo::JSON qw(to_json);
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
 use Mojo::Promise;
-use Mojo::Util 'monkey_patch';
+use Mojo::Util qw(monkey_patch);
 
 has 'dbh';
 has pg            => undef, weak => 1;
@@ -175,7 +175,7 @@ sub _watch {
 
       # Do not raise exceptions inside the event loop
       my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
-      my $err = defined $result ? undef : $dbh->errstr;
+      my $err    = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, $self->results_class->new(db => $self, sth => $sth));
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
