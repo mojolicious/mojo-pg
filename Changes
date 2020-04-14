@@ -1,5 +1,6 @@
 
-4.19  2020-02-01
+4.19  2020-04-14
+  - Fixed validation problem in blog example.
 
 4.18  2020-01-30
   - Improved support for -json values to be a little more consistent.
