@@ -12,9 +12,8 @@ sub startup {
   $self->secrets($self->config('secrets'));
 
   # Model
-  $self->helper(pg => sub { state $pg = Mojo::Pg->new(shift->config('pg')) });
-  $self->helper(
-    posts => sub { state $posts = Blog::Model::Posts->new(pg => shift->pg) });
+  $self->helper(pg    => sub { state $pg    = Mojo::Pg->new(shift->config('pg')) });
+  $self->helper(posts => sub { state $posts = Blog::Model::Posts->new(pg => shift->pg) });
 
   # Migrate to latest version if necessary
   my $path = $self->home->child('migrations', 'blog.sql');
