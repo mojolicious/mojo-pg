@@ -5,8 +5,7 @@ BEGIN { *puke = \&SQL::Abstract::puke }
 
 sub insert {
   my ($self, $table, $data, $options) = @_;
-  local @{$options}{qw(returning _pg_returning)} = (1, 1)
-    if exists $options->{on_conflict} && !$options->{returning};
+  local @{$options}{qw(returning _pg_returning)} = (1, 1) if exists $options->{on_conflict} && !$options->{returning};
   return $self->SUPER::insert($table, $data, $options);
 }
 
@@ -37,20 +36,18 @@ sub _insert_returning {
       $conflict => {
         ARRAYREF => sub {
           my ($target, $set) = @$conflict;
-          puke 'on_conflict value must be in the form [$target, \%set]'
-            unless ref $set eq 'HASH';
+          puke 'on_conflict value must be in the form [$target, \%set]' unless ref $set eq 'HASH';
           $target = [$target] unless ref $target eq 'ARRAY';
 
-          $conflict_sql
-            = '(' . join(', ', map { $self->_quote($_) } @$target) . ')';
+          $conflict_sql = '(' . join(', ', map { $self->_quote($_) } @$target) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
           my ($set_sql, @set_bind) = $self->_update_set_values($set);
           $conflict_sql .= $set_sql;
           push @conflict_bind, @set_bind;
         },
         ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
-        SCALARREF => sub { $conflict_sql = $$conflict },
-        UNDEF => sub { $conflict_sql = $self->_sqlcase('do nothing') }
+        SCALARREF   => sub { $conflict_sql                   = $$conflict },
+        UNDEF       => sub { $conflict_sql                   = $self->_sqlcase('do nothing') }
       }
     );
     $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;
@@ -66,9 +63,7 @@ sub _order_by {
   my ($self, $options) = @_;
 
   # Legacy
-  return $self->SUPER::_order_by($options)
-    if ref $options ne 'HASH'
-    or grep {/^-(?:desc|asc)/i} keys %$options;
+  return $self->SUPER::_order_by($options) if ref $options ne 'HASH' or grep {/^-(?:desc|asc)/i} keys %$options;
 
   # GROUP BY
   my $sql = '';
@@ -94,8 +89,7 @@ sub _order_by {
   }
 
   # ORDER BY
-  $sql .= $self->_order_by($options->{order_by})
-    if defined $options->{order_by};
+  $sql .= $self->_order_by($options->{order_by}) if defined $options->{order_by};
 
   # LIMIT
   if (defined $options->{limit}) {
@@ -137,12 +131,8 @@ sub _select_fields {
     $self->_SWITCH_refkind(
       $field => {
         ARRAYREF => sub {
-          puke 'field alias must be in the form [$name => $alias]'
-            if @$field < 2;
-          push @fields,
-              $self->_quote($field->[0])
-            . $self->_sqlcase(' as ')
-            . $self->_quote($field->[1]);
+          puke 'field alias must be in the form [$name => $alias]' if @$field < 2;
+          push @fields, $self->_quote($field->[0]) . $self->_sqlcase(' as ') . $self->_quote($field->[1]);
         },
         ARRAYREFREF => sub {
           push @fields, shift @$$field;
@@ -172,17 +162,16 @@ sub _table {
   my $sep = $self->{name_sep} // '';
   for my $join (@join) {
     puke 'join must be in the form [$table, $fk => $pk]' if @$join < 3;
-    my ($type, $name, $fk, $pk, @morekeys)
-      = @$join % 2 == 0 ? @$join : ('', @$join);
+    my ($type, $name, $fk, $pk, @morekeys) = @$join % 2 == 0 ? @$join : ('', @$join);
     $table
       .= $self->_sqlcase($type =~ /^-(.+)$/ ? " $1 join " : ' join ')
       . $self->_quote($name)
       . $self->_sqlcase(' on ') . '(';
     do {
       $table
-        .= $self->_quote(index($fk, $sep) > 0 ? $fk : "$name.$fk") . ' = '
-        . $self->_quote(index($pk, $sep) > 0  ? $pk : "$table[0].$pk")
-        . (@morekeys ? $self->_sqlcase(' and ') : ')');
+        .= $self->_quote(index($fk, $sep) > 0 ? $fk                      : "$name.$fk") . ' = '
+        . $self->_quote(index($pk, $sep) > 0  ? $pk                      : "$table[0].$pk")
+        . (@morekeys                          ? $self->_sqlcase(' and ') : ')');
     } while ($fk, $pk, @morekeys) = @morekeys;
   }
 
@@ -206,13 +195,12 @@ SQL::Abstract::Pg - PostgreSQL
 
 =head1 DESCRIPTION
 
-L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features
-used by L<Mojo::Pg>.
+L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features used by L<Mojo::Pg>.
 
 =head2 JSON
 
-In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary
-op to encode JSON from Perl data structures.
+In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary op to encode JSON from Perl data
+structures.
 
   # "update some_table set foo = '[1,2,3]' where bar = 23"
   $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
@@ -226,11 +214,9 @@ op to encode JSON from Perl data structures.
 
 =head2 ON CONFLICT
 
-The C<on_conflict> option can be used to generate C<INSERT> queries with
-C<ON CONFLICT> clauses. So far, C<undef> to pass C<DO NOTHING>, array references
-to pass C<DO UPDATE> with conflict targets and a C<SET> expression, scalar
-references to pass literal SQL and array reference references to pass literal
-SQL with bind values are supported.
+The C<on_conflict> option can be used to generate C<INSERT> queries with C<ON CONFLICT> clauses. So far, C<undef> to
+pass C<DO NOTHING>, array references to pass C<DO UPDATE> with conflict targets and a C<SET> expression, scalar
+references to pass literal SQL and array reference references to pass literal SQL with bind values are supported.
 
   # "insert into t (a) values ('b') on conflict do nothing"
   $abstract->insert('t', {a => 'b'}, {on_conflict => undef});
@@ -259,9 +245,8 @@ This includes operations commonly referred to as C<upsert>.
 
 =head2 AS
 
-The C<$fields> argument now also accepts array references containing array
-references with field names and aliases, as well as array references containing
-scalar references to pass literal SQL and array reference references to pass
+The C<$fields> argument now also accepts array references containing array references with field names and aliases, as
+well as array references containing scalar references to pass literal SQL and array reference references to pass
 literal SQL with bind values.
 
   # "select foo as bar from some_table"
@@ -278,9 +263,8 @@ literal SQL with bind values.
 
 =head2 JOIN
 
-The C<$source> argument now also accepts array references containing not only
-table names, but also array references with tables to generate C<JOIN> clauses
-for.
+The C<$source> argument now also accepts array references containing not only table names, but also array references
+with tables to generate C<JOIN> clauses for.
 
   # "select * from foo join bar on (bar.foo_id = foo.id)"
   $abstract->select(['foo', ['bar', foo_id => 'id']]);
@@ -299,17 +283,15 @@ for.
 
 =head2 ORDER BY
 
-Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now
-also pass a hash reference with various options. This includes C<order_by>,
-which takes the same values as the C<$order> argument.
+Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now also pass a hash reference with
+various options. This includes C<order_by>, which takes the same values as the C<$order> argument.
 
   # "select * from some_table order by foo desc"
   $abstract->select('some_table', '*', undef, {order_by => {-desc => 'foo'}});
 
 =head2 LIMIT/OFFSET
 
-The C<limit> and C<offset> options can be used to generate C<SELECT> queries
-with C<LIMIT> and C<OFFSET> clauses.
+The C<limit> and C<offset> options can be used to generate C<SELECT> queries with C<LIMIT> and C<OFFSET> clauses.
 
   # "select * from some_table limit 10"
   $abstract->select('some_table', '*', undef, {limit => 10});
@@ -322,9 +304,8 @@ with C<LIMIT> and C<OFFSET> clauses.
 
 =head2 GROUP BY
 
-The C<group_by> option can be used to generate C<SELECT> queries with
-C<GROUP BY> clauses. So far, array references to pass a list of fields and
-scalar references to pass literal SQL are supported.
+The C<group_by> option can be used to generate C<SELECT> queries with C<GROUP BY> clauses. So far, array references to
+pass a list of fields and scalar references to pass literal SQL are supported.
 
   # "select * from some_table group by foo, bar"
   $abstract->select('some_table', '*', undef, {group_by => ['foo', 'bar']});
@@ -334,17 +315,16 @@ scalar references to pass literal SQL are supported.
 
 =head2 HAVING
 
-The C<having> option can be used to generate C<SELECT> queries with C<HAVING>
-clauses, which takes the same values as the C<$where> argument.
+The C<having> option can be used to generate C<SELECT> queries with C<HAVING> clauses, which takes the same values as
+the C<$where> argument.
 
   # "select * from t group by a having b = 'c'"
   $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
 
 =head2 FOR
 
-The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses.
-So far, the scalar value C<update> to pass C<UPDATE> and scalar references to
-pass literal SQL are supported.
+The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses. So far, the scalar value C<update> to
+pass C<UPDATE> and scalar references to pass literal SQL are supported.
 
   # "select * from some_table for update"
   $abstract->select('some_table', '*', undef, {for => 'update'});

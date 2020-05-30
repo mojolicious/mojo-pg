@@ -51,8 +51,7 @@ sub listen {
   my ($self, $name) = @_;
 
   my $dbh = $self->dbh;
-  $dbh->do('listen ' . $dbh->quote_identifier($name))
-    unless $self->{listen}{$name}++;
+  $dbh->do('listen ' . $dbh->quote_identifier($name)) unless $self->{listen}{$name}++;
   $self->_watch;
 
   return $self;
@@ -113,8 +112,7 @@ sub query {
 sub query_p {
   my $self    = shift;
   my $promise = Mojo::Promise->new;
-  $self->query(
-    @_ => sub { $_[1] ? $promise->reject($_[1]) : $promise->resolve($_[2]) });
+  $self->query(@_ => sub { $_[1] ? $promise->reject($_[1]) : $promise->resolve($_[2]) });
   return $promise;
 }
 
@@ -201,13 +199,11 @@ Mojo::Pg::Database - Database
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Database> is a container for L<DBD::Pg> database handles used by
-L<Mojo::Pg>.
+L<Mojo::Pg::Database> is a container for L<DBD::Pg> database handles used by L<Mojo::Pg>.
 
 =head1 EVENTS
 
-L<Mojo::Pg::Database> inherits all events from L<Mojo::EventEmitter> and can
-emit the following new ones.
+L<Mojo::Pg::Database> inherits all events from L<Mojo::EventEmitter> and can emit the following new ones.
 
 =head2 close
 
@@ -216,8 +212,7 @@ emit the following new ones.
     ...
   });
 
-Emitted when the database connection gets closed while waiting for
-notifications.
+Emitted when the database connection gets closed while waiting for notifications.
 
 =head2 notification
 
@@ -247,28 +242,25 @@ L<DBD::Pg> database handle used for all queries.
   my $pg = $db->pg;
   $db    = $db->pg(Mojo::Pg->new);
 
-L<Mojo::Pg> object this database belongs to. Note that this attribute is
-weakened.
+L<Mojo::Pg> object this database belongs to. Note that this attribute is weakened.
 
 =head2 results_class
 
   my $class = $db->results_class;
   $db       = $db->results_class('MyApp::Results');
 
-Class to be used by L</"query">, defaults to L<Mojo::Pg::Results>. Note that
-this class needs to have already been loaded before L</"query"> is called.
+Class to be used by L</"query">, defaults to L<Mojo::Pg::Results>. Note that this class needs to have already been
+loaded before L</"query"> is called.
 
 =head1 METHODS
 
-L<Mojo::Pg::Database> inherits all methods from L<Mojo::EventEmitter> and
-implements the following new ones.
+L<Mojo::Pg::Database> inherits all methods from L<Mojo::EventEmitter> and implements the following new ones.
 
 =head2 begin
 
   my $tx = $db->begin;
 
-Begin transaction and return L<Mojo::Pg::Transaction> object, which will
-automatically roll back the transaction unless
+Begin transaction and return L<Mojo::Pg::Transaction> object, which will automatically roll back the transaction unless
 L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   # Insert rows in a transaction
@@ -284,9 +276,8 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 
   my $results = $db->delete($table, \%where, \%options);
 
-Generate a C<DELETE> statement with L<Mojo::Pg/"abstract"> (usually an
-L<SQL::Abstract::Pg> object) and execute it with L</"query">. You can also
-append a callback to perform operations non-blocking.
+Generate a C<DELETE> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it with
+L</"query">. You can also append a callback to perform operations non-blocking.
 
   $db->delete(some_table => sub {
     my ($db, $err, $results) = @_;
@@ -294,8 +285,7 @@ append a callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Use all the same argument variations you would pass to the C<delete> method of
-L<SQL::Abstract>.
+Use all the same argument variations you would pass to the C<delete> method of L<SQL::Abstract>.
 
   # "delete from some_table"
   $db->delete('some_table');
@@ -313,8 +303,8 @@ L<SQL::Abstract>.
 
   my $promise = $db->delete_p($table, \%where, \%options);
 
-Same as L</"delete">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object instead of accepting a callback.
+Same as L</"delete">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
+accepting a callback.
 
   $db->delete_p('some_table')->then(sub {
     my $results = shift;
@@ -334,8 +324,7 @@ Disconnect L</"dbh"> and prevent it from getting reused.
 
   $db = $db->dollar_only;
 
-Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?>
-to be used as an operator.
+Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?> to be used as an operator.
 
   # Check for a key in a JSON document
   $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
@@ -345,9 +334,8 @@ to be used as an operator.
 
   my $results = $db->insert($table, \@values || \%fieldvals, \%options);
 
-Generate an C<INSERT> statement with L<Mojo::Pg/"abstract"> (usually an
-L<SQL::Abstract::Pg> object) and execute it with L</"query">. You can also
-append a callback to perform operations non-blocking.
+Generate an C<INSERT> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it
+with L</"query">. You can also append a callback to perform operations non-blocking.
 
   $db->insert(some_table => {foo => 'bar'} => sub {
     my ($db, $err, $results) = @_;
@@ -355,8 +343,7 @@ append a callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Use all the same argument variations you would pass to the C<insert> method of
-L<SQL::Abstract>.
+Use all the same argument variations you would pass to the C<insert> method of L<SQL::Abstract>.
 
   # "insert into some_table (foo, baz) values ('bar', 'yada')"
   $db->insert('some_table', {foo => 'bar', baz => 'yada'});
@@ -392,8 +379,8 @@ Including operations commonly referred to as C<upsert>.
 
   my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);
 
-Same as L</"insert">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object instead of accepting a callback.
+Same as L</"insert">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
+accepting a callback.
 
   $db->insert_p(some_table => {foo => 'bar'})->then(sub {
     my $results = shift;
@@ -413,8 +400,7 @@ Check if L</"dbh"> is listening for notifications.
 
   $db = $db->listen('foo');
 
-Subscribe to a channel and receive L</"notification"> events when the
-L<Mojo::IOLoop> event loop is running.
+Subscribe to a channel and receive L</"notification"> events when the L<Mojo::IOLoop> event loop is running.
 
 =head2 notify
 
@@ -441,12 +427,10 @@ Check database connection.
   my $results = $db->query('insert into foo values (?, ?, ?)', @values);
   my $results = $db->query('select ?::json as foo', {-json => {bar => 'baz'}});
 
-Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
-statement and return a results object based on L</"results_class"> (which is
-usually L<Mojo::Pg::Results>) with the query results. The L<DBD::Pg> statement
-handle will be automatically reused when it is not active anymore, to increase
-the performance of future queries. You can also append a callback to perform
-operations non-blocking.
+Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html> statement and return a results object
+based on L</"results_class"> (which is usually L<Mojo::Pg::Results>) with the query results. The L<DBD::Pg> statement
+handle will be automatically reused when it is not active anymore, to increase the performance of future queries. You
+can also append a callback to perform operations non-blocking.
 
   $db->query('insert into foo values (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
@@ -454,18 +438,16 @@ operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Hash reference arguments containing a value named C<-json> or C<json> will be
-encoded to JSON text with L<Mojo::JSON/"to_json">. To accomplish the reverse,
-you can use the method L<Mojo::Pg::Results/"expand">, which automatically
-decodes all fields of the types C<json> and C<jsonb> with
-L<Mojo::JSON/"from_json"> to Perl values.
+Hash reference arguments containing a value named C<-json> or C<json> will be encoded to JSON text with
+L<Mojo::JSON/"to_json">. To accomplish the reverse, you can use the method L<Mojo::Pg::Results/"expand">, which
+automatically decodes all fields of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
 
   # "I ♥ Mojolicious!"
   $db->query('select ?::jsonb as foo', {-json => {bar => 'I ♥ Mojolicious!'}})
     ->expand->hash->{foo}{bar};
 
-Hash reference arguments containing values named C<type> and C<value> can be
-used to bind specific L<DBD::Pg> data types to placeholders.
+Hash reference arguments containing values named C<type> and C<value> can be used to bind specific L<DBD::Pg> data
+types to placeholders.
 
   # Insert binary data
   use DBD::Pg ':pg_types';
@@ -475,8 +457,8 @@ used to bind specific L<DBD::Pg> data types to placeholders.
 
   my $promise = $db->query_p('select * from foo');
 
-Same as L</"query">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object instead of accepting a callback.
+Same as L</"query">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
+accepting a callback.
 
   $db->query_p('insert into foo values (?, ?, ?)' => @values)->then(sub {
     my $results = shift;
@@ -490,9 +472,8 @@ L<Mojo::Promise> object instead of accepting a callback.
 
   my $results = $db->select($source, $fields, $where, \%options);
 
-Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an
-L<SQL::Abstract::Pg> object) and execute it with L</"query">. You can also
-append a callback to perform operations non-blocking.
+Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it with
+L</"query">. You can also append a callback to perform operations non-blocking.
 
   $db->select(some_table => ['foo'] => {bar => 'yada'} => sub {
     my ($db, $err, $results) = @_;
@@ -500,8 +481,7 @@ append a callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Use all the same argument variations you would pass to the C<select> method of
-L<SQL::Abstract>.
+Use all the same argument variations you would pass to the C<select> method of L<SQL::Abstract>.
 
   # "select * from some_table"
   $db->select('some_table');
@@ -559,8 +539,8 @@ Including a new last argument to pass many new options.
 
   my $promise = $db->select_p($source, $fields, $where, \%options);
 
-Same as L</"select">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object instead of accepting a callback.
+Same as L</"select">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
+accepting a callback.
 
   $db->select_p(some_table => ['foo'] => {bar => 'yada'})->then(sub {
     my $results = shift;
@@ -574,8 +554,8 @@ L<Mojo::Promise> object instead of accepting a callback.
 
   my $tables = $db->tables;
 
-Return table and view names for this database, that are visible to the current
-user and not internal, as an array reference.
+Return table and view names for this database, that are visible to the current user and not internal, as an array
+reference.
 
   # Names of all tables
   say for @{$db->tables};
@@ -591,9 +571,8 @@ Unsubscribe from a channel, C<*> can be used to unsubscribe from all channels.
 
   my $results = $db->update($table, \%fieldvals, \%where, \%options);
 
-Generate an C<UPDATE> statement with L<Mojo::Pg/"abstract"> (usually an
-L<SQL::Abstract::Pg> object) and execute it with L</"query">. You can also
-append a callback to perform operations non-blocking.
+Generate an C<UPDATE> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it
+with L</"query">. You can also append a callback to perform operations non-blocking.
 
   $db->update(some_table => {foo => 'baz'} => {foo => 'bar'} => sub {
     my ($db, $err, $results) = @_;
@@ -601,8 +580,7 @@ append a callback to perform operations non-blocking.
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
 
-Use all the same argument variations you would pass to the C<update> method of
-L<SQL::Abstract>.
+Use all the same argument variations you would pass to the C<update> method of L<SQL::Abstract>.
 
   # "update some_table set foo = 'bar' where id = 23"
   $db->update('some_table', {foo => 'bar'}, {id => 23});
@@ -623,9 +601,8 @@ L<SQL::Abstract>.
 
   my $promise = $db->update_p($table, \%fieldvals, \%where, \%options);
 
-Same as L</"update">, but performs all operations non-blocking and returns a
-L<Mojo::Promise> object instead of accepting a
-callback.
+Same as L</"update">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
+accepting a callback.
 
   $db->update_p(some_table => {foo => 'baz'} => {foo => 'bar'})->then(sub {
     my $results = shift;

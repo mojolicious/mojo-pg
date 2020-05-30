@@ -10,26 +10,14 @@ use Mojo::URL;
 use Scalar::Util qw(blessed);
 use SQL::Abstract::Pg;
 
-has abstract => sub {
-  SQL::Abstract::Pg->new(
-    array_datatypes => 1,
-    name_sep        => '.',
-    quote_char      => '"'
-  );
-};
+has abstract => sub { SQL::Abstract::Pg->new(array_datatypes => 1, name_sep => '.', quote_char => '"') };
 has [qw(auto_migrate parent search_path)];
 has database_class  => 'Mojo::Pg::Database';
 has dsn             => 'dbi:Pg:';
 has max_connections => 1;
 has migrations      => sub { Mojo::Pg::Migrations->new(pg => shift) };
 has options         => sub {
-  {
-    AutoCommit          => 1,
-    AutoInactiveDestroy => 1,
-    PrintError          => 0,
-    PrintWarn           => 0,
-    RaiseError          => 1
-  };
+  {AutoCommit => 1, AutoInactiveDestroy => 1, PrintError => 0, PrintWarn => 0, RaiseError => 1};
 };
 has [qw(password username)] => '';
 has pubsub                  => sub { Mojo::Pg::PubSub->new(pg => shift) };
@@ -47,8 +35,7 @@ sub from_string {
 
   # Protocol
   my $url = Mojo::URL->new($str);
-  croak qq{Invalid PostgreSQL connection string "$str"}
-    unless $url->protocol =~ /^postgres(?:ql)?$/;
+  croak qq{Invalid PostgreSQL connection string "$str"} unless $url->protocol =~ /^postgres(?:ql)?$/;
 
   # Connection information
   my $db  = $url->path->parts->[0];
@@ -107,8 +94,7 @@ sub _prepare {
   my $self = shift;
 
   # Automatic migrations
-  ++$self->{migrated} and $self->migrations->migrate
-    if !$self->{migrated} && $self->auto_migrate;
+  ++$self->{migrated} and $self->migrations->migrate if !$self->{migrated} && $self->auto_migrate;
 
   my $parent = $self->parent;
   return $parent ? $parent->_prepare : $self->_dequeue;
@@ -206,20 +192,16 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes
-L<PostgreSQL|http://www.postgresql.org> a lot of fun to use with the
-L<Mojolicious|https://mojolicious.org> real-time web framework. Perform queries
-blocking and non-blocking, use all
-L<SQL features|https://www.postgresql.org/docs/current/static/sql.html>
-PostgreSQL has to offer, generate CRUD queries from data structures, manage your
-database schema with migrations and build scalable real-time web applications
+L<Mojo::Pg> is a tiny wrapper around L<DBD::Pg> that makes L<PostgreSQL|http://www.postgresql.org> a lot of fun to use
+with the L<Mojolicious|https://mojolicious.org> real-time web framework. Perform queries blocking and non-blocking, use
+all L<SQL features|https://www.postgresql.org/docs/current/static/sql.html> PostgreSQL has to offer, generate CRUD
+queries from data structures, manage your database schema with migrations and build scalable real-time web applications
 with the publish/subscribe pattern.
 
 =head1 BASICS
 
-Database and statement handles are cached automatically, and will be reused
-transparently to increase performance. You can handle connection timeouts
-gracefully by holding on to them only for short amounts of time.
+Database and statement handles are cached automatically, and will be reused transparently to increase performance. You
+can handle connection timeouts gracefully by holding on to them only for short amounts of time.
 
   use Mojolicious::Lite;
   use Mojo::Pg;
@@ -234,30 +216,25 @@ gracefully by holding on to them only for short amounts of time.
 
   app->start;
 
-In this example application, we create a C<pg> helper to store a L<Mojo::Pg>
-object. Our action calls that helper and uses the method L<Mojo::Pg/"db"> to
-dequeue a L<Mojo::Pg::Database> object from the connection pool. Then we use the
-method L<Mojo::Pg::Database/"query"> to execute an
-L<SQL|http://www.postgresql.org/docs/current/static/sql.html> statement, which
-returns a L<Mojo::Pg::Results> object. And finally we call the method
-L<Mojo::Pg::Results/"hash"> to retrieve the first row as a hash reference.
+In this example application, we create a C<pg> helper to store a L<Mojo::Pg> object. Our action calls that helper and
+uses the method L<Mojo::Pg/"db"> to dequeue a L<Mojo::Pg::Database> object from the connection pool. Then we use the
+method L<Mojo::Pg::Database/"query"> to execute an L<SQL|http://www.postgresql.org/docs/current/static/sql.html>
+statement, which returns a L<Mojo::Pg::Results> object. And finally we call the method L<Mojo::Pg::Results/"hash"> to
+retrieve the first row as a hash reference.
 
-While all I/O operations are performed blocking, you can wait for long running
-queries asynchronously, allowing the L<Mojo::IOLoop> event loop to perform
-other tasks in the meantime. Since database connections usually have a very low
+While all I/O operations are performed blocking, you can wait for long running queries asynchronously, allowing the
+L<Mojo::IOLoop> event loop to perform other tasks in the meantime. Since database connections usually have a very low
 latency, this often results in very good performance.
 
-Every database connection can only handle one active query at a time, this
-includes asynchronous ones. To perform multiple queries concurrently, you have
-to use multiple connections.
+Every database connection can only handle one active query at a time, this includes asynchronous ones. To perform
+multiple queries concurrently, you have to use multiple connections.
 
   # Performed concurrently (5 seconds)
   $pg->db->query('select pg_sleep(5)' => sub {...});
   $pg->db->query('select pg_sleep(5)' => sub {...});
 
-All cached database handles will be reset automatically if a new process has
-been forked, this allows multiple processes to share the same L<Mojo::Pg>
-object safely.
+All cached database handles will be reset automatically if a new process has been forked, this allows multiple
+processes to share the same L<Mojo::Pg> object safely.
 
 =head1 GROWING
 
@@ -290,20 +267,16 @@ Which get integrated into your application with helpers.
 
 =head1 EXAMPLES
 
-This distribution also contains two great
-L<example
-applications|https://github.com/mojolicious/mojo-pg/tree/master/examples/>
-you can use for inspiration. The minimal
-L<chat|https://github.com/mojolicious/mojo-pg/tree/master/examples/chat.pl>
-application will show you how to scale WebSockets to multiple servers, and the
-well-structured
-L<blog|https://github.com/mojolicious/mojo-pg/tree/master/examples/blog>
-application how to apply the MVC design pattern in practice.
+This distribution also contains two great L<example
+applications|https://github.com/mojolicious/mojo-pg/tree/master/examples/> you can use for inspiration. The minimal
+L<chat|https://github.com/mojolicious/mojo-pg/tree/master/examples/chat.pl> application will show you how to scale
+WebSockets to multiple servers, and the well-structured
+L<blog|https://github.com/mojolicious/mojo-pg/tree/master/examples/blog> application how to apply the MVC design
+pattern in practice.
 
 =head1 EVENTS
 
-L<Mojo::Pg> inherits all events from L<Mojo::EventEmitter> and can emit the
-following new ones.
+L<Mojo::Pg> inherits all events from L<Mojo::EventEmitter> and can emit the following new ones.
 
 =head2 connection
 
@@ -328,9 +301,8 @@ L<Mojo::Pg> implements the following attributes.
   my $abstract = $pg->abstract;
   $pg          = $pg->abstract(SQL::Abstract::Pg->new);
 
-L<SQL::Abstract::Pg> object used to generate CRUD queries for
-L<Mojo::Pg::Database>, defaults to enabling C<array_datatypes> and setting
-C<name_sep> to C<.> and C<quote_char> to C<">.
+L<SQL::Abstract::Pg> object used to generate CRUD queries for L<Mojo::Pg::Database>, defaults to enabling
+C<array_datatypes> and setting C<name_sep> to C<.> and C<quote_char> to C<">.
 
   # Generate WHERE clause and bind values
   my($stmt, @bind) = $pg->abstract->where({foo => 'bar', baz => 'yada'});
@@ -340,16 +312,16 @@ C<name_sep> to C<.> and C<quote_char> to C<">.
   my $bool = $pg->auto_migrate;
   $pg      = $pg->auto_migrate($bool);
 
-Automatically migrate to the latest database schema with L</"migrations">, as
-soon as L</"db"> has been called for the first time.
+Automatically migrate to the latest database schema with L</"migrations">, as soon as L</"db"> has been called for the
+first time.
 
 =head2 database_class
 
   my $class = $pg->database_class;
   $pg       = $pg->database_class('MyApp::Database');
 
-Class to be used by L</"db">, defaults to L<Mojo::Pg::Database>. Note that this
-class needs to have already been loaded before L</"db"> is called.
+Class to be used by L</"db">, defaults to L<Mojo::Pg::Database>. Note that this class needs to have already been loaded
+before L</"db"> is called.
 
 =head2 dsn
 
@@ -363,16 +335,14 @@ Data source name, defaults to C<dbi:Pg:>.
   my $max = $pg->max_connections;
   $pg     = $pg->max_connections(3);
 
-Maximum number of idle database handles to cache for future use, defaults to
-C<1>.
+Maximum number of idle database handles to cache for future use, defaults to C<1>.
 
 =head2 migrations
 
   my $migrations = $pg->migrations;
   $pg            = $pg->migrations(Mojo::Pg::Migrations->new);
 
-L<Mojo::Pg::Migrations> object you can use to change your database schema more
-easily.
+L<Mojo::Pg::Migrations> object you can use to change your database schema more easily.
 
   # Load migrations from file and migrate to latest version
   $pg->migrations->from_file('/home/sri/migrations.sql')->migrate;
@@ -382,18 +352,17 @@ easily.
   my $options = $pg->options;
   $pg         = $pg->options({AutoCommit => 1, RaiseError => 1});
 
-Options for database handles, defaults to activating C<AutoCommit>,
-C<AutoInactiveDestroy> as well as C<RaiseError> and deactivating C<PrintError>
-as well as C<PrintWarn>. Note that C<AutoCommit> and C<RaiseError> are
-considered mandatory, so deactivating them would be very dangerous.
+Options for database handles, defaults to activating C<AutoCommit>, C<AutoInactiveDestroy> as well as C<RaiseError> and
+deactivating C<PrintError> as well as C<PrintWarn>. Note that C<AutoCommit> and C<RaiseError> are considered mandatory,
+so deactivating them would be very dangerous.
 
 =head2 parent
 
   my $parent = $pg->parent;
   $pg        = $pg->parent(Mojo::Pg->new);
 
-Another L<Mojo::Pg> object to use for connection management, instead of
-establishing and caching our own database connections.
+Another L<Mojo::Pg> object to use for connection management, instead of establishing and caching our own database
+connections.
 
 =head2 password
 
@@ -407,8 +376,8 @@ Database password, defaults to an empty string.
   my $pubsub = $pg->pubsub;
   $pg        = $pg->pubsub(Mojo::Pg::PubSub->new);
 
-L<Mojo::Pg::PubSub> object you can use to send and receive notifications very
-efficiently, by sharing a single database connection with many consumers.
+L<Mojo::Pg::PubSub> object you can use to send and receive notifications very efficiently, by sharing a single database
+connection with many consumers.
 
   # Subscribe to a channel
   $pg->pubsub->listen(news => sub {
@@ -442,18 +411,16 @@ Database username, defaults to an empty string.
 
 =head1 METHODS
 
-L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the
-following new ones.
+L<Mojo::Pg> inherits all methods from L<Mojo::EventEmitter> and implements the following new ones.
 
 =head2 db
 
   my $db = $pg->db;
 
-Get a database object based on L</"database_class"> (which is usually
-L<Mojo::Pg::Database>) for a cached or newly established database connection.
-The L<DBD::Pg> database handle will be automatically cached again when that
-object is destroyed, so you can handle problems like connection timeouts
-gracefully by holding on to it only for short amounts of time.
+Get a database object based on L</"database_class"> (which is usually L<Mojo::Pg::Database>) for a cached or newly
+established database connection. The L<DBD::Pg> database handle will be automatically cached again when that object is
+destroyed, so you can handle problems like connection timeouts gracefully by holding on to it only for short amounts of
+time.
 
   # Add up all the money
   say $pg->db->select('accounts')
@@ -464,8 +431,7 @@ gracefully by holding on to it only for short amounts of time.
   $pg = $pg->from_string('postgresql://postgres@/test');
   $pg = $pg->from_string(Mojo::Pg->new);
 
-Parse configuration from connection string or use another L<Mojo::Pg> object as
-L</"parent">.
+Parse configuration from connection string or use another L<Mojo::Pg> object as L</"parent">.
 
   # Just a database
   $pg->from_string('postgresql:///db1');
@@ -497,16 +463,14 @@ L</"parent">.
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
   my $pg = Mojo::Pg->new(Mojo::Pg->new);
 
-Construct a new L<Mojo::Pg> object and parse connection string with
-L</"from_string"> if necessary.
+Construct a new L<Mojo::Pg> object and parse connection string with L</"from_string"> if necessary.
 
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
 
 =head1 DEBUGGING
 
-You can set the C<DBI_TRACE> environment variable to get some advanced
-diagnostics information printed by L<DBI>.
+You can set the C<DBI_TRACE> environment variable to get some advanced diagnostics information printed by L<DBI>.
 
   DBI_TRACE=1
   DBI_TRACE=15
@@ -566,12 +530,11 @@ William Lindley
 
 Copyright (C) 2014-2020, Sebastian Riedel and others.
 
-This program is free software, you can redistribute it and/or modify it under
-the terms of the Artistic License version 2.0.
+This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version
+2.0.
 
 =head1 SEE ALSO
 
-L<https://github.com/mojolicious/mojo-pg>, L<Mojolicious::Guides>,
-L<https://mojolicious.org>.
+L<https://github.com/mojolicious/mojo-pg>, L<Mojolicious::Guides>, L<https://mojolicious.org>.
 
 =cut

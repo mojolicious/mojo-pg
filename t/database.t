@@ -17,13 +17,12 @@ ok $pg->db->ping, 'connected';
 
 # Custom search_path
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['$user', 'foo', 'bar']);
-is_deeply $pg->db->query('show search_path')->hash,
-  {search_path => '"$user", foo, bar'}, 'right structure';
+is_deeply $pg->db->query('show search_path')->hash, {search_path => '"$user", foo, bar'}, 'right structure';
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 
 # Blocking select
-is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash,
-  {one => 1, two => 2, three => 3}, 'right structure';
+is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash, {one => 1, two => 2, three => 3},
+  'right structure';
 
 # Non-blocking select
 my ($fail, $result);
@@ -94,8 +93,7 @@ is_deeply $result, [{one => 1}, {one => 1}, {two => 2}], 'right structure';
 is $pg->max_connections, 1, 'right default';
 $pg->max_connections(5);
 my @dbhs = map { refaddr $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db;
-is_deeply \@dbhs,
-  [reverse map { refaddr $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
+is_deeply \@dbhs, [reverse map { refaddr $_->dbh } $pg->db, $pg->db, $pg->db, $pg->db, $pg->db],
   'same database handles';
 @dbhs = ();
 my $dbh = $pg->max_connections(1)->db->dbh;
@@ -140,39 +138,35 @@ is $results->array->[0], 2, 'right result';
 
 # Dollar only
 $db = $pg->db;
-is $db->dollar_only->query('select $1::int as test', 23)->hash->{test}, 23,
-  'right result';
+is $db->dollar_only->query('select $1::int as test', 23)->hash->{test}, 23, 'right result';
 eval { $db->dollar_only->query('select ?::int as test', 23) };
 like $@, qr/Statement has no placeholders to bind/, 'right error';
 is $db->query('select ?::int as test', 23)->hash->{test}, 23, 'right result';
 
 # JSON
 $db = $pg->db;
-is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
-is_deeply $db->query('select ?::jsonb as foo', {json => {bar => 'baz'}})
-  ->expand->hash, {foo => {bar => 'baz'}}, 'right structure';
-is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->expand->array, [{bar => 'baz'}], 'right structure';
-is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->expand->hashes->first, {foo => {bar => 'baz'}}, 'right structure';
-is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})
-  ->expand->arrays->first, [{bar => 'baz'}], 'right structure';
-is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->hash,
-  {foo => '{"bar":"baz"}'}, 'right structure';
-is_deeply $db->query('select ?::json as foo', {json => \1})
-  ->expand->hashes->first, {foo => true}, 'right structure';
-is_deeply $db->query('select ?::json as foo', undef)->expand->hash,
-  {foo => undef}, 'right structure';
-is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef],
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
   'right structure';
+is_deeply $db->query('select ?::jsonb as foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
+  'right structure';
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->array, [{bar => 'baz'}],
+  'right structure';
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->hashes->first,
+  {foo => {bar => 'baz'}}, 'right structure';
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->arrays->first, [{bar => 'baz'}],
+  'right structure';
+is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->hash, {foo => '{"bar":"baz"}'},
+  'right structure';
+is_deeply $db->query('select ?::json as foo', {json => \1})->expand->hashes->first, {foo => true}, 'right structure';
+is_deeply $db->query('select ?::json as foo', undef)->expand->hash, {foo => undef}, 'right structure';
+is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef], 'right structure';
 $results = $db->query('select ?::json', undef);
 is_deeply $results->expand->array, [undef], 'right structure';
 is_deeply $results->expand->array, undef, 'no more results';
-is_deeply $db->query('select ?::json as unicode', {json => {'☃' => '♥'}})
-  ->expand->hash, {unicode => {'☃' => '♥'}}, 'right structure';
-is_deeply $db->query("select json_build_object('☃', ?::text) as unicode",
-  '♥')->expand->hash, {unicode => {'☃' => '♥'}}, 'right structure';
+is_deeply $db->query('select ?::json as unicode', {json => {'☃' => '♥'}})->expand->hash,
+  {unicode => {'☃' => '♥'}}, 'right structure';
+is_deeply $db->query("select json_build_object('☃', ?::text) as unicode", '♥')->expand->hash,
+  {unicode => {'☃' => '♥'}}, 'right structure';
 
 # Fork-safety
 $dbh = $pg->db->dbh;
@@ -203,13 +197,11 @@ is $pg2->db->dbh, $dbh, 'same database handle';
 is $pg->db->dbh,  $dbh, 'same database handle';
 is $pg2->db->dbh, $dbh, 'same database handle';
 $db = $pg->db;
-is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}],
-  'right structure';
+is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}], 'right structure';
 $dbh = $db->dbh;
 $db->disconnect;
 $db = $pg2->db;
-is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}],
-  'right structure';
+is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}], 'right structure';
 isnt $db->dbh, $dbh, 'different database handle';
 
 # Notifications
@@ -274,8 +266,7 @@ is $notifications[5], undef, 'no more notifications';
 
 # Stop listening for all notifications
 ok !$db->is_listening, 'not listening';
-ok $db->listen('dbtest')->listen('dbtest2')->unlisten('dbtest2')->is_listening,
-  'listening';
+ok $db->listen('dbtest')->listen('dbtest2')->unlisten('dbtest2')->is_listening, 'listening';
 ok !$db->unlisten('*')->is_listening, 'not listening';
 
 # Connection close while listening for notifications

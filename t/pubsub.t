@@ -26,8 +26,7 @@ $db->on(notification => sub { push @all, [@_[1, 3]] });
 $pg->db->notify(pstest => '♥test♥');
 Mojo::IOLoop->start;
 is_deeply \@test, ['♥test♥', 'stop'], 'right messages';
-is_deeply \@all, [['pstest', '♥test♥'], ['pstest', 'stop']],
-  'right notifications';
+is_deeply \@all, [['pstest', '♥test♥'], ['pstest', 'stop']], 'right notifications';
 
 # JSON
 $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
@@ -47,14 +46,11 @@ $pg->pubsub->listen(
 );
 Mojo::IOLoop->next_tick(sub {
   $pg->db->notify(pstest => 'fail');
-  $pg->pubsub->notify('pstest')->notify(pstest => {msg => '♥works♥'})
-    ->notify(pstest  => [1, 2, 3])->notify(pstest => true)
-    ->notify(pstest2 => '♥works♥')->notify(pstest => {msg => 'stop'});
+  $pg->pubsub->notify('pstest')->notify(pstest => {msg => '♥works♥'})->notify(pstest => [1, 2, 3])
+    ->notify(pstest => true)->notify(pstest2 => '♥works♥')->notify(pstest => {msg => 'stop'});
 });
 Mojo::IOLoop->start;
-is_deeply \@json,
-  [undef, undef, {msg => '♥works♥'}, [1, 2, 3], true, {msg => 'stop'}],
-  'right data structures';
+is_deeply \@json, [undef, undef, {msg => '♥works♥'}, [1, 2, 3], true, {msg => 'stop'}], 'right data structures';
 is_deeply \@raw, ['♥works♥'], 'right messages';
 
 # Unsubscribe
@@ -70,12 +66,10 @@ is_deeply \@test, ['', '', 'first', 'first'], 'right messages';
 is_deeply \@all, [['pstest', ''], ['pstest', 'first']], 'right notifications';
 $pg->pubsub->unlisten(pstest => $first)->notify(pstest => 'second');
 is_deeply \@test, ['', '', 'first', 'first', 'second'], 'right messages';
-is_deeply \@all, [['pstest', ''], ['pstest', 'first'], ['pstest', 'second']],
-  'right notifications';
+is_deeply \@all, [['pstest', ''], ['pstest', 'first'], ['pstest', 'second']], 'right notifications';
 $pg->pubsub->unlisten(pstest => $second)->notify(pstest => 'third');
 is_deeply \@test, ['', '', 'first', 'first', 'second'], 'right messages';
-is_deeply \@all, [['pstest', ''], ['pstest', 'first'], ['pstest', 'second']],
-  'right notifications';
+is_deeply \@all, [['pstest', ''], ['pstest', 'first'], ['pstest', 'second']], 'right notifications';
 @all = @test = ();
 my $third  = $pg->pubsub->listen(pstest => sub { push @test, pop });
 my $fourth = $pg->pubsub->listen(pstest => sub { push @test, pop });
@@ -95,8 +89,7 @@ ok $dbhs[0], 'database handle';
 is_deeply \@test, [], 'no messages';
 {
   local $dbhs[0]{Warn} = 0;
-  $pg->pubsub->on(
-    reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
+  $pg->pubsub->on(reconnect => sub { shift->notify(pstest => 'works'); Mojo::IOLoop->stop });
   $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
   Mojo::IOLoop->start;
   ok $dbhs[1], 'database handle';
@@ -118,8 +111,7 @@ is_deeply \@test, [], 'no messages';
   local $dbhs[0]{Warn} = 0;
   $pg->pubsub->on(
     reconnect => sub {
-      shift->notify(pstest => 'works')->notify(pstest3 => 'works too')
-        ->notify(pstest4 => 'failed');
+      shift->notify(pstest => 'works')->notify(pstest3 => 'works too')->notify(pstest4 => 'failed');
       Mojo::IOLoop->stop;
     }
   );

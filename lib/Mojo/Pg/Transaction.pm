@@ -16,7 +16,7 @@ sub commit {
 
 sub new {
   my $self = shift->SUPER::new(@_, rollback => 1);
-  my $dbh = $self->{dbh} = $self->db->dbh;
+  my $dbh  = $self->{dbh} = $self->db->dbh;
   $dbh->begin_work;
   return $self;
 }
@@ -38,8 +38,7 @@ Mojo::Pg::Transaction - Transaction
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Transaction> is a scope guard for L<DBD::Pg> transactions used by
-L<Mojo::Pg::Database>.
+L<Mojo::Pg::Transaction> is a scope guard for L<DBD::Pg> transactions used by L<Mojo::Pg::Database>.
 
 =head1 ATTRIBUTES
 
@@ -50,13 +49,11 @@ L<Mojo::Pg::Transaction> implements the following attributes.
   my $db = $tx->db;
   $tx    = $tx->db(Mojo::Pg::Database->new);
 
-L<Mojo::Pg::Database> object this transaction belongs to. Note that this
-attribute is weakened.
+L<Mojo::Pg::Database> object this transaction belongs to. Note that this attribute is weakened.
 
 =head1 METHODS
 
-L<Mojo::Pg::Transaction> inherits all methods from L<Mojo::Base> and
-implements the following new ones.
+L<Mojo::Pg::Transaction> inherits all methods from L<Mojo::Base> and implements the following new ones.
 
 =head2 commit
 

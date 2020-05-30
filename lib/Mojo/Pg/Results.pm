@@ -46,8 +46,7 @@ sub _expand {
   my ($idx, $name) = @$self{qw(idx name)};
   unless ($idx) {
     my $types = $self->sth->{pg_type};
-    my @idx   = grep { $types->[$_] eq 'json' || $types->[$_] eq 'jsonb' }
-      0 .. $#$types;
+    my @idx   = grep { $types->[$_] eq 'json' || $types->[$_] eq 'jsonb' } 0 .. $#$types;
     ($idx, $name) = @$self{qw(idx name)} = (\@idx, [@{$self->columns}[@idx]]);
   }
 
@@ -79,8 +78,7 @@ Mojo::Pg::Results - Results
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Results> is a container for L<DBD::Pg> statement handles used by
-L<Mojo::Pg::Database>.
+L<Mojo::Pg::Results> is a container for L<DBD::Pg> statement handles used by L<Mojo::Pg::Database>.
 
 =head1 ATTRIBUTES
 
@@ -102,15 +100,14 @@ L<DBD::Pg> statement handle results are fetched from.
 
 =head1 METHODS
 
-L<Mojo::Pg::Results> inherits all methods from L<Mojo::Base> and implements the
-following new ones.
+L<Mojo::Pg::Results> inherits all methods from L<Mojo::Base> and implements the following new ones.
 
 =head2 array
 
   my $array = $results->array;
 
-Fetch next row from L</"sth"> and return it as an array reference. Note that
-L</"finish"> needs to be called if you are not fetching all the possible rows.
+Fetch next row from L</"sth"> and return it as an array reference. Note that L</"finish"> needs to be called if you are
+not fetching all the possible rows.
 
   # Process one row at a time
   while (my $next = $results->array) {
@@ -121,8 +118,7 @@ L</"finish"> needs to be called if you are not fetching all the possible rows.
 
   my $collection = $results->arrays;
 
-Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
-containing array references.
+Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object containing array references.
 
   # Process all rows at once
   say $results->arrays->reduce(sub { $a + $b->[3] }, 0);
@@ -149,15 +145,14 @@ Decode C<json> and C<jsonb> fields automatically to Perl values for all rows.
 
   $results->finish;
 
-Indicate that you are finished with L</"sth"> and will not be fetching all the
-remaining rows.
+Indicate that you are finished with L</"sth"> and will not be fetching all the remaining rows.
 
 =head2 hash
 
   my $hash = $results->hash;
 
-Fetch next row from L</"sth"> and return it as a hash reference. Note that
-L</"finish"> needs to be called if you are not fetching all the possible rows.
+Fetch next row from L</"sth"> and return it as a hash reference. Note that L</"finish"> needs to be called if you are
+not fetching all the possible rows.
 
   # Process one row at a time
   while (my $next = $results->hash) {
@@ -168,8 +163,7 @@ L</"finish"> needs to be called if you are not fetching all the possible rows.
 
   my $collection = $results->hashes;
 
-Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object
-containing hash references.
+Fetch all rows from L</"sth"> and return them as a L<Mojo::Collection> object containing hash references.
 
   # Process all rows at once
   say $results->hashes->reduce(sub { $a + $b->{money} }, 0);
@@ -192,8 +186,7 @@ Number of rows.
 
   my $text = $results->text;
 
-Fetch all rows from L</"sth"> and turn them into a table with
-L<Mojo::Util/"tablify">.
+Fetch all rows from L</"sth"> and turn them into a table with L<Mojo::Util/"tablify">.
 
 =head1 SEE ALSO
 

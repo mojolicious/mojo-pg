@@ -1,9 +1,8 @@
 
 # Mojo::Pg [![](https://github.com/mojolicious/mojo-pg/workflows/linux/badge.svg)](https://github.com/mojolicious/mojo-pg/actions)
 
-  A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes
-  [PostgreSQL](https://www.postgresql.org) a lot of fun to use with the
-  [Mojolicious](https://mojolicious.org) real-time web framework.
+  A tiny wrapper around [DBD::Pg](https://metacpan.org/pod/DBD::Pg) that makes [PostgreSQL](https://www.postgresql.org)
+  a lot of fun to use with the [Mojolicious](https://mojolicious.org) real-time web framework.
 
 ```perl
 use Mojolicious::Lite -signatures;

@@ -24,57 +24,46 @@ $db->query(
 
 # Create
 $db->insert('crud_test', {name => 'foo'});
-is_deeply $db->select('crud_test')->hashes->to_array,
-  [{id => 1, name => 'foo'}], 'right structure';
-is $db->insert('crud_test', {name => 'bar'}, {returning => 'id'})->hash->{id},
-  2, 'right value';
-is_deeply $db->select('crud_test')->hashes->to_array,
-  [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
+is_deeply $db->select('crud_test')->hashes->to_array, [{id => 1, name => 'foo'}], 'right structure';
+is $db->insert('crud_test', {name => 'bar'}, {returning => 'id'})->hash->{id}, 2, 'right value';
+is_deeply $db->select('crud_test')->hashes->to_array, [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}],
+  'right structure';
 $db->insert('crud_test', {id => 1, name => 'foo'}, {on_conflict => undef});
-$db->insert(
-  'crud_test',
-  {id => 2, name => 'bar'},
-  {on_conflict => [id => {name => 'baz'}]}
-);
+$db->insert('crud_test', {id => 2, name => 'bar'}, {on_conflict => [id => {name => 'baz'}]});
 
 # Read
-is_deeply $db->select('crud_test')->hashes->to_array,
-  [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}], 'right structure';
-is_deeply $db->select('crud_test', ['name'])->hashes->to_array,
-  [{name => 'foo'}, {name => 'baz'}], 'right structure';
-is_deeply $db->select('crud_test', ['name'], {name => 'foo'})->hashes->to_array,
-  [{name => 'foo'}], 'right structure';
-is_deeply $db->select('crud_test', ['name'], undef, {-desc => 'id'})
-  ->hashes->to_array, [{name => 'baz'}, {name => 'foo'}], 'right structure';
-is_deeply $db->select('crud_test', undef, undef, {offset => 1})
-  ->hashes->to_array, [{id => 2, name => 'baz'}], 'right structure';
-is_deeply $db->select('crud_test', undef, undef, {limit => 1})
-  ->hashes->to_array, [{id => 1, name => 'foo'}], 'right structure';
+is_deeply $db->select('crud_test')->hashes->to_array, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}],
+  'right structure';
+is_deeply $db->select('crud_test', ['name'])->hashes->to_array, [{name => 'foo'}, {name => 'baz'}], 'right structure';
+is_deeply $db->select('crud_test', ['name'], {name => 'foo'})->hashes->to_array, [{name => 'foo'}], 'right structure';
+is_deeply $db->select('crud_test', ['name'], undef, {-desc => 'id'})->hashes->to_array,
+  [{name => 'baz'}, {name => 'foo'}], 'right structure';
+is_deeply $db->select('crud_test', undef, undef, {offset => 1})->hashes->to_array, [{id => 2, name => 'baz'}],
+  'right structure';
+is_deeply $db->select('crud_test', undef, undef, {limit => 1})->hashes->to_array, [{id => 1, name => 'foo'}],
+  'right structure';
 
 # Non-blocking read
 my $result;
 my $delay = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
 $db->select('crud_test', $delay->begin);
 $delay->wait;
-is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}],
-  'right structure';
+is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}], 'right structure';
 $result = undef;
 $delay  = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
 $db->select('crud_test', undef, undef, {-desc => 'id'}, $delay->begin);
 $delay->wait;
-is_deeply $result, [{id => 2, name => 'baz'}, {id => 1, name => 'foo'}],
-  'right structure';
+is_deeply $result, [{id => 2, name => 'baz'}, {id => 1, name => 'foo'}], 'right structure';
 
 # Update
 $db->update('crud_test', {name => 'yada'}, {name => 'foo'});
-is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})
-  ->hashes->to_array, [{id => 1, name => 'yada'}, {id => 2, name => 'baz'}],
-  'right structure';
+is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})->hashes->to_array,
+  [{id => 1, name => 'yada'}, {id => 2, name => 'baz'}], 'right structure';
 
 # Delete
 $db->delete('crud_test', {name => 'yada'});
-is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})
-  ->hashes->to_array, [{id => 2, name => 'baz'}], 'right structure';
+is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})->hashes->to_array, [{id => 2, name => 'baz'}],
+  'right structure';
 $db->delete('crud_test');
 is_deeply $db->select('crud_test')->hashes->to_array, [], 'right structure';
 
@@ -88,8 +77,7 @@ $db->query(
 $db->insert('crud_test2',                {'t e s t' => 'foo'});
 $db->insert('mojo_crud_test.crud_test2', {'t e s t' => 'bar'});
 is_deeply $db->select('mojo_crud_test.crud_test2')->hashes->to_array,
-  [{id => 1, 't e s t' => 'foo'}, {id => 2, 't e s t' => 'bar'}],
-  'right structure';
+  [{id => 1, 't e s t' => 'foo'}, {id => 2, 't e s t' => 'bar'}], 'right structure';
 
 # Arrays
 $db->query(
@@ -99,20 +87,17 @@ $db->query(
    )'
 );
 $db->insert('crud_test3', {names => ['foo', 'bar']});
-is_deeply $db->select('crud_test3')->hashes->to_array,
-  [{id => 1, names => ['foo', 'bar']}], 'right structure';
+is_deeply $db->select('crud_test3')->hashes->to_array, [{id => 1, names => ['foo', 'bar']}], 'right structure';
 $db->update('crud_test3', {names => ['foo', 'bar', 'baz', 'yada']}, {id => 1});
-is_deeply $db->select('crud_test3')->hashes->to_array,
-  [{id => 1, names => ['foo', 'bar', 'baz', 'yada']}], 'right structure';
+is_deeply $db->select('crud_test3')->hashes->to_array, [{id => 1, names => ['foo', 'bar', 'baz', 'yada']}],
+  'right structure';
 
 # Promises
 $result = undef;
-$pg->db->insert_p('crud_test', {name => 'promise'}, {returning => '*'})
-  ->then(sub { $result = shift->hash })->wait;
+$pg->db->insert_p('crud_test', {name => 'promise'}, {returning => '*'})->then(sub { $result = shift->hash })->wait;
 is $result->{name}, 'promise', 'right result';
 $result = undef;
-$db->select_p('crud_test', '*', {name => 'promise'})
-  ->then(sub { $result = shift->hash })->wait;
+$db->select_p('crud_test', '*', {name => 'promise'})->then(sub { $result = shift->hash })->wait;
 is $result->{name}, 'promise', 'right result';
 $result = undef;
 my $first  = $pg->db->query_p("select * from crud_test where name = 'promise'");
@@ -124,15 +109,10 @@ Mojo::Promise->all($first, $second)->then(sub {
 is $result->[0]{name}, 'promise', 'right result';
 is $result->[1]{name}, 'promise', 'right result';
 $result = undef;
-$db->update_p(
-  'crud_test',
-  {name      => 'promise_two'},
-  {name      => 'promise'},
-  {returning => '*'}
-)->then(sub { $result = shift->hash })->wait;
-is $result->{name}, 'promise_two', 'right result';
-$db->delete_p('crud_test', {name => 'promise_two'}, {returning => '*'})
+$db->update_p('crud_test', {name => 'promise_two'}, {name => 'promise'}, {returning => '*'})
   ->then(sub { $result = shift->hash })->wait;
+is $result->{name}, 'promise_two', 'right result';
+$db->delete_p('crud_test', {name => 'promise_two'}, {returning => '*'})->then(sub { $result = shift->hash })->wait;
 is $result->{name}, 'promise_two', 'right result';
 
 # Promises (rejected)
@@ -156,10 +136,8 @@ $db->query(
 $db->insert('crud_test4', {test1 => 'hello'});
 $db->insert('crud_test5', {test2 => 'world'});
 is_deeply $db->select(['crud_test4', ['crud_test5', id => 'id']],
-  ['crud_test4.id', 'test1', 'test2', ['crud_test4.test1' => 'test3']])
-  ->hashes->to_array,
-  [{id => 1, test1 => 'hello', test2 => 'world', test3 => 'hello'}],
-  'right structure';
+  ['crud_test4.id', 'test1', 'test2', ['crud_test4.test1' => 'test3']])->hashes->to_array,
+  [{id => 1, test1 => 'hello', test2 => 'world', test3 => 'hello'}], 'right structure';
 
 # Clean up once we are done
 $pg->db->query('drop schema mojo_crud_test cascade');

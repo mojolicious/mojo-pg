@@ -15,8 +15,7 @@ sub active { $_[0]->_active($_[0]->pg->db) }
 
 sub from_data {
   my ($self, $class, $name) = @_;
-  return $self->from_string(
-    data_section($class //= caller, $name // $self->name));
+  return $self->from_string(data_section($class //= caller, $name // $self->name));
 }
 
 sub from_file { shift->from_string(decode 'UTF-8', path(pop)->slurp) }
@@ -57,8 +56,7 @@ sub migrate {
   return $self if (my $active = $self->_active($db, 1)) == $target;
 
   # Newer version
-  croak "Active version $active is greater than the latest version $latest"
-    if $active > $latest;
+  croak "Active version $active is greater than the latest version $latest" if $active > $latest;
 
   my $sql = $self->sql_for($active, $target);
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
@@ -123,10 +121,9 @@ Mojo::Pg::Migrations - Migrations
 
 =head1 DESCRIPTION
 
-L<Mojo::Pg::Migrations> is used by L<Mojo::Pg> to allow database schemas to
-evolve easily over time. A migration file is just a collection of sql blocks,
-with one or more statements, separated by comments of the form
-C<-- VERSION UP/DOWN>.
+L<Mojo::Pg::Migrations> is used by L<Mojo::Pg> to allow database schemas to evolve easily over time. A migration file
+is just a collection of sql blocks, with one or more statements, separated by comments of the form C<-- VERSION
+UP/DOWN>.
 
   -- 1 up
   create table messages (message text);
@@ -139,12 +136,10 @@ C<-- VERSION UP/DOWN>.
   -- 2 down
   drop table stuff;
 
-The idea is to let you migrate from any version, to any version, up and down.
-Migrations are very safe, because they are performed in transactions and only
-one can be performed at a time. If a single statement fails, the whole
-migration will fail and get rolled back. Every set of migrations has a
-L</"name">, which is stored together with the currently active version in an
-automatically created table named C<mojo_migrations>.
+The idea is to let you migrate from any version, to any version, up and down. Migrations are very safe, because they
+are performed in transactions and only one can be performed at a time. If a single statement fails, the whole migration
+will fail and get rolled back. Every set of migrations has a L</"name">, which is stored together with the currently
+active version in an automatically created table named C<mojo_migrations>.
 
 =head1 ATTRIBUTES
 
@@ -162,13 +157,11 @@ Name for this set of migrations, defaults to C<migrations>.
   my $pg      = $migrations->pg;
   $migrations = $migrations->pg(Mojo::Pg->new);
 
-L<Mojo::Pg> object these migrations belong to. Note that this attribute is
-weakened.
+L<Mojo::Pg> object these migrations belong to. Note that this attribute is weakened.
 
 =head1 METHODS
 
-L<Mojo::Pg::Migrations> inherits all methods from L<Mojo::Base> and implements
-the following new ones.
+L<Mojo::Pg::Migrations> inherits all methods from L<Mojo::Base> and implements the following new ones.
 
 =head2 active
 
@@ -182,9 +175,8 @@ Currently active version.
   $migrations = $migrations->from_data('main');
   $migrations = $migrations->from_data('main', 'file_name');
 
-Extract migrations from a file in the DATA section of a class with
-L<Mojo::Loader/"data_section">, defaults to using the caller class and
-L</"name">.
+Extract migrations from a file in the DATA section of a class with L<Mojo::Loader/"data_section">, defaults to using
+the caller class and L</"name">.
 
   __DATA__
   @@ migrations
@@ -222,9 +214,8 @@ Latest version available.
   $migrations = $migrations->migrate;
   $migrations = $migrations->migrate(3);
 
-Migrate from L</"active"> to a different version, up or down, defaults to using
-L</"latest">. All version numbers need to be positive, with version C<0>
-representing an empty database.
+Migrate from L</"active"> to a different version, up or down, defaults to using L</"latest">. All version numbers need
+to be positive, with version C<0> representing an empty database.
 
   # Reset database
   $migrations->migrate(0)->migrate;
@@ -237,8 +228,8 @@ Get SQL to migrate from one version to another, up or down.
 
 =head1 DEBUGGING
 
-You can set the C<MOJO_MIGRATIONS_DEBUG> environment variable to get some
-advanced diagnostics information printed to C<STDERR>.
+You can set the C<MOJO_MIGRATIONS_DEBUG> environment variable to get some advanced diagnostics information printed to
+C<STDERR>.
 
   MOJO_MIGRATIONS_DEBUG=1
 
