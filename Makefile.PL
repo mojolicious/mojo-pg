@@ -1,4 +1,4 @@
-use 5.010001;
+use 5.016;
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ WriteMakefile(
     dynamic_config => 0,
     'meta-spec'    => {version => 2},
     no_index       => {directory => ['examples', 't']},
-    prereqs        => {runtime => {requires => {perl => '5.010001'}}},
+    prereqs        => {runtime => {requires => {perl => '5.016'}}},
     resources      => {
       bugtracker => {web => 'https://github.com/mojolicious/mojo-pg/issues'},
       homepage   => 'https://mojolicious.org',
@@ -29,6 +29,6 @@ WriteMakefile(
       x_IRC => 'irc://irc.freenode.net/#mojo'
     },
   },
-  PREREQ_PM => {'DBD::Pg' => 3.007004, Mojolicious => '8.35', 'SQL::Abstract' => '1.86'},
+  PREREQ_PM => {'DBD::Pg' => 3.007004, Mojolicious => '8.50', 'SQL::Abstract' => '1.86'},
   test      => {TESTS     => 't/*.t t/*/*.t'}
 );
