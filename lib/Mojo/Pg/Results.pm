@@ -106,13 +106,7 @@ L<Mojo::Pg::Results> inherits all methods from L<Mojo::Base> and implements the 
 
   my $array = $results->array;
 
-Fetch next row from L</"sth"> and return it as an array reference. Note that L</"finish"> needs to be called if you are
-not fetching all the possible rows.
-
-  # Process one row at a time
-  while (my $next = $results->array) {
-    say $next->[3];
-  }
+Fetch one row from L</"sth"> and return it as an array reference.
 
 =head2 arrays
 
@@ -151,13 +145,7 @@ Indicate that you are finished with L</"sth"> and will not be fetching all the r
 
   my $hash = $results->hash;
 
-Fetch next row from L</"sth"> and return it as a hash reference. Note that L</"finish"> needs to be called if you are
-not fetching all the possible rows.
-
-  # Process one row at a time
-  while (my $next = $results->hash) {
-    say $next->{money};
-  }
+Fetch one row from L</"sth"> and return it as a hash reference.
 
 =head2 hashes
 
