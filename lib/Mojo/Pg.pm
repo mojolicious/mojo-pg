@@ -476,7 +476,7 @@ You can set the C<DBI_TRACE> environment variable to get some advanced diagnosti
   DBI_TRACE=15
   DBI_TRACE=SQL
 
-=head1 REFERENCE
+=head1 API
 
 This is the class hierarchy of the L<Mojo::Pg> distribution.
 
