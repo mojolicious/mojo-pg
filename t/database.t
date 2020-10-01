@@ -104,9 +104,9 @@ subtest 'Connection cache' => sub {
     'same database handles';
   @dbhs = ();
   my $dbh = $pg->max_connections(1)->db->dbh;
-  is $pg->db->dbh, $dbh, 'same database handle';
+  is $pg->db->dbh,   $dbh, 'same database handle';
   isnt $pg->db->dbh, $pg->db->dbh, 'different database handles';
-  is $pg->db->dbh, $dbh, 'different database handles';
+  is $pg->db->dbh,   $dbh, 'different database handles';
   $dbh = $pg->db->dbh;
   is $pg->db->dbh, $dbh, 'same database handle';
   $pg->db->disconnect;
@@ -194,9 +194,17 @@ subtest 'Fork-safety' => sub {
   ok !$connections, 'no new connections';
   {
     local $$ = -23;
-    isnt $pg->db->dbh, $dbh,     'different database handles';
-    is $pg->db->dbh,   $current, 'same database handle';
+    my $dbh2 = $pg->db->dbh;
+    isnt $dbh2,      $dbh,     'different database handles';
+    is $dbh2,        $current, 'same database handle';
     is $connections, 1, 'one new connection';
+    {
+      local $$ = -24;
+      isnt $pg->db->dbh, $dbh,     'different database handles';
+      isnt $pg->db->dbh, $dbh2,    'different database handles';
+      is $pg->db->dbh,   $current, 'same database handle';
+      is $connections, 2, 'two new connections';
+    };
   };
   $pg->unsubscribe('connection');
 };
@@ -261,13 +269,13 @@ subtest 'Notifications' => sub {
   )->wait;
   ok !$db->unlisten('dbtest')->is_listening, 'not listening';
   ok !$db2->unlisten('*')->is_listening,     'not listening';
-  is $notifications[0][0], 'dbtest',  'right channel name';
+  is $notifications[0][0], 'dbtest', 'right channel name';
   ok $notifications[0][1], 'has process id';
-  is $notifications[0][2], 'foo',     'right payload';
-  is $notifications[1][0], 'dbtest',  'right channel name';
+  is $notifications[0][2], 'foo',    'right payload';
+  is $notifications[1][0], 'dbtest', 'right channel name';
   ok $notifications[1][1], 'has process id';
-  is $notifications[1][2], 'foo',     'right payload';
-  is $notifications[2][0], 'dbtest',  'right channel name';
+  is $notifications[1][2], 'foo',    'right payload';
+  is $notifications[2][0], 'dbtest', 'right channel name';
   ok $notifications[2][1], 'has process id';
   is $notifications[2][2], '',        'no payload';
   is $notifications[3][0], 'dbtest2', 'right channel name';
@@ -275,7 +283,7 @@ subtest 'Notifications' => sub {
   is $notifications[3][2], 'bar',     'no payload';
   is $notifications[4][0], 'dbtest2', 'right channel name';
   ok $notifications[4][1], 'has process id';
-  is $notifications[4][2], 'baz',     'no payload';
+  is $notifications[4][2], 'baz', 'no payload';
   is $notifications[5], undef, 'no more notifications';
 };
 

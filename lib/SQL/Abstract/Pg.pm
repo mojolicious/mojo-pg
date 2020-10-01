@@ -37,7 +37,7 @@ sub _insert_returning {
         ARRAYREF => sub {
           my ($target, $set) = @$conflict;
           puke 'on_conflict value must be in the form [$target, \%set]' unless ref $set eq 'HASH';
-          $target = [$target] unless ref $target eq 'ARRAY';
+          $target = [$target]                                           unless ref $target eq 'ARRAY';
 
           $conflict_sql = '(' . join(', ', map { $self->_quote($_) } @$target) . ')';
           $conflict_sql .= $self->_sqlcase(' do update set ');
@@ -46,8 +46,8 @@ sub _insert_returning {
           push @conflict_bind, @set_bind;
         },
         ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
-        SCALARREF   => sub { $conflict_sql                   = $$conflict },
-        UNDEF       => sub { $conflict_sql                   = $self->_sqlcase('do nothing') }
+        SCALARREF => sub { $conflict_sql = $$conflict },
+        UNDEF     => sub { $conflict_sql = $self->_sqlcase('do nothing') }
       }
     );
     $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;

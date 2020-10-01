@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::JSON qw(from_json to_json);
 use Scalar::Util qw(weaken);
 
-has pg                 => undef, weak => 1;
+has pg => undef, weak => 1;
 has reconnect_interval => 1;
 
 sub db {

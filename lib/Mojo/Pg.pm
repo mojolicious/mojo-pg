@@ -64,7 +64,8 @@ sub _dequeue {
   my $self = shift;
 
   # Fork-safety
-  delete @$self{qw(pid queue)} unless ($self->{pid} //= $$) eq $$;
+  delete @$self{qw(pid queue)} if $self->{pid} && $self->{pid} ne $$;
+  $self->{pid} //= $$;
 
   while (my $dbh = shift @{$self->{queue} || []}) { return $dbh if $dbh->ping }
   my $dbh = DBI->connect(map { $self->$_ } qw(dsn username password options));

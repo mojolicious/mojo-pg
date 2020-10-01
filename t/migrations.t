@@ -111,9 +111,9 @@ EOF
   $pg3->auto_migrate(1)->db;
   is $pg3->migrations->active, 6, 'active version is 6';
   is_deeply $pg3->db->query('select * from migration_test_six')->hashes, [{foo => 'works!'}], 'right structure';
-  is $pg3->migrations->migrate(5)->active, 5, 'active version is 5';
+  is $pg3->migrations->migrate(5)->active,                               5, 'active version is 5';
   is_deeply $pg3->db->query('select * from migration_test_six')->hashes, [], 'right structure';
-  is $pg3->migrations->migrate(0)->active, 0, 'active version is 0';
+  is $pg3->migrations->migrate(0)->active,                               0, 'active version is 0';
   is $pg3->migrations->sql_for(0, 5), <<EOF, 'right SQL';
 -- 5 up
 create table if not exists migration_test_six (foo varchar(255));

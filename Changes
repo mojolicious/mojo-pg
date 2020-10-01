@@ -1,6 +1,6 @@
 
-4.20  2020-07-26
-  - Updated project metadata.
+4.20  2020-10-01
+  - Fixed fork-safety feature to work with more than one fork.
 
 4.19  2020-05-30
   - Improved .perltidyrc with more modern settings.
