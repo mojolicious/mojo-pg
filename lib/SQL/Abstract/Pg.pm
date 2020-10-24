@@ -256,10 +256,10 @@ literal SQL with bind values.
   $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
 
   # "SELECT EXTRACT(EPOCH FROM foo) AS foo, bar FROM some_table"
-  $abstract->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
+  $abstract->select('some_table', [\'extract(epoch from foo) AS foo', 'bar']);
 
   # "SELECT 'test' AS foo, bar FROM some_table"
-  $abstract->select('some_table', [\['? as foo', 'test'], 'bar']);
+  $abstract->select('some_table', [\['? AS foo', 'test'], 'bar']);
 
 =head2 JOIN
 

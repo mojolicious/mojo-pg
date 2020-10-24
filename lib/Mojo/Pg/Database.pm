@@ -508,10 +508,10 @@ As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
   $db->select('some_table', '*', {foo => {'=' => {-json => [1, 2, 3]}}});
 
   # "SELECT EXTRACT(EPOCH FROM foo) AS foo, bar FROM some_table"
-  $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
+  $db->select('some_table', [\'extract(epoch from foo) AS foo', 'bar']);
 
   # "SELECT 'test' AS foo, bar FROM some_table"
-  $db->select('some_table', [\['? as foo', 'test'], 'bar']);
+  $db->select('some_table', [\['? AS foo', 'test'], 'bar']);
 
 Including a new last argument to pass many new options.
 

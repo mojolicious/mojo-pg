@@ -117,7 +117,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   my $pg = Mojo::Pg->new('postgresql://postgres@/test');
 
   # Select the server version
-  say $pg->db->query('SELECT VERSION() as version')->hash->{version};
+  say $pg->db->query('SELECT VERSION() AS version')->hash->{version};
 
   # Use migrations to create a table
   $pg->migrations->name('my_names_app')->from_string(<<EOF)->migrate;

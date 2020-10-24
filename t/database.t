@@ -24,7 +24,7 @@ subtest 'Custom search_path' => sub {
 };
 
 subtest 'Blocking select' => sub {
-  is_deeply $pg->db->query('SELECT 1 AS one, 2 as two, 3 as three')->hash, {one => 1, two => 2, three => 3},
+  is_deeply $pg->db->query('SELECT 1 AS one, 2 AS two, 3 AS three')->hash, {one => 1, two => 2, three => 3},
     'right structure';
 };
 
