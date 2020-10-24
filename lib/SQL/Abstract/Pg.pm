@@ -229,14 +229,11 @@ This includes operations commonly referred to as C<upsert>.
   # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
   $abstract->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
 
-  # "INSERT INTO t (a, b) VALUES ('c', 'd')
-  #  ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
-  $abstract->insert(
-    't', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
+  # "INSERT INTO t (a, b) VALUES ('c', 'd') ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
+  $abstract->insert('t', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
   # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
-  $abstract->insert(
-    't', {a => 'b'}, {on_conflict => \['(a) do update set a = ?', 'c']});
+  $abstract->insert('t', {a => 'b'}, {on_conflict => \['(a) do update set a = ?', 'c']});
 
 =head1 SELECT
 

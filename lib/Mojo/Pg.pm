@@ -424,8 +424,7 @@ destroyed, so you can handle problems like connection timeouts gracefully by hol
 time.
 
   # Add up all the money
-  say $pg->db->select('accounts')
-    ->hashes->reduce(sub { $a->{money} + $b->{money} });
+  say $pg->db->select('accounts')->hashes->reduce(sub { $a->{money} + $b->{money} });
 
 =head2 from_string
 

@@ -194,8 +194,7 @@ Mojo::Pg::Database - Database
   use Mojo::Pg::Database;
 
   my $db = Mojo::Pg::Database->new(pg => $pg, dbh => $dbh);
-  $db->query('SELECT * FROM foo')
-    ->hashes->map(sub { $_->{bar} })->join("\n")->say;
+  $db->query('SELECT * FROM foo') ->hashes->map(sub { $_->{bar} })->join("\n")->say;
 
 =head1 DESCRIPTION
 
@@ -370,8 +369,7 @@ Including operations commonly referred to as C<upsert>.
   # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
   $db->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
 
-  # "INSERT INTO t (a, b) VALUES ('c', 'd')
-  #  ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
+  # "INSERT INTO t (a, b) VALUES ('c', 'd') ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
   $db->insert('t', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
 =head2 insert_p
