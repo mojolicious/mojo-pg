@@ -52,7 +52,7 @@ sub migrate {
 
   # Lock migrations table and check version again
   my $tx = $db->begin;
-  $db->query('lock table mojo_migrations in exclusive mode');
+  $db->query('LOCK TABLE mojo_migrations IN EXCLUSIVE MODE');
   return $self if (my $active = $self->_active($db, 1)) == $target;
 
   # Newer version
@@ -60,7 +60,7 @@ sub migrate {
 
   my $sql = $self->sql_for($active, $target);
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
-  $sql .= ';update mojo_migrations set version = $1 where name = $2;';
+  $sql .= ';UPDATE mojo_migrations SET version = $1 WHERE name = $2;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
   return $self;
@@ -88,18 +88,18 @@ sub _active {
   my $results;
   {
     local $db->dbh->{RaiseError} = 0;
-    my $sql = 'select version from mojo_migrations where name = $1';
+    my $sql = 'SELECT version FROM mojo_migrations WHERE name = $1';
     $results = $db->query($sql, $name);
   };
   if ((my $next = $results->array) || !$create) { return $next->[0] || 0 }
 
   $db->query(
-    'create table if not exists mojo_migrations (
-       name    text primary key,
-       version bigint not null check (version >= 0)
+    'CREATE TABLE IF NOT EXISTS mojo_migrations (
+       name    TEXT PRIMARY KEY,
+       version BIGINT NOT NULL CHECK (version >= 0)
      )'
   ) if $results->sth->err;
-  $db->query('insert into mojo_migrations values ($1, $2)', $name, 0);
+  $db->query('INSERT INTO mojo_migrations VALUES ($1, $2)', $name, 0);
 
   return 0;
 }
@@ -126,15 +126,15 @@ is just a collection of sql blocks, with one or more statements, separated by co
 UP/DOWN>.
 
   -- 1 up
-  create table messages (message text);
-  insert into messages values ('I ♥ Mojolicious!');
+  CREATE TABLE messages (message TEXT);
+  INSERT INTO messages VALUES ('I ♥ Mojolicious!');
   -- 1 down
-  drop table messages;
+  DROP TABLE messages;
 
   -- 2 up (...you can comment freely here...)
-  create table stuff (whatever int);
+  CREATE TABLE stuff (whatever INT);
   -- 2 down
-  drop table stuff;
+  DROP TABLE stuff;
 
 The idea is to let you migrate from any version, to any version, up and down. Migrations are very safe, because they
 are performed in transactions and only one can be performed at a time. If a single statement fails, the whole migration
@@ -181,10 +181,10 @@ the caller class and L</"name">.
   __DATA__
   @@ migrations
   -- 1 up
-  create table messages (message text);
-  insert into messages values ('I ♥ Mojolicious!');
+  CREATE TABLE messages (message TEXT);
+  INSERT INTO messages VALUES ('I ♥ Mojolicious!');
   -- 1 down
-  drop table messages;
+  DROP TABLE messages;
 
 =head2 from_file
 
@@ -196,9 +196,9 @@ Extract migrations from a file.
 
   $migrations = $migrations->from_string(
     '-- 1 up
-     create table foo (bar int);
+     CREATE TABLE foo (bar INT);
      -- 1 down
-     drop table foo;'
+     DROP TABLE foo;'
   );
 
 Extract migrations from string.

@@ -13,27 +13,27 @@ use Test::Mojo;
 
 # Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
-$pg->db->query('drop schema if exists mojo_app_test cascade');
-$pg->db->query('create schema mojo_app_test');
+$pg->db->query('DROP SCHEMA IF EXISTS mojo_app_test CASCADE');
+$pg->db->query('CREATE SCHEMA mojo_app_test');
 
 helper pg => sub {
   state $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_app_test']);
 };
 
-app->pg->db->query('create table if not exists app_test (stuff text)');
-app->pg->db->query('insert into app_test values (?)', 'I ♥ Mojolicious!');
+app->pg->db->query('CREATE TABLE IF NOT EXISTS app_test (stuff TEXT)');
+app->pg->db->query('INSERT INTO app_test VALUES (?)', 'I ♥ Mojolicious!');
 
 get '/blocking' => sub {
   my $c  = shift;
   my $db = $c->pg->db;
   $c->res->headers->header('X-Ref' => refaddr $db->dbh);
-  $c->render(text => $db->query('select * from app_test')->hash->{stuff});
+  $c->render(text => $db->query('SELECT * FROM app_test')->hash->{stuff});
 };
 
 get '/non-blocking' => sub {
   my $c = shift;
   $c->pg->db->query(
-    'select * from app_test' => sub {
+    'SELECT * FROM app_test' => sub {
       my ($db, $err, $results) = @_;
       $c->res->headers->header('X-Ref' => refaddr $db->dbh);
       $c->render(text => $results->hash->{stuff});
@@ -62,6 +62,6 @@ subtest 'Non-blocking select (with connection reuse)' => sub {
 };
 
 # Clean up once we are done
-$pg->db->query('drop schema mojo_app_test cascade');
+$pg->db->query('DROP SCHEMA mojo_app_test CASCADE');
 
 done_testing();

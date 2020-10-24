@@ -127,7 +127,7 @@ subtest 'Reconnect while listening multiple retries' => sub {
         $pubsub->unlisten('pstest4');
       }
     );
-    $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
+    $pg->db->query('SELECT PG_TERMINATE_BACKEND(?)', $dbhs[0]{pg_pid});
     $pg->dsn('dbi:Pg:badoption=1');
     Mojo::IOLoop->start;
     ok $dbhs[1], 'database handle';
@@ -148,7 +148,7 @@ subtest 'Reconnect while not listening' => sub {
   {
     local $dbhs[0]{Warn} = 0;
     $pg->pubsub->on(reconnect => sub { Mojo::IOLoop->stop });
-    $pg->db->query('select pg_terminate_backend(?)', $dbhs[0]{pg_pid});
+    $pg->db->query('SELECT PG_TERMINATE_BACKEND(?)', $dbhs[0]{pg_pid});
     Mojo::IOLoop->start;
     ok $dbhs[1], 'database handle';
     isnt $dbhs[0], $dbhs[1], 'different database handles';

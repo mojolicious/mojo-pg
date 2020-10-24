@@ -202,10 +202,10 @@ L<SQL::Abstract::Pg> extends L<SQL::Abstract> with a few PostgreSQL features use
 In many places (as supported by L<SQL::Abstract>) you can use the C<-json> unary op to encode JSON from Perl data
 structures.
 
-  # "update some_table set foo = '[1,2,3]' where bar = 23"
+  # "UPDATE some_table SET foo = '[1,2,3]' WHERE bar = 23"
   $abstract->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
 
-  # "select * from some_table where foo = '[1,2,3]'"
+  # "SELECT * FROM some_table WHERE foo = '[1,2,3]'"
   $abstract->select('some_table', '*', {foo => {'=' => {-json => [1, 2, 3]}}});
 
 =head1 INSERT
@@ -218,23 +218,23 @@ The C<on_conflict> option can be used to generate C<INSERT> queries with C<ON CO
 pass C<DO NOTHING>, array references to pass C<DO UPDATE> with conflict targets and a C<SET> expression, scalar
 references to pass literal SQL and array reference references to pass literal SQL with bind values are supported.
 
-  # "insert into t (a) values ('b') on conflict do nothing"
+  # "INSERT INTO t (a) VALUES ('b') ON CONFLICT DO NOTHING"
   $abstract->insert('t', {a => 'b'}, {on_conflict => undef});
 
-  # "insert into t (a) values ('b') on conflict do nothing"
+  # "INSERT INTO t (a) VALUES ('b') ON CONFLICT DO NOTHING"
   $abstract->insert('t', {a => 'b'}, {on_conflict => \'do nothing'});
 
 This includes operations commonly referred to as C<upsert>.
 
-  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
   $abstract->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
 
-  # "insert into t (a, b) values ('c', 'd')
-  #  on conflict (a, b) do update set a = 'e'"
+  # "INSERT INTO t (a, b) VALUES ('c', 'd')
+  #  ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
   $abstract->insert(
     't', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
-  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
   $abstract->insert(
     't', {a => 'b'}, {on_conflict => \['(a) do update set a = ?', 'c']});
 
@@ -249,16 +249,16 @@ The C<$fields> argument now also accepts array references containing array refer
 well as array references containing scalar references to pass literal SQL and array reference references to pass
 literal SQL with bind values.
 
-  # "select foo as bar from some_table"
+  # "SELECT foo AS bar FROM some_table"
   $abstract->select('some_table', [[foo => 'bar']]);
 
-  # "select foo, bar as baz, yada from some_table"
+  # "SELECT foo, bar AS baz, yada FROM some_table"
   $abstract->select('some_table', ['foo', [bar => 'baz'], 'yada']);
 
-  # "select extract(epoch from foo) as foo, bar from some_table"
+  # "SELECT EXTRACT(EPOCH FROM foo) AS foo, bar FROM some_table"
   $abstract->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 
-  # "select 'test' as foo, bar from some_table"
+  # "SELECT 'test' AS foo, bar FROM some_table"
   $abstract->select('some_table', [\['? as foo', 'test'], 'bar']);
 
 =head2 JOIN
@@ -266,19 +266,19 @@ literal SQL with bind values.
 The C<$source> argument now also accepts array references containing not only table names, but also array references
 with tables to generate C<JOIN> clauses for.
 
-  # "select * from foo join bar on (bar.foo_id = foo.id)"
+  # "SELECT * FROM foo JOIN bar ON (bar.foo_id = foo.id)"
   $abstract->select(['foo', ['bar', foo_id => 'id']]);
 
-  # "select * from foo join bar on (foo.id = bar.foo_id)"
+  # "SELECT * FROM foo JOIN bar ON (foo.id = bar.foo_id)"
   $abstract->select(['foo', ['bar', 'foo.id' => 'bar.foo_id']]);
 
-  # "select * from a join b on (b.a_id = a.id) join c on (c.a_id = a.id)"
+  # "SELECT * FROM a JOIN b ON (b.a_id = a.id) JOIN c ON (c.a_id = a.id)"
   $abstract->select(['a', ['b', a_id => 'id'], ['c', a_id => 'id']]);
 
-  # "select * from foo left join bar on (bar.foo_id = foo.id)"
+  # "SELECT * FROM foo LEFT JOIN bar ON (bar.foo_id = foo.id)"
   $abstract->select(['foo', [-left => 'bar', foo_id => 'id']]);
 
-  # "select * from a left join b on (b.a_id = a.id and b.a_id2 = a.id2)"
+  # "SELECT * FROM a LEFT JOIN b ON (b.a_id = a.id AND b.a_id2 = a.id2)"
   $abstract->select(['a', [-left => 'b', a_id => 'id', a_id2 => 'id2']]);
 
 =head2 ORDER BY
@@ -286,20 +286,20 @@ with tables to generate C<JOIN> clauses for.
 Alternatively to the C<$order> argument accepted by L<SQL::Abstract> you can now also pass a hash reference with
 various options. This includes C<order_by>, which takes the same values as the C<$order> argument.
 
-  # "select * from some_table order by foo desc"
+  # "SELECT * FROM some_table ORDER BY foo DESC"
   $abstract->select('some_table', '*', undef, {order_by => {-desc => 'foo'}});
 
 =head2 LIMIT/OFFSET
 
 The C<limit> and C<offset> options can be used to generate C<SELECT> queries with C<LIMIT> and C<OFFSET> clauses.
 
-  # "select * from some_table limit 10"
+  # "SELECT * FROM some_table LIMIT 10"
   $abstract->select('some_table', '*', undef, {limit => 10});
 
-  # "select * from some_table offset 5"
+  # "SELECT * FROM some_table OFFSET 5"
   $abstract->select('some_table', '*', undef, {offset => 5});
 
-  # "select * from some_table limit 10 offset 5"
+  # "SELECT * FROM some_table LIMIT 10 OFFSET 5"
   $abstract->select('some_table', '*', undef, {limit => 10, offset => 5});
 
 =head2 GROUP BY
@@ -307,10 +307,10 @@ The C<limit> and C<offset> options can be used to generate C<SELECT> queries wit
 The C<group_by> option can be used to generate C<SELECT> queries with C<GROUP BY> clauses. So far, array references to
 pass a list of fields and scalar references to pass literal SQL are supported.
 
-  # "select * from some_table group by foo, bar"
+  # "SELECT * FROM some_table GROUP BY foo, bar"
   $abstract->select('some_table', '*', undef, {group_by => ['foo', 'bar']});
 
-  # "select * from some_table group by foo, bar"
+  # "SELECT * FROM some_table GROUP BY foo, bar"
   $abstract->select('some_table', '*', undef, {group_by => \'foo, bar'});
 
 =head2 HAVING
@@ -318,7 +318,7 @@ pass a list of fields and scalar references to pass literal SQL are supported.
 The C<having> option can be used to generate C<SELECT> queries with C<HAVING> clauses, which takes the same values as
 the C<$where> argument.
 
-  # "select * from t group by a having b = 'c'"
+  # "SELECT * FROM t GROUP BY a HAVING b = 'c'"
   $abstract->select('t', '*', undef, {group_by => ['a'], having => {b => 'c'}});
 
 =head2 FOR
@@ -326,10 +326,10 @@ the C<$where> argument.
 The C<for> option can be used to generate C<SELECT> queries with C<FOR> clauses. So far, the scalar value C<update> to
 pass C<UPDATE> and scalar references to pass literal SQL are supported.
 
-  # "select * from some_table for update"
+  # "SELECT * FROM some_table FOR UPDATE"
   $abstract->select('some_table', '*', undef, {for => 'update'});
 
-  # "select * from some_table for update skip locked"
+  # "SELECT * FROM some_table FOR UPDATE SKIP LOCKED"
   $abstract->select('some_table', '*', undef, {for => \'update skip locked'});
 
 =head1 METHODS

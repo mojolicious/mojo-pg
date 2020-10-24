@@ -19,10 +19,10 @@ get '/' => sub ($c) {
   my $ip = $c->tx->remote_address;
 
   # Store information about current visitor blocking
-  $db->query('insert into visitors values (now(), ?)', $ip);
+  $db->query('INSERT INTO visitors VALUES (NOW(), ?)', $ip);
 
   # Retrieve information about previous visitors non-blocking
-  $db->query('select * from visitors limit 50' => sub ($db, $err, $results) {
+  $db->query('SELECT * FROM visitors LIMIT 50' => sub ($db, $err, $results) {
 
     return $c->reply->exception($err) if $err;
 
@@ -35,9 +35,9 @@ __DATA__
 
 @@ migrations
 -- 1 up
-create table visitors (at timestamp with time zone, ip text);
+CREATE TABLE visitors (at TIMESTAMP WITH TIME ZONE, ip TEXT);
 -- 1 down
-drop table visitors;
+DROP TABLE visitors;
 ```
 
 ## Installation

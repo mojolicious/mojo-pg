@@ -1,5 +1,6 @@
 
-4.21  2020-10-02
+4.21  2020-10-24
+  - Changed SQL style to use uppercase keywords.
 
 4.20  2020-10-01
   - Fixed fork-safety feature to work with more than one fork.

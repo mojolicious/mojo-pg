@@ -15,8 +15,8 @@ use Test::Mojo;
 # Isolate tests
 my $url = Mojo::URL->new($ENV{TEST_ONLINE})->query([search_path => 'mojo_blog_test']);
 my $pg  = Mojo::Pg->new($url);
-$pg->db->query('drop schema if exists mojo_blog_test cascade');
-$pg->db->query('create schema mojo_blog_test');
+$pg->db->query('DROP SCHEMA IF EXISTS mojo_blog_test CASCADE');
+$pg->db->query('CREATE SCHEMA mojo_blog_test');
 
 # Override configuration for testing
 my $t = Test::Mojo->new(Blog => {pg => $url, secrets => ['test_s3cret']});
@@ -51,6 +51,6 @@ $t->get_ok('/posts/1')->status_is(200)->text_is('title' => 'Again')->text_is('h2
 $t->post_ok('/posts/1?_method=DELETE')->status_is(200)->text_is('title' => 'Blog')->element_exists_not('h2');
 
 # Clean up once we are done
-$pg->db->query('drop schema mojo_blog_test cascade');
+$pg->db->query('DROP SCHEMA mojo_blog_test CASCADE');
 
 done_testing();

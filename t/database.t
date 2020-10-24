@@ -19,12 +19,12 @@ subtest 'Connected' => sub {
 
 subtest 'Custom search_path' => sub {
   $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['$user', 'foo', 'bar']);
-  is_deeply $pg->db->query('show search_path')->hash, {search_path => '"$user", foo, bar'}, 'right structure';
+  is_deeply $pg->db->query('SHOW search_path')->hash, {search_path => '"$user", foo, bar'}, 'right structure';
   $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
 };
 
 subtest 'Blocking select' => sub {
-  is_deeply $pg->db->query('select 1 as one, 2 as two, 3 as three')->hash, {one => 1, two => 2, three => 3},
+  is_deeply $pg->db->query('SELECT 1 AS one, 2 as two, 3 as three')->hash, {one => 1, two => 2, three => 3},
     'right structure';
 };
 
@@ -33,7 +33,7 @@ subtest 'Non-blocking select' => sub {
   my $same;
   my $db = $pg->db;
   $db->query(
-    'select 1 as one, 2 as two, 3 as three' => sub {
+    'SELECT 1 AS one, 2 AS two, 3 AS three' => sub {
       my ($db, $err, $results) = @_;
       $fail   = $err;
       $result = $results->hash;
@@ -52,9 +52,9 @@ subtest 'Concurrent non-blocking selects' => sub {
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $pg->db->query('select 1 as one' => $delay->begin);
-      $pg->db->query('select 2 as two' => $delay->begin);
-      $pg->db->query('select 2 as two' => $delay->begin);
+      $pg->db->query('SELECT 1 AS one' => $delay->begin);
+      $pg->db->query('SELECT 2 AS two' => $delay->begin);
+      $pg->db->query('SELECT 2 AS two' => $delay->begin);
     },
     sub {
       my ($delay, $err_one, $one, $err_two, $two, $err_again, $again) = @_;
@@ -72,19 +72,19 @@ subtest 'Sequential non-blocking selects' => sub {
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $db->query('select 1 as one' => $delay->begin);
+      $db->query('SELECT 1 AS one' => $delay->begin);
     },
     sub {
       my ($delay, $err, $one) = @_;
       $fail = $err;
       push @$result, $one->hashes->first;
-      $db->query('select 1 as one' => $delay->begin);
+      $db->query('SELECT 1 AS one' => $delay->begin);
     },
     sub {
       my ($delay, $err, $again) = @_;
       $fail ||= $err;
       push @$result, $again->hashes->first;
-      $db->query('select 2 as two' => $delay->begin);
+      $db->query('SELECT 2 AS two' => $delay->begin);
     },
     sub {
       my ($delay, $err, $two) = @_;
@@ -115,20 +115,20 @@ subtest 'Connection cache' => sub {
 
 subtest 'Statement cache' => sub {
   my $db  = $pg->db;
-  my $sth = $db->query('select 3 as three')->sth;
-  is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
-  isnt $db->query('select 4 as four')->sth, $sth, 'different statement handles';
-  is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
+  my $sth = $db->query('SELECT 3 AS three')->sth;
+  is $db->query('SELECT 3 AS three')->sth,  $sth, 'same statement handle';
+  isnt $db->query('SELECT 4 AS four')->sth, $sth, 'different statement handles';
+  is $db->query('SELECT 3 AS three')->sth,  $sth, 'same statement handle';
   undef $db;
   $db = $pg->db;
-  my $results = $db->query('select 3 as three');
+  my $results = $db->query('SELECT 3 AS three');
   is $results->sth, $sth, 'same statement handle';
-  isnt $db->query('select 3 as three')->sth, $sth, 'different statement handles';
-  $sth = $db->query('select 3 as three')->sth;
-  is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
-  isnt $db->query('select 5 as five')->sth, $sth, 'different statement handles';
-  isnt $db->query('select 6 as six')->sth,  $sth, 'different statement handles';
-  is $db->query('select 3 as three')->sth,  $sth, 'same statement handle';
+  isnt $db->query('SELECT 3 AS three')->sth, $sth, 'different statement handles';
+  $sth = $db->query('SELECT 3 AS three')->sth;
+  is $db->query('SELECT 3 AS three')->sth,  $sth, 'same statement handle';
+  isnt $db->query('SELECT 5 AS five')->sth, $sth, 'different statement handles';
+  isnt $db->query('SELECT 6 AS six')->sth,  $sth, 'different statement handles';
+  is $db->query('SELECT 3 AS three')->sth,  $sth, 'same statement handle';
 };
 
 subtest 'Connection reuse' => sub {
@@ -141,42 +141,42 @@ subtest 'Connection reuse' => sub {
   undef $results;
   my $db3 = $pg->db;
   is $db3->dbh, $dbh, 'same database handle';
-  $results = $db3->query('select 2');
+  $results = $db3->query('SELECT 2');
   is $results->db->dbh, $dbh, 'same database handle';
   is $results->array->[0], 2, 'right result';
 };
 
 subtest 'Dollar only' => sub {
   my $db = $pg->db;
-  is $db->dollar_only->query('select $1::int as test', 23)->hash->{test}, 23, 'right result';
-  eval { $db->dollar_only->query('select ?::int as test', 23) };
+  is $db->dollar_only->query('SELECT $1::INT AS test', 23)->hash->{test}, 23, 'right result';
+  eval { $db->dollar_only->query('SELECT ?::INT AS test', 23) };
   like $@, qr/Statement has no placeholders to bind/, 'right error';
-  is $db->query('select ?::int as test', 23)->hash->{test}, 23, 'right result';
+  is $db->query('SELECT ?::INT AS test', 23)->hash->{test}, 23, 'right result';
 };
 
 subtest 'JSON' => sub {
   my $db = $pg->db;
-  is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
     'right structure';
-  is_deeply $db->query('select ?::jsonb as foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
+  is_deeply $db->query('SELECT ?::JSONB AS foo', {json => {bar => 'baz'}})->expand->hash, {foo => {bar => 'baz'}},
     'right structure';
-  is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->array, [{bar => 'baz'}],
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->expand->array, [{bar => 'baz'}],
     'right structure';
-  is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->hashes->first,
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->expand->hashes->first,
     {foo => {bar => 'baz'}}, 'right structure';
-  is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->expand->arrays->first, [{bar => 'baz'}],
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->expand->arrays->first, [{bar => 'baz'}],
     'right structure';
-  is_deeply $db->query('select ?::json as foo', {json => {bar => 'baz'}})->hash, {foo => '{"bar":"baz"}'},
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->hash, {foo => '{"bar":"baz"}'},
     'right structure';
-  is_deeply $db->query('select ?::json as foo', {json => \1})->expand->hashes->first, {foo => true}, 'right structure';
-  is_deeply $db->query('select ?::json as foo', undef)->expand->hash, {foo => undef}, 'right structure';
-  is_deeply $db->query('select ?::json as foo', undef)->expand->array, [undef], 'right structure';
-  my $results = $db->query('select ?::json', undef);
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => \1})->expand->hashes->first, {foo => true}, 'right structure';
+  is_deeply $db->query('SELECT ?::JSON AS foo', undef)->expand->hash, {foo => undef}, 'right structure';
+  is_deeply $db->query('SELECT ?::JSON AS foo', undef)->expand->array, [undef], 'right structure';
+  my $results = $db->query('SELECT ?::json', undef);
   is_deeply $results->expand->array, [undef], 'right structure';
   is_deeply $results->expand->array, undef, 'no more results';
-  is_deeply $db->query('select ?::json as unicode', {json => {'☃' => '♥'}})->expand->hash, {unicode => {'☃' => '♥'}},
+  is_deeply $db->query('SELECT ?::JSON AS unicode', {json => {'☃' => '♥'}})->expand->hash, {unicode => {'☃' => '♥'}},
     'right structure';
-  is_deeply $db->query("select json_build_object('☃', ?::text) as unicode", '♥')->expand->hash,
+  is_deeply $db->query("SELECT JSON_BUILD_OBJECT('☃', ?::TEXT) AS unicode", '♥')->expand->hash,
     {unicode => {'☃' => '♥'}}, 'right structure';
 };
 
@@ -218,11 +218,11 @@ subtest 'Shared connection cache' => sub {
   is $pg->db->dbh,  $dbh, 'same database handle';
   is $pg2->db->dbh, $dbh, 'same database handle';
   my $db = $pg->db;
-  is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}], 'right structure';
+  is_deeply $db->query('SELECT 1 AS one')->hashes->to_array, [{one => 1}], 'right structure';
   $dbh = $db->dbh;
   $db->disconnect;
   $db = $pg2->db;
-  is_deeply $db->query('select 1 as one')->hashes->to_array, [{one => 1}], 'right structure';
+  is_deeply $db->query('SELECT 1 AS one')->hashes->to_array, [{one => 1}], 'right structure';
   isnt $db->dbh, $dbh, 'different database handle';
 };
 
@@ -250,7 +250,7 @@ subtest 'Notifications' => sub {
       my ($delay, $name, $pid, $payload) = @_;
       push @notifications, [$name, $pid, $payload];
       $db2->listen('dbtest2')->once(notification => $delay->begin);
-      Mojo::IOLoop->next_tick(sub { $db2->query("notify dbtest2, 'bar'") });
+      Mojo::IOLoop->next_tick(sub { $db2->query("NOTIFY dbtest2, 'bar'") });
     },
     sub {
       my ($delay, $name, $pid, $payload) = @_;
@@ -300,7 +300,7 @@ subtest 'Connection close while listening for notifications' => sub {
   my $close = 0;
   $db->on(close => sub { $close++ });
   local $db->dbh->{Warn} = 0;
-  $pg->db->query('select pg_terminate_backend(?)', $db->pid);
+  $pg->db->query('SELECT PG_TERMINATE_BACKEND(?)', $db->pid);
   Mojo::IOLoop->start;
   is $close, 1, 'close event has been emitted once';
 };
@@ -326,9 +326,9 @@ subtest 'Non-blocking error' => sub {
 
 subtest 'Non-blocking query in progress' => sub {
   my $db = $pg->db;
-  $db->query('select 1' => sub { });
+  $db->query('SELECT 1' => sub { });
   eval {
-    $db->query('select 1' => sub { });
+    $db->query('SELECT 1' => sub { });
   };
   like $@, qr/Non-blocking query already in progress/, 'right error';
 };
@@ -337,7 +337,7 @@ subtest 'CLean up non-blocking query' => sub {
   my $fail;
   my $db = $pg->db;
   $db->query(
-    'select 1' => sub {
+    'SELECT 1' => sub {
       my ($db, $err, $results) = @_;
       $fail = $err;
     }

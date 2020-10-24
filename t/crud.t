@@ -11,14 +11,14 @@ use Mojo::Pg;
 
 # Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_crud_test']);
-$pg->db->query('drop schema if exists mojo_crud_test cascade');
-$pg->db->query('create schema mojo_crud_test');
+$pg->db->query('DROP SCHEMA IF EXISTS mojo_crud_test CASCADE');
+$pg->db->query('CREATE SCHEMA mojo_crud_test');
 
 my $db = $pg->db;
 $db->query(
-  'create table if not exists crud_test (
-     id   serial primary key,
-     name text
+  'CREATE TABLE IF NOT EXISTS crud_test (
+     id   SERIAL PRIMARY KEY,
+     name TEXT
    )'
 );
 
@@ -74,9 +74,9 @@ subtest 'Delete' => sub {
 
 subtest 'Quoting' => sub {
   $db->query(
-    'create table if not exists crud_test2 (
-     id   serial primary key,
-     "t e s t" text
+    'CREATE TABLE IF NOT EXISTS crud_test2 (
+     id   SERIAL PRIMARY KEY,
+     "t e s t" TEXT
    )'
   );
   $db->insert('crud_test2',                {'t e s t' => 'foo'});
@@ -87,9 +87,9 @@ subtest 'Quoting' => sub {
 
 subtest 'Arrays' => sub {
   $db->query(
-    'create table if not exists crud_test3 (
-     id   serial primary key,
-     names text[]
+    'CREATE TABLE IF NOT EXISTS crud_test3 (
+     id   SERIAL PRIMARY KEY,
+     names TEXT[]
    )'
   );
   $db->insert('crud_test3', {names => ['foo', 'bar']});
@@ -108,8 +108,8 @@ subtest 'Promises' => sub {
   is $result->{name}, 'promise', 'right result';
 
   $result = undef;
-  my $first  = $pg->db->query_p("select * from crud_test where name = 'promise'");
-  my $second = $pg->db->query_p("select * from crud_test where name = 'promise'");
+  my $first  = $pg->db->query_p("SELECT * FROM crud_test WHERE name = 'promise'");
+  my $second = $pg->db->query_p("SELECT * FROM crud_test WHERE name = 'promise'");
   Mojo::Promise->all($first, $second)->then(sub {
     my ($first, $second) = @_;
     $result = [$first->[0]->hash, $second->[0]->hash];
@@ -133,15 +133,15 @@ subtest 'Promises (rejected)' => sub {
 
 subtest 'Join' => sub {
   $db->query(
-    'create table if not exists crud_test4 (
-     id    serial primary key,
-     test1 text
+    'CREATE TABLE IF NOT EXISTS crud_test4 (
+     id    SERIAL PRIMARY KEY,
+     test1 TEXT
    )'
   );
   $db->query(
-    'create table if not exists crud_test5 (
-     id    serial primary key,
-     test2 text
+    'CREATE TABLE IF NOT EXISTS crud_test5 (
+     id    SERIAL PRIMARY KEY,
+     test2 TEXT
    )'
   );
   $db->insert('crud_test4', {test1 => 'hello'});
@@ -152,6 +152,6 @@ subtest 'Join' => sub {
 };
 
 # Clean up once we are done
-$pg->db->query('drop schema mojo_crud_test cascade');
+$pg->db->query('DROP SCHEMA mojo_crud_test CASCADE');
 
 done_testing();

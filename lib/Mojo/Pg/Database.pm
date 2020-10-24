@@ -194,7 +194,7 @@ Mojo::Pg::Database - Database
   use Mojo::Pg::Database;
 
   my $db = Mojo::Pg::Database->new(pg => $pg, dbh => $dbh);
-  $db->query('select * from foo')
+  $db->query('SELECT * FROM foo')
     ->hashes->map(sub { $_->{bar} })->join("\n")->say;
 
 =head1 DESCRIPTION
@@ -287,16 +287,16 @@ L</"query">. You can also append a callback to perform operations non-blocking.
 
 Use all the same argument variations you would pass to the C<delete> method of L<SQL::Abstract>.
 
-  # "delete from some_table"
+  # "DELETE FROM some_table"
   $db->delete('some_table');
 
-  # "delete from some_table where foo = 'bar'"
+  # "DELETE FROM some_table WHERE foo = 'bar'"
   $db->delete('some_table', {foo => 'bar'});
 
-  # "delete from some_table where foo like '%test%'"
+  # "DELETE from some_table WHERE foo LIKE '%test%'"
   $db->delete('some_table', {foo => {-like => '%test%'}});
 
-  # "delete from some_table where foo = 'bar' returning id"
+  # "DELETE FROM some_table WHERE foo = 'bar' RETURNING id"
   $db->delete('some_table', {foo => 'bar'}, {returning => 'id'});
 
 =head2 delete_p
@@ -327,7 +327,7 @@ Disconnect L</"dbh"> and prevent it from getting reused.
 Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?> to be used as an operator.
 
   # Check for a key in a JSON document
-  $db->dollar_only->query('select * from foo where bar ? $1', 'baz')
+  $db->dollar_only->query('SELECT * FROM foo WHERE bar ? $1', 'baz')
     ->expand->hashes->map(sub { $_->{bar}{baz} })->join("\n")->say;
 
 =head2 insert
@@ -345,35 +345,34 @@ with L</"query">. You can also append a callback to perform operations non-block
 
 Use all the same argument variations you would pass to the C<insert> method of L<SQL::Abstract>.
 
-  # "insert into some_table (foo, baz) values ('bar', 'yada')"
+  # "INSERT INTO some_table (foo, baz) VALUES ('bar', 'yada')"
   $db->insert('some_table', {foo => 'bar', baz => 'yada'});
 
-  # "insert into some_table (foo) values ({1,2,3})"
+  # "INSERT INTO some_table (foo) VALUES ({1,2,3})"
   $db->insert('some_table', {foo => [1, 2, 3]});
 
-  # "insert into some_table (foo) values ('bar') returning id"
+  # "INSERT INTO some_table (foo) VALUES ('bar') RETURNING id"
   $db->insert('some_table', {foo => 'bar'}, {returning => 'id'});
 
-  # "insert into some_table (foo) values ('bar') returning id, foo"
+  # "INSERT INTO some_table (foo) VALUES ('bar') RETURNING id, foo"
   $db->insert('some_table', {foo => 'bar'}, {returning => ['id', 'foo']});
 
 As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
-  # "insert into some_table (foo) values ('{"test":23}')"
+  # "INSERT INTO some_table (foo) VALUES ('{"test":23}')"
   $db->insert('some_table', {foo => {-json => {test => 23}}});
 
-  # "insert into some_table (foo) values ('bar') on conflict do nothing"
+  # "INSERT INTO some_table (foo) VALUES ('bar') ON CONFLICT DO NOTHING"
   $db->insert('some_table', {foo => 'bar'}, {on_conflict => undef});
 
 Including operations commonly referred to as C<upsert>.
 
-  # "insert into t (a) values ('b') on conflict (a) do update set a = 'c'"
+  # "INSERT INTO t (a) VALUES ('b') ON CONFLICT (a) DO UPDATE SET a = 'c'"
   $db->insert('t', {a => 'b'}, {on_conflict => [a => {a => 'c'}]});
 
-  # "insert into t (a, b) values ('c', 'd')
-  #  on conflict (a, b) do update set a = 'e'"
-  $db->insert(
-    't', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
+  # "INSERT INTO t (a, b) VALUES ('c', 'd')
+  #  ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
+  $db->insert('t', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
 =head2 insert_p
 
@@ -423,16 +422,16 @@ Check database connection.
 
 =head2 query
 
-  my $results = $db->query('select * from foo');
-  my $results = $db->query('insert into foo values (?, ?, ?)', @values);
-  my $results = $db->query('select ?::json as foo', {-json => {bar => 'baz'}});
+  my $results = $db->query('SELECT * FROM foo');
+  my $results = $db->query('INSERT INTO foo VALUES (?, ?, ?)', @values);
+  my $results = $db->query('SELECT ?::JSON AS foo', {-json => {bar => 'baz'}});
 
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html> statement and return a results object
 based on L</"results_class"> (which is usually L<Mojo::Pg::Results>) with the query results. The L<DBD::Pg> statement
 handle will be automatically reused when it is not active anymore, to increase the performance of future queries. You
 can also append a callback to perform operations non-blocking.
 
-  $db->query('insert into foo values (?, ?, ?)' => @values => sub {
+  $db->query('INSERT INTO foo VALUES (?, ?, ?)' => @values => sub {
     my ($db, $err, $results) = @_;
     ...
   });
@@ -443,24 +442,23 @@ L<Mojo::JSON/"to_json">. To accomplish the reverse, you can use the method L<Moj
 automatically decodes all fields of the types C<json> and C<jsonb> with L<Mojo::JSON/"from_json"> to Perl values.
 
   # "I ♥ Mojolicious!"
-  $db->query('select ?::jsonb as foo', {-json => {bar => 'I ♥ Mojolicious!'}})
-    ->expand->hash->{foo}{bar};
+  $db->query('SELECT ?::JSONB AS foo', {-json => {bar => 'I ♥ Mojolicious!'}}) ->expand->hash->{foo}{bar};
 
 Hash reference arguments containing values named C<type> and C<value> can be used to bind specific L<DBD::Pg> data
 types to placeholders.
 
   # Insert binary data
   use DBD::Pg ':pg_types';
-  $db->query('insert into bar values (?)', {type => PG_BYTEA, value => $bytes});
+  $db->query('INSERT INTO bar VALUES (?)', {type => PG_BYTEA, value => $bytes});
 
 =head2 query_p
 
-  my $promise = $db->query_p('select * from foo');
+  my $promise = $db->query_p('SELECT * FROM foo');
 
 Same as L</"query">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->query_p('insert into foo values (?, ?, ?)' => @values)->then(sub {
+  $db->query_p('INSERT INTO foo VALUES (?, ?, ?)' => @values)->then(sub {
     my $results = shift;
     ...
   })->catch(sub {
@@ -483,56 +481,56 @@ L</"query">. You can also append a callback to perform operations non-blocking.
 
 Use all the same argument variations you would pass to the C<select> method of L<SQL::Abstract>.
 
-  # "select * from some_table"
+  # "SELECT * FROM some_table"
   $db->select('some_table');
 
-  # "select id, foo from some_table"
+  # "SELECT id, foo FROM some_table"
   $db->select('some_table', ['id', 'foo']);
 
-  # "select * from some_table where foo = 'bar'"
+  # "SELECT * FROM some_table WHERE foo = 'bar'"
   $db->select('some_table', undef, {foo => 'bar'});
 
-  # "select * from some_table where foo like '%test%'"
+  # "SELECT * FROM some_table WHERE foo LIKE '%test%'"
   $db->select('some_table', undef, {foo => {-like => '%test%'}});
 
 As well as some PostgreSQL specific extensions added by L<SQL::Abstract::Pg>.
 
-  # "select * from foo join bar on (bar.foo_id = foo.id)"
+  # "SELECT * FROM foo JOIN bar ON (bar.foo_id = foo.id)"
   $db->select(['foo', ['bar', foo_id => 'id']]);
 
-  # "select * from foo left join bar on (bar.foo_id = foo.id)"
+  # "SELECT * FROM foo LEFT JOIN bar ON (bar.foo_id = foo.id)"
   $db->select(['foo', [-left => 'bar', foo_id => 'id']]);
 
-  # "select foo as bar from some_table"
+  # "SELECT foo AS bar FROM some_table"
   $db->select('some_table', [[foo => 'bar']]);
 
-  # "select * from some_table where foo = '[1,2,3]'"
+  # "SELECT * FROM some_table WHERE foo = '[1,2,3]'"
   $db->select('some_table', '*', {foo => {'=' => {-json => [1, 2, 3]}}});
 
-  # "select extract(epoch from foo) as foo, bar from some_table"
+  # "SELECT EXTRACT(EPOCH FROM foo) AS foo, bar FROM some_table"
   $db->select('some_table', [\'extract(epoch from foo) as foo', 'bar']);
 
-  # "select 'test' as foo, bar from some_table"
+  # "SELECT 'test' AS foo, bar FROM some_table"
   $db->select('some_table', [\['? as foo', 'test'], 'bar']);
 
 Including a new last argument to pass many new options.
 
-  # "select * from some_table where foo = 'bar' order by id desc"
+  # "SELECT * FROM some_table WHERE foo = 'bar' ORDER BY id DESC"
   $db->select('some_table', '*', {foo => 'bar'}, {order_by => {-desc => 'id'}});
 
-  # "select * from some_table limit 10 offset 20"
+  # "SELECT * FROM some_table LIMIT 10 OFFSET 20"
   $db->select('some_table', '*', undef, {limit => 10, offset => 20});
 
-  # "select * from some_table where foo = 23 group by foo, bar"
+  # "SELECT * FROM some_table WHERE foo = 23 GROUP BY foo, bar"
   $db->select('some_table', '*', {foo => 23}, {group_by => ['foo', 'bar']});
 
-  # "select * from t where a = 'b' group by c having d = 'e'"
+  # "SELECT * FROM t WHERE a = 'b' GROUP BY c HAVING d = 'e'"
   $db->select('t', '*', {a => 'b'}, {group_by => ['c'], having => {d => 'e'}});
 
-  # "select * from some_table where id = 1 for update"
+  # "SELECT * FROM some_table WHERE id = 1 FOR UPDATE"
   $db->select('some_table', '*', {id => 1}, {for => 'update'});
 
-  # "select * from some_table where id = 1 for update skip locked"
+  # "SELECT * FROM some_table WHERE id = 1 FOR UPDATE SKIP LOCKED"
   $db->select('some_table', '*', {id => 1}, {for => \'update skip locked'});
 
 =head2 select_p
@@ -582,19 +580,19 @@ with L</"query">. You can also append a callback to perform operations non-block
 
 Use all the same argument variations you would pass to the C<update> method of L<SQL::Abstract>.
 
-  # "update some_table set foo = 'bar' where id = 23"
+  # "UPDATE some_table SET foo = 'bar' WHERE id = 23"
   $db->update('some_table', {foo => 'bar'}, {id => 23});
 
-  # "update some_table set foo = {1,2,3} where id = 23"
+  # "UPDATE some_table SET foo = {1,2,3} WHERE id = 23"
   $db->update('some_table', {foo => [1, 2, 3]}, {id => 23});
 
-  # "update some_table set foo = 'bar' where foo like '%test%'"
+  # "UPDATE some_table SET foo = 'bar' WHERE foo LIKE '%test%'"
   $db->update('some_table', {foo => 'bar'}, {foo => {-like => '%test%'}});
 
-  # "update some_table set foo = 'bar' where id = 23 returning id"
+  # "UPDATE some_table SET foo = 'bar' WHERE id = 23 RETURNING id"
   $db->update('some_table', {foo => 'bar'}, {id => 23}, {returning => 'id'});
 
-  # "update some_table set foo = '[1,2,3]' where bar = 23"
+  # "UPDATE some_table SET foo = '[1,2,3]' WHERE bar = 23"
   $db->update('some_table', {foo => {-json => [1, 2, 3]}}, {bar => 23});
 
 =head2 update_p
