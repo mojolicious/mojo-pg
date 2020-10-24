@@ -51,7 +51,7 @@ sub listen {
   my ($self, $name) = @_;
 
   my $dbh = $self->dbh;
-  $dbh->do('listen ' . $dbh->quote_identifier($name)) unless $self->{listen}{$name}++;
+  $dbh->do('LISTEN ' . $dbh->quote_identifier($name)) unless $self->{listen}{$name}++;
   $self->_watch;
 
   return $self;
@@ -61,7 +61,7 @@ sub notify {
   my ($self, $name, $payload) = @_;
 
   my $dbh    = $self->dbh;
-  my $notify = 'notify ' . $dbh->quote_identifier($name);
+  my $notify = 'NOTIFY ' . $dbh->quote_identifier($name);
   $notify .= ', ' . $dbh->quote($payload) if defined $payload;
   $dbh->do($notify);
   $self->_notifications;
@@ -125,7 +125,7 @@ sub unlisten {
   my ($self, $name) = @_;
 
   my $dbh = $self->dbh;
-  $dbh->do('unlisten ' . $dbh->quote_identifier($name));
+  $dbh->do('UNLISTEN ' . $dbh->quote_identifier($name));
   $name eq '*' ? delete $self->{listen} : delete $self->{listen}{$name};
   $self->_unwatch unless $self->{waiting} || $self->is_listening;
 

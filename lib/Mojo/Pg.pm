@@ -73,7 +73,7 @@ sub _dequeue {
   # Search path
   if (my $path = $self->search_path) {
     my $search_path = join ', ', map { $dbh->quote_identifier($_) } @$path;
-    $dbh->do("set search_path to $search_path");
+    $dbh->do("SET search_path TO $search_path");
   }
 
   $self->emit(connection => $dbh);
@@ -290,7 +290,7 @@ Emitted when a new database connection has been established.
 
   $pg->on(connection => sub {
     my ($pg, $dbh) = @_;
-    $dbh->do('set search_path to my_schema');
+    $dbh->do('SET search_path TO my_schema');
   });
 
 =head1 ATTRIBUTES
