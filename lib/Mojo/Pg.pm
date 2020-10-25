@@ -60,6 +60,8 @@ sub from_string {
 
 sub new { @_ > 1 ? shift->SUPER::new->from_string(@_) : shift->SUPER::new }
 
+sub reset { ($_[0]->{queue} = []) and return $_[0] }
+
 sub _dequeue {
   my $self = shift;
 
@@ -467,6 +469,12 @@ Construct a new L<Mojo::Pg> object and parse connection string with L</"from_str
 
   # Customize configuration further
   my $pg = Mojo::Pg->new->dsn('dbi:Pg:service=foo');
+
+=head2 reset
+
+  $pg = $pg->reset;
+
+Reset connection cache.
 
 =head1 DEBUGGING
 

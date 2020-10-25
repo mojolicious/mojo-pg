@@ -226,6 +226,18 @@ subtest 'Shared connection cache' => sub {
   isnt $db->dbh, $dbh, 'different database handle';
 };
 
+subtest 'Cahce reset' => sub {
+  my $dbh = $pg->db->dbh;
+  is $pg->db->dbh, $dbh, 'same database handle';
+  is $pg->db->dbh, $dbh, 'same database handle again';
+  is $pg->db->dbh, $dbh, 'same database handle again';
+  isnt $pg->reset->db->dbh, $dbh, 'different database handle';
+  $dbh = $pg->db->dbh;
+  is $pg->db->dbh, $dbh, 'same database handle';
+  is $pg->db->dbh, $dbh, 'same database handle again';
+  isnt $pg->reset->db->dbh, $dbh, 'different database handle';
+};
+
 subtest 'Notifications' => sub {
   my $db = $pg->db;
   ok !$db->is_listening, 'not listening';
