@@ -1,4 +1,6 @@
 
+4.22  2020-10-26
+
 4.21  2020-10-25
   - Added reset method to Mojo::Pg.
   - Changed SQL style to use uppercase keywords.
