@@ -226,7 +226,7 @@ subtest 'Shared connection cache' => sub {
   isnt $db->dbh, $dbh, 'different database handle';
 };
 
-subtest 'Cahce reset' => sub {
+subtest 'Cache reset' => sub {
   my $dbh = $pg->db->dbh;
   is $pg->db->dbh, $dbh, 'same database handle';
   is $pg->db->dbh, $dbh, 'same database handle again';
