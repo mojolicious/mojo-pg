@@ -18,6 +18,17 @@ sub from_data {
   return $self->from_string(data_section($class //= caller, $name // $self->name));
 }
 
+sub from_dir {
+  my ($self, $dir) = @_;
+  my $migrations = $self->{migrations} = {up => {}, down => {}};
+  path($dir)->list_tree({max_depth => 2})->each(sub {
+    return unless my ($way)     = ($_->basename          =~ /^(up|down)\.sql$/);
+    return unless my ($version) = ($_->dirname->basename =~ /^(\d+)$/);
+    $migrations->{$way}{$version} = decode 'UTF-8', $_->slurp;
+  });
+  return $self;
+}
+
 sub from_file { shift->from_string(decode 'UTF-8', path(pop)->slurp) }
 
 sub from_string {
@@ -185,6 +196,19 @@ the caller class and L</"name">.
   INSERT INTO messages VALUES ('I ♥ Mojolicious!');
   -- 1 down
   DROP TABLE messages;
+
+=head2 from_dir
+
+  $migrations = $migrations->from_dir('/home/sri/migrations');
+
+Extract migrations from a directory tree where each versioned migration is in a directory, named for the version, and
+each migration has one or both of the files named C<up.sql> or C<down.sql>.
+
+  migrations/1/up.sql
+  migrations/1/down.sql
+  migrations/2/up.sql
+  migrations/3/up.sql
+  migrations/3/down.sql
 
 =head2 from_file
 
