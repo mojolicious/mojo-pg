@@ -6,8 +6,7 @@ use Test::More;
 
 plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
-use File::Spec::Functions qw(catfile);
-use FindBin;
+use Mojo::File qw(curfile);
 use Mojo::Pg;
 
 # Isolate tests
@@ -81,7 +80,7 @@ EOF
 
 subtest 'Bad and concurrent migrations' => sub {
   my $pg2 = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
-  $pg2->migrations->name('migrations_test2')->from_file(catfile($FindBin::Bin, 'migrations', 'test.sql'));
+  $pg2->migrations->name('migrations_test2')->from_file(curfile->sibling('migrations', 'test.sql'));
   is $pg2->migrations->latest, 4, 'latest version is 4';
   is $pg2->migrations->active, 0, 'active version is 0';
   eval { $pg2->migrations->migrate };
@@ -164,6 +163,28 @@ EOF
   eval { $pg->migrations->migrate(0) };
   like $@, qr/Active version 2 is greater than the latest version 1/, 'right error';
   is $pg->migrations->from_string($newer)->migrate(0)->active, 0, 'active version is 0';
+};
+
+subtest 'Migration directory' => sub {
+  my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_migrations_test']);
+  $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree'));
+  is $pg->migrations->migrate(0)->migrate(2)->active, 2, 'migrate table with unicode';
+  is_deeply $pg->db->query('SELECT * FROM migration_test_three')->hashes, [{baz => 'just'}, {baz => 'works ♥'}],
+    'right structure';
+  eval { $pg->migrations->migrate(36) };
+  like $@, qr/^Version 36 has no migration/, 'empty file has no version';
+  eval { $pg->migrations->migrate(54) };
+  like $@, qr/^Version 54 has no migration/, 'sparse directory has no version';
+  eval { $pg->migrations->migrate(55) };
+  like $@, qr/^Version 55 has no migration/, 'upgrade.sql is not up.sql, so no version';
+  is $pg->migrations->migrate->active, 99, 'active version is 99';
+  is $pg->migrations->latest, 99, 'latest version is 99';
+  ok !!(grep {/^mojo_migrations_test\.migration_test_luft_balloons$/} @{$pg->db->tables}), 'last table exists';
+  $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree2'));
+  is $pg->migrations->latest, 8, 'from_directory acts like others';
+
+  is $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree3'))->latest, 0,
+    'Should this raise an error?';
 };
 
 # Clean up once we are done
