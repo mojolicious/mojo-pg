@@ -20,12 +20,14 @@ sub from_data {
 
 sub from_dir {
   my ($self, $dir) = @_;
+
   my $migrations = $self->{migrations} = {up => {}, down => {}};
   path($dir)->list_tree({max_depth => 2})->each(sub {
     return unless my ($way)     = ($_->basename          =~ /^(up|down)\.sql$/);
     return unless my ($version) = ($_->dirname->basename =~ /^(\d+)$/);
     $migrations->{$way}{$version} = decode 'UTF-8', $_->slurp;
   });
+
   return $self;
 }
 
