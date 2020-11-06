@@ -137,10 +137,10 @@ sub _notifications {
 
   my $dbh = $self->dbh;
   my $n;
-  return undef unless $n = $dbh->pg_notifies;
+  return undef unless $n = eval { $dbh->pg_notifies };
   while ($n) {
     $self->emit(notification => @$n);
-    $n = $dbh->pg_notifies;
+    $n = eval { $dbh->pg_notifies };
   }
 
   return 1;
