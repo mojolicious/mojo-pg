@@ -184,10 +184,10 @@ subtest 'Migration directory' => sub {
   ok !!(grep {/^mojo_migrations_test\.migration_test_luft_balloons$/} @{$pg->db->tables}), 'last table exists';
 
   $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree2'));
-  is $pg->migrations->latest, 8, 'from_directory acts like others';
+  is $pg->migrations->latest, 8, 'latest version is 8';
 
   is $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree3'))->latest, 0,
-    'Should this raise an error?';
+    'latest version is 0';
 };
 
 # Clean up once we are done
