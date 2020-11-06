@@ -22,11 +22,11 @@ sub from_dir {
   my ($self, $dir) = @_;
 
   my $migrations = $self->{migrations} = {up => {}, down => {}};
-  path($dir)->list_tree({max_depth => 2})->each(sub {
-    return unless my ($way)     = ($_->basename          =~ /^(up|down)\.sql$/);
-    return unless my ($version) = ($_->dirname->basename =~ /^(\d+)$/);
-    $migrations->{$way}{$version} = decode 'UTF-8', $_->slurp;
-  });
+  for my $file (path($dir)->list_tree({max_depth => 2})->each) {
+    next unless my ($way)     = ($file->basename          =~ /^(up|down)\.sql$/);
+    next unless my ($version) = ($file->dirname->basename =~ /^(\d+)$/);
+    $migrations->{$way}{$version} = decode 'UTF-8', $file->slurp;
+  }
 
   return $self;
 }
