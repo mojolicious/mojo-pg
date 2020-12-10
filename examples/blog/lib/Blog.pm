@@ -1,11 +1,10 @@
 package Blog;
-use Mojo::Base 'Mojolicious';
+use Mojo::Base 'Mojolicious', -signatures;
 
 use Blog::Model::Posts;
 use Mojo::Pg;
 
-sub startup {
-  my $self = shift;
+sub startup ($self) {
 
   # Configuration
   $self->plugin('Config');

@@ -1,21 +1,19 @@
-use Mojolicious::Lite;
+use Mojolicious::Lite -signatures;
 use Mojo::Pg;
 
 helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
 get '/' => 'chat';
 
-websocket '/channel' => sub {
-  my $c = shift;
-
+websocket '/channel' => sub ($c) {
   $c->inactivity_timeout(3600);
 
   # Forward messages from the browser to PostgreSQL
-  $c->on(message => sub { shift->pg->pubsub->notify(mojochat => shift) });
+  $c->on(message => sub ($c, $message) { $c->pg->pubsub->notify(mojochat => $message) });
 
   # Forward messages from PostgreSQL to the browser
-  my $cb = $c->pg->pubsub->listen(mojochat => sub { $c->send(pop) });
-  $c->on(finish => sub { shift->pg->pubsub->unlisten(mojochat => $cb) });
+  my $cb = $c->pg->pubsub->listen(mojochat => sub ($pubsub, $message) { $c->send($message) });
+  $c->on(finish => sub ($c) { $c->pg->pubsub->unlisten(mojochat => $cb) });
 };
 
 app->start;

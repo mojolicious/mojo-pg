@@ -1,27 +1,25 @@
 package Blog::Model::Posts;
-use Mojo::Base -base;
+use Mojo::Base -base, -signatures;
 
 has 'pg';
 
-sub add {
-  my ($self, $post) = @_;
+sub add ($self, $post) {
   return $self->pg->db->insert('posts', $post, {returning => 'id'})->hash->{id};
 }
 
-sub all { shift->pg->db->select('posts')->hashes->to_array }
+sub all ($self) {
+  return $self->pg->db->select('posts')->hashes->to_array;
+}
 
-sub find {
-  my ($self, $id) = @_;
+sub find ($self, $id) {
   return $self->pg->db->select('posts', '*', {id => $id})->hash;
 }
 
-sub remove {
-  my ($self, $id) = @_;
+sub remove ($self, $id) {
   $self->pg->db->delete('posts', {id => $id});
 }
 
-sub save {
-  my ($self, $id, $post) = @_;
+sub save ($self, $id, $post) {
   $self->pg->db->update('posts', $post, {id => $id});
 }
 

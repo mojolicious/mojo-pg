@@ -1,5 +1,6 @@
 
-4.23  2020-11-07
+4.23  2020-12-10
+  - Updated examples to use signatures.
 
 4.22  2020-11-06
   - Added from_dir method to Mojo::Pg::Migrations. (kiwiroy)
