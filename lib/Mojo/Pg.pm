@@ -161,8 +161,7 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   say $_->{name} for $db->select('names')->hashes->each;
 
   # Select all rows non-blocking with SQL::Abstract
-  $db->select('names' => sub {
-    my ($db, $err, $results) = @_;
+  $db->select('names' => sub ($db, $err, $results) {
     die $err if $err;
     say $_->{name} for $results->hashes->each;
   });
@@ -171,23 +170,19 @@ Mojo::Pg - Mojolicious ♥ PostgreSQL
   # Concurrent non-blocking queries (synchronized with promises)
   my $now   = $pg->db->query_p('SELECT NOW() AS now');
   my $names = $pg->db->query_p('SELECT * FROM names');
-  Mojo::Promise->all($now, $names)->then(sub {
-    my ($now, $names) = @_;
+  Mojo::Promise->all($now, $names)->then(sub ($now, $names) {
     say $now->[0]->hash->{now};
     say $_->{name} for $names->[0]->hashes->each;
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     warn "Something went wrong: $err";
   })->wait;
 
   # Send and receive notifications non-blocking
-  $pg->pubsub->listen(foo => sub {
-    my ($pubsub, $payload) = @_;
+  $pg->pubsub->listen(foo => sub ($pubsub, $payload) {
     say "foo: $payload";
     $pubsub->notify(bar => $payload);
   });
-  $pg->pubsub->listen(bar => sub {
-    my ($pubsub, $payload) = @_;
+  $pg->pubsub->listen(bar => sub ($pubsub, $payload) {
     say "bar: $payload";
   });
   $pg->pubsub->notify(foo => 'PostgreSQL rocks!');
@@ -206,13 +201,12 @@ with the publish/subscribe pattern.
 Database and statement handles are cached automatically, and will be reused transparently to increase performance. You
 can handle connection timeouts gracefully by holding on to them only for short amounts of time.
 
-  use Mojolicious::Lite;
+  use Mojolicious::Lite -signatures;
   use Mojo::Pg;
 
   helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
 
-  get '/' => sub {
-    my $c  = shift;
+  get '/' => sub ($c) {
     my $db = $c->pg->db;
     $c->render(json => $db->query('SELECT NOW() AS now')->hash);
   };
@@ -233,8 +227,8 @@ Every database connection can only handle one active query at a time, this inclu
 multiple queries concurrently, you have to use multiple connections.
 
   # Performed concurrently (5 seconds)
-  $pg->db->query('SELECT PG_SLEEP(5)' => sub {...});
-  $pg->db->query('SELECT PG_SLEEP(5)' => sub {...});
+  $pg->db->query('SELECT PG_SLEEP(5)' => sub ($db, $err, $results) {...});
+  $pg->db->query('SELECT PG_SLEEP(5)' => sub ($db, $err, $results) {...});
 
 All cached database handles will be reset automatically if a new process has been forked, this allows multiple
 processes to share the same L<Mojo::Pg> object safely.
@@ -244,25 +238,26 @@ processes to share the same L<Mojo::Pg> object safely.
 And as your application grows, you can move queries into model classes.
 
   package MyApp::Model::Time;
-  use Mojo::Base -base;
+  use Mojo::Base -base, -signatures;
 
   has 'pg';
 
-  sub now { shift->pg->db->query('SELECT NOW() AS now')->hash }
+  sub now ($self) {
+    return $self->pg->db->query('SELECT NOW() AS now')->hash;
+  }
 
   1;
 
 Which get integrated into your application with helpers.
 
-  use Mojolicious::Lite;
+  use Mojolicious::Lite -signatures;
   use Mojo::Pg;
   use MyApp::Model::Time;
 
-  helper pg => sub { state $pg = Mojo::Pg->new('postgresql://postgres@/test') };
+  helper pg   => sub { state $pg   = Mojo::Pg->new('postgresql://postgres@/test') };
   helper time => sub { state $time = MyApp::Model::Time->new(pg => shift->pg) };
 
-  get '/' => sub {
-    my $c = shift;
+  get '/' => sub ($c) {
     $c->render(json => $c->time->now);
   };
 
@@ -283,15 +278,13 @@ L<Mojo::Pg> inherits all events from L<Mojo::EventEmitter> and can emit the foll
 
 =head2 connection
 
-  $pg->on(connection => sub {
-    my ($pg, $dbh) = @_;
+  $pg->on(connection => sub ($pg, $dbh) {
     ...
   });
 
 Emitted when a new database connection has been established.
 
-  $pg->on(connection => sub {
-    my ($pg, $dbh) = @_;
+  $pg->on(connection => sub ($pg, $dbh) {
     $dbh->do('SET search_path TO my_schema');
   });
 
@@ -383,8 +376,7 @@ L<Mojo::Pg::PubSub> object you can use to send and receive notifications very ef
 connection with many consumers.
 
   # Subscribe to a channel
-  $pg->pubsub->listen(news => sub {
-    my ($pubsub, $payload) = @_;
+  $pg->pubsub->listen(news => sub ($pubsub, $payload) {
     say "Received: $payload";
   });
 

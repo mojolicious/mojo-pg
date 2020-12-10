@@ -98,8 +98,7 @@ Mojo::Pg::PubSub - Publish/Subscribe
   use Mojo::Pg::PubSub;
 
   my $pubsub = Mojo::Pg::PubSub->new(pg => $pg);
-  my $cb = $pubsub->listen(foo => sub {
-    my ($pubsub, $payload) = @_;
+  my $cb = $pubsub->listen(foo => sub ($pubsub, $payload) {
     say "Received: $payload";
   });
   $pubsub->notify(foo => 'I ♥ Mojolicious!');
@@ -117,8 +116,7 @@ L<Mojo::Pg::PubSub> inherits all events from L<Mojo::EventEmitter> and can emit 
 
 =head2 disconnect
 
-  $pubsub->on(disconnect => sub {
-    my ($pubsub, $db) = @_;
+  $pubsub->on(disconnect => sub ($pubsub, $db) {
     ...
   });
 
@@ -126,8 +124,7 @@ Emitted after the current database connection is lost.
 
 =head2 reconnect
 
-  $pubsub->on(reconnect => sub {
-    my ($pubsub, $db) = @_;
+  $pubsub->on(reconnect => sub ($pubsub, $db) {
     ...
   });
 
@@ -162,7 +159,7 @@ L<Mojo::Pg::PubSub> inherits all methods from L<Mojo::EventEmitter> and implemen
 Build and cache or get cached L<Mojo::Pg::Database> connection from L</"pg">. Used to reconnect if disconnected.
 
   # Reconnect immediately
-  $pubsub->unsubscribe('disconnect')->on(disconnect => sub { shift->db });
+  $pubsub->unsubscribe('disconnect')->on(disconnect => sub ($pubsub, $db) { pubsub->db });
 
 =head2 json
 
@@ -171,8 +168,7 @@ Build and cache or get cached L<Mojo::Pg::Database> connection from L</"pg">. Us
 Activate automatic JSON encoding and decoding with L<Mojo::JSON/"to_json"> and L<Mojo::JSON/"from_json"> for a channel.
 
   # Send and receive data structures
-  $pubsub->json('foo')->listen(foo => sub {
-    my ($pubsub, $payload) = @_;
+  $pubsub->json('foo')->listen(foo => sub ($pubsub, $payload) {
     say $payload->{bar};
   });
   $pubsub->notify(foo => {bar => 'I ♥ Mojolicious!'});
@@ -185,12 +181,10 @@ Subscribe to a channel, there is no limit on how many subscribers a channel can 
 to Perl values can be activated with L</"json">.
 
   # Subscribe to the same channel twice
-  $pubsub->listen(foo => sub {
-    my ($pubsub, $payload) = @_;
+  $pubsub->listen(foo => sub ($pubsub, $payload) {
     say "One: $payload";
   });
-  $pubsub->listen(foo => sub {
-    my ($pubsub, $payload) = @_;
+  $pubsub->listen(foo => sub ($pubsub, $payload) {
     say "Two: $payload";
   });
 

@@ -206,8 +206,7 @@ L<Mojo::Pg::Database> inherits all events from L<Mojo::EventEmitter> and can emi
 
 =head2 close
 
-  $db->on(close => sub {
-    my $db = shift;
+  $db->on(close => sub ($db) {
     ...
   });
 
@@ -215,8 +214,7 @@ Emitted when the database connection gets closed while waiting for notifications
 
 =head2 notification
 
-  $db->on(notification => sub {
-    my ($db, $name, $pid, $payload) = @_;
+  $db->on(notification => sub ($db, $name, $pid, $payload) {
     ...
   });
 
@@ -278,8 +276,7 @@ L<Mojo::Pg::Transaction/"commit"> has been called before it is destroyed.
 Generate a C<DELETE> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it with
 L</"query">. You can also append a callback to perform operations non-blocking.
 
-  $db->delete(some_table => sub {
-    my ($db, $err, $results) = @_;
+  $db->delete(some_table => sub ($db, $err, $results) {
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
@@ -305,11 +302,9 @@ Use all the same argument variations you would pass to the C<delete> method of L
 Same as L</"delete">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->delete_p('some_table')->then(sub {
-    my $results = shift;
+  $db->delete_p('some_table')->then(sub ($results) {
     ...
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     ...
   })->wait;
 
@@ -336,8 +331,7 @@ Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?> t
 Generate an C<INSERT> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it
 with L</"query">. You can also append a callback to perform operations non-blocking.
 
-  $db->insert(some_table => {foo => 'bar'} => sub {
-    my ($db, $err, $results) = @_;
+  $db->insert(some_table => {foo => 'bar'} => sub ($db, $err, $results) {
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
@@ -379,11 +373,9 @@ Including operations commonly referred to as C<upsert>.
 Same as L</"insert">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->insert_p(some_table => {foo => 'bar'})->then(sub {
-    my $results = shift;
+  $db->insert_p(some_table => {foo => 'bar'})->then(sub ($results) {
     ...
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     ...
   })->wait;
 
@@ -429,8 +421,7 @@ based on L</"results_class"> (which is usually L<Mojo::Pg::Results>) with the qu
 handle will be automatically reused when it is not active anymore, to increase the performance of future queries. You
 can also append a callback to perform operations non-blocking.
 
-  $db->query('INSERT INTO foo VALUES (?, ?, ?)' => @values => sub {
-    my ($db, $err, $results) = @_;
+  $db->query('INSERT INTO foo VALUES (?, ?, ?)' => @values => sub ($db, $err, $results) {
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
@@ -456,11 +447,9 @@ types to placeholders.
 Same as L</"query">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->query_p('INSERT INTO foo VALUES (?, ?, ?)' => @values)->then(sub {
-    my $results = shift;
+  $db->query_p('INSERT INTO foo VALUES (?, ?, ?)' => @values)->then(sub ($results) {
     ...
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     ...
   })->wait;
 
@@ -471,8 +460,7 @@ accepting a callback.
 Generate a C<SELECT> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it with
 L</"query">. You can also append a callback to perform operations non-blocking.
 
-  $db->select(some_table => ['foo'] => {bar => 'yada'} => sub {
-    my ($db, $err, $results) = @_;
+  $db->select(some_table => ['foo'] => {bar => 'yada'} => sub ($db, $err, $results) {
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
@@ -538,11 +526,9 @@ Including a new last argument to pass many new options.
 Same as L</"select">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->select_p(some_table => ['foo'] => {bar => 'yada'})->then(sub {
-    my $results = shift;
+  $db->select_p(some_table => ['foo'] => {bar => 'yada'})->then(sub ($results) {
     ...
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     ...
   })->wait;
 
@@ -570,8 +556,7 @@ Unsubscribe from a channel, C<*> can be used to unsubscribe from all channels.
 Generate an C<UPDATE> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it
 with L</"query">. You can also append a callback to perform operations non-blocking.
 
-  $db->update(some_table => {foo => 'baz'} => {foo => 'bar'} => sub {
-    my ($db, $err, $results) = @_;
+  $db->update(some_table => {foo => 'baz'} => {foo => 'bar'} => sub ($db, $err, $results) {
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
@@ -600,11 +585,9 @@ Use all the same argument variations you would pass to the C<update> method of L
 Same as L</"update">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.
 
-  $db->update_p(some_table => {foo => 'baz'} => {foo => 'bar'})->then(sub {
-    my $results = shift;
+  $db->update_p(some_table => {foo => 'baz'} => {foo => 'bar'})->then(sub ($results) {
     ...
-  })->catch(sub {
-    my $err = shift;
+  })->catch(sub ($err) {
     ...
   })->wait;
 
