@@ -1,6 +1,7 @@
 
-4.23  2020-12-10
+4.23  2020-12-20
   - Updated examples to use signatures.
+  - Improved Mojo::Pg::PubSub to handle unknown notifications more gracefully.
 
 4.22  2020-11-06
   - Added from_dir method to Mojo::Pg::Migrations. (kiwiroy)

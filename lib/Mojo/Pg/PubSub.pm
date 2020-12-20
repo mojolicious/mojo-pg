@@ -17,9 +17,9 @@ sub db {
   $db->on(
     notification => sub {
       my ($db, $name, $pid, $payload) = @_;
+      return unless my $cbs = $self->{chans}{$name};
       $payload = eval { from_json $payload } if $self->{json}{$name};
-      my @cbs = @{$self->{chans}{$name}};
-      for my $cb (@cbs) { $self->$cb($payload) }
+      for my $cb (@$cbs) { $self->$cb($payload) }
     }
   );
 
