@@ -1,4 +1,6 @@
 
+4.24  2021-01-03
+
 4.23  2020-12-20
   - Updated examples to use signatures.
   - Improved Mojo::Pg::PubSub to handle unknown notifications more gracefully.
