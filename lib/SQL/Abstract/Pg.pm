@@ -46,8 +46,8 @@ sub _insert_returning {
           push @conflict_bind, @set_bind;
         },
         ARRAYREFREF => sub { ($conflict_sql, @conflict_bind) = @$$conflict },
-        SCALARREF => sub { $conflict_sql = $$conflict },
-        UNDEF     => sub { $conflict_sql = $self->_sqlcase('do nothing') }
+        SCALARREF   => sub { $conflict_sql = $$conflict },
+        UNDEF       => sub { $conflict_sql = $self->_sqlcase('do nothing') }
       }
     );
     $sql .= $self->_sqlcase(' on conflict ') . $conflict_sql;

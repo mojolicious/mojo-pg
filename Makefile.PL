@@ -14,9 +14,9 @@ WriteMakefile(
   LICENSE      => 'artistic_2',
   META_MERGE   => {
     dynamic_config => 0,
-    'meta-spec'    => {version => 2},
+    'meta-spec'    => {version   => 2},
     no_index       => {directory => ['examples', 't']},
-    prereqs        => {runtime => {requires => {perl => '5.016'}}},
+    prereqs        => {runtime   => {requires => {perl => '5.016'}}},
     resources      => {
       bugtracker => {web => 'https://github.com/mojolicious/mojo-pg/issues'},
       homepage   => 'https://mojolicious.org',
@@ -26,7 +26,7 @@ WriteMakefile(
         url  => 'https://github.com/mojolicious/mojo-pg.git',
         web  => 'https://github.com/mojolicious/mojo-pg',
       },
-      x_IRC => {url => 'irc://irc.freenode.net/#mojo', web => 'https://webchat.freenode.net/#mojo'}
+      x_IRC => {url => 'irc://chat.freenode.net/#mojo', web => 'https://webchat.freenode.net/#mojo'}
     },
   },
   PREREQ_PM => {'DBD::Pg' => 3.007004, Mojolicious => '8.50', 'SQL::Abstract' => '1.86'},
