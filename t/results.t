@@ -8,6 +8,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use DBD::Pg qw(:pg_types);
 use Mojo::Pg;
+use Mojo::Promise;
 use Mojo::Util qw(encode);
 
 package MojoPgTest::Database;
@@ -93,31 +94,20 @@ subtest 'Iterate' => sub {
 
 subtest 'Non-blocking query where not all results have been fetched' => sub {
   my ($fail, $result);
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $db->query('SELECT name FROM results_test' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $results) = @_;
-      $fail = $err;
-      push @$result, $results->array;
-      $results->finish;
-      $db->query('SELECT name FROM results_test' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $results) = @_;
-      $fail ||= $err;
-      push @$result, $results->array_test;
-      $results->finish;
-      $db->query('SELECT name FROM results_test' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $results) = @_;
-      $fail ||= $err;
-      push @$result, $results->array;
-    }
-  )->wait;
+  $db->query_p('SELECT name FROM results_test')->then(sub {
+    my $results = shift;
+    push @$result, $results->array;
+    $results->finish;
+    return $db->query_p('SELECT name FROM results_test');
+  })->then(sub {
+    my $results = shift;
+    push @$result, $results->array_test;
+    $results->finish;
+    return $db->query_p('SELECT name FROM results_test');
+  })->then(sub {
+    my $results = shift;
+    push @$result, $results->array;
+  })->catch(sub { $fail = shift })->wait;
   ok !$fail, 'no error';
   is_deeply $result, [['foo'], ['foo'], ['foo']], 'right structure';
 };

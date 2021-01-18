@@ -9,6 +9,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 use Mojo::IOLoop;
 use Mojo::JSON qw(true);
 use Mojo::Pg;
+use Mojo::Promise;
 use Scalar::Util qw(refaddr);
 
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
@@ -49,19 +50,14 @@ subtest 'Non-blocking select' => sub {
 
 subtest 'Concurrent non-blocking selects' => sub {
   my ($fail, $result);
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $pg->db->query('SELECT 1 AS one' => $delay->begin);
-      $pg->db->query('SELECT 2 AS two' => $delay->begin);
-      $pg->db->query('SELECT 2 AS two' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err_one, $one, $err_two, $two, $err_again, $again) = @_;
-      $fail   = $err_one || $err_two || $err_again;
-      $result = [$one->hashes->first, $two->hashes->first, $again->hashes->first];
-    }
-  )->wait;
+  Mojo::Promise->all(
+    $pg->db->query_p('SELECT 1 AS one'),
+    $pg->db->query_p('SELECT 2 AS two'),
+    $pg->db->query_p('SELECT 2 AS two')
+  )->then(sub {
+    my ($one, $two, $three) = @_;
+    $result = [$one->[0]->hashes->first, $two->[0]->hashes->first, $three->[0]->hashes->first];
+  })->catch(sub { $fail = shift })->wait;
   ok !$fail, 'no error';
   is_deeply $result, [{one => 1}, {two => 2}, {two => 2}], 'right structure';
 };
@@ -69,29 +65,15 @@ subtest 'Concurrent non-blocking selects' => sub {
 subtest 'Sequential non-blocking selects' => sub {
   my ($fail, $result);
   my $db = $pg->db;
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $db->query('SELECT 1 AS one' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $one) = @_;
-      $fail = $err;
-      push @$result, $one->hashes->first;
-      $db->query('SELECT 1 AS one' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $again) = @_;
-      $fail ||= $err;
-      push @$result, $again->hashes->first;
-      $db->query('SELECT 2 AS two' => $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $two) = @_;
-      $fail ||= $err;
-      push @$result, $two->hashes->first;
-    }
-  )->wait;
+  $db->query_p('SELECT 1 AS one')->then(sub {
+    push @$result, shift->hashes->first;
+    return $db->query_p('SELECT 1 AS one');
+  })->then(sub {
+    push @$result, shift->hashes->first;
+    return $db->query_p('SELECT 2 AS two');
+  })->then(sub {
+    push @$result, shift->hashes->first;
+  })->catch(sub { $fail = shift })->wait;
   ok !$fail, 'no error';
   is_deeply $result, [{one => 1}, {one => 1}, {two => 2}], 'right structure';
 };
@@ -243,60 +225,57 @@ subtest 'Notifications' => sub {
   ok !$db->is_listening, 'not listening';
   ok $db->listen('dbtest')->is_listening, 'listening';
   my $db2 = $pg->db->listen('dbtest');
-  my @notifications;
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $db->once(notification => $delay->begin);
-      $db2->once(notification => $delay->begin);
-      Mojo::IOLoop->next_tick(sub { $db2->notify(dbtest => 'foo') });
-    },
-    sub {
-      my ($delay, $name, $pid, $payload, $name2, $pid2, $payload2) = @_;
-      push @notifications, [$name, $pid, $payload], [$name2, $pid2, $payload2];
-      $db->once(notification => $delay->begin);
-      $db2->unlisten('dbtest');
-      Mojo::IOLoop->next_tick(sub { $pg->db->notify('dbtest') });
-    },
-    sub {
-      my ($delay, $name, $pid, $payload) = @_;
-      push @notifications, [$name, $pid, $payload];
-      $db2->listen('dbtest2')->once(notification => $delay->begin);
-      Mojo::IOLoop->next_tick(sub { $db2->query("NOTIFY dbtest2, 'bar'") });
-    },
-    sub {
-      my ($delay, $name, $pid, $payload) = @_;
-      push @notifications, [$name, $pid, $payload];
-      $db2->once(notification => $delay->begin);
-      my $tx = $db2->begin;
-      Mojo::IOLoop->next_tick(sub {
-        $db2->notify(dbtest2 => 'baz');
-        $tx->commit;
-      });
-    },
-    sub {
-      my ($delay, $name, $pid, $payload) = @_;
-      push @notifications, [$name, $pid, $payload];
-    }
-  )->wait;
+
+  my @result;
+  my $promise = Mojo::Promise->new;
+  $db->once(notification => sub { shift; $promise->resolve(@_) });
+  my $promise2 = Mojo::Promise->new;
+  $db2->once(notification => sub { shift; $promise2->resolve(@_) });
+  Mojo::IOLoop->next_tick(sub { $db2->notify(dbtest => 'foo') });
+  Mojo::Promise->all($promise, $promise2)->then(sub {
+    my ($one, $two) = @_;
+    push @result, $one, $two;
+  })->wait;
+  is $result[0][0], 'dbtest', 'right channel name';
+  ok $result[0][1], 'has process id';
+  is $result[0][2], 'foo',    'right payload';
+  is $result[1][0], 'dbtest', 'right channel name';
+  ok $result[1][1], 'has process id';
+  is $result[1][2], 'foo', 'right payload';
+
+  @result  = ();
+  $promise = Mojo::Promise->new;
+  $db->once(notification => sub { shift; $promise->resolve(@_) });
+  Mojo::IOLoop->next_tick(sub { $pg->db->notify('dbtest') });
+  $promise->then(sub { push @result, [@_] })->wait;
+  is $result[0][0], 'dbtest', 'right channel name';
+  ok $result[0][1], 'has process id';
+  is $result[0][2], '', 'no payload';
+
+  @result  = ();
+  $promise = Mojo::Promise->new;
+  $db2->listen('dbtest2')->once(notification => sub { shift; $promise->resolve(@_) });
+  Mojo::IOLoop->next_tick(sub { $db2->query("NOTIFY dbtest2, 'bar'") });
+  $promise->then(sub { push @result, [@_] })->wait;
+  is $result[0][0], 'dbtest2', 'right channel name';
+  ok $result[0][1], 'has process id';
+  is $result[0][2], 'bar', 'no payload';
+
+  @result  = ();
+  $promise = Mojo::Promise->new;
+  $db2->once(notification => sub { shift; $promise->resolve(@_) });
+  my $tx = $db2->begin;
+  Mojo::IOLoop->next_tick(sub {
+    $db2->notify(dbtest2 => 'baz');
+    $tx->commit;
+  });
+  $promise->then(sub { push @result, [@_] })->wait;
+  is $result[0][0], 'dbtest2', 'right channel name';
+  ok $result[0][1], 'has process id';
+  is $result[0][2], 'baz', 'no payload';
+
   ok !$db->unlisten('dbtest')->is_listening, 'not listening';
   ok !$db2->unlisten('*')->is_listening,     'not listening';
-  is $notifications[0][0], 'dbtest', 'right channel name';
-  ok $notifications[0][1], 'has process id';
-  is $notifications[0][2], 'foo',    'right payload';
-  is $notifications[1][0], 'dbtest', 'right channel name';
-  ok $notifications[1][1], 'has process id';
-  is $notifications[1][2], 'foo',    'right payload';
-  is $notifications[2][0], 'dbtest', 'right channel name';
-  ok $notifications[2][1], 'has process id';
-  is $notifications[2][2], '',        'no payload';
-  is $notifications[3][0], 'dbtest2', 'right channel name';
-  ok $notifications[3][1], 'has process id';
-  is $notifications[3][2], 'bar',     'no payload';
-  is $notifications[4][0], 'dbtest2', 'right channel name';
-  ok $notifications[4][1], 'has process id';
-  is $notifications[4][2], 'baz', 'no payload';
-  is $notifications[5], undef, 'no more notifications';
 };
 
 subtest 'Stop listening for all notifications' => sub {

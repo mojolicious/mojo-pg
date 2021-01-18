@@ -8,6 +8,7 @@ plan skip_all => 'set TEST_ONLINE to enable this test' unless $ENV{TEST_ONLINE};
 
 use Mojo::IOLoop;
 use Mojo::Pg;
+use Mojo::Promise;
 
 # Isolate tests
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE})->search_path(['mojo_crud_test']);
@@ -47,14 +48,29 @@ subtest 'Read' => sub {
 
 subtest 'Non-blocking read' => sub {
   my $result;
-  my $delay = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
-  $db->select('crud_test', $delay->begin);
-  $delay->wait;
+  my $promise = Mojo::Promise->new;
+  $db->select(
+    'crud_test',
+    sub {
+      $result = pop->hashes->to_array;
+      $promise->resolve;
+    }
+  );
+  $promise->wait;
   is_deeply $result, [{id => 1, name => 'foo'}, {id => 2, name => 'baz'}], 'right structure';
-  $result = undef;
-  $delay  = Mojo::IOLoop->delay(sub { $result = pop->hashes->to_array });
-  $db->select('crud_test', undef, undef, {-desc => 'id'}, $delay->begin);
-  $delay->wait;
+
+  $result  = undef;
+  $promise = Mojo::Promise->new;
+  $db->select(
+    'crud_test',
+    undef, undef,
+    {-desc => 'id'},
+    sub {
+      $result = pop->hashes->to_array;
+      $promise->resolve;
+    }
+  );
+  $promise->wait;
   is_deeply $result, [{id => 2, name => 'baz'}, {id => 1, name => 'foo'}], 'right structure';
 };
 
