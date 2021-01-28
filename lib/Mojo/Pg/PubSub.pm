@@ -31,7 +31,7 @@ sub db {
   return $db;
 }
 
-sub DESTROY { Mojo::Util::_global_destruction() or shift->reset }
+sub DESTROY { shift->reset unless ${^GLOBAL_PHASE} eq 'DESTRUCT' }
 
 sub json { ++$_[0]{json}{$_[1]} and return $_[0] }
 
