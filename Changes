@@ -1,4 +1,6 @@
 
+4.26  2021-02-21
+
 4.25  2021-02-20
   - Moved SQL::Abstract::Pg into a separate distribution.
 
