@@ -1,5 +1,6 @@
 
-4.25  2021-02-06
+4.25  2021-02-20
+  - Moved SQL::Abstract::Pg into a separate distribution.
 
 4.24  2021-01-27
   - Fixed Mojolicious 8.72 support.

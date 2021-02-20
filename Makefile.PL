@@ -29,6 +29,6 @@ WriteMakefile(
       x_IRC => {url => 'irc://chat.freenode.net/#mojo', web => 'https://webchat.freenode.net/#mojo'}
     },
   },
-  PREREQ_PM => {'DBD::Pg' => 3.007004, Mojolicious => '8.50', 'SQL::Abstract' => '1.86'},
+  PREREQ_PM => {'DBD::Pg' => 3.007004, Mojolicious => '8.50', 'SQL::Abstract::Pg' => '1.0'},
   test      => {TESTS     => 't/*.t t/*/*.t'}
 );

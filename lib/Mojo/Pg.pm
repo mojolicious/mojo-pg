@@ -494,8 +494,6 @@ This is the class hierarchy of the L<Mojo::Pg> distribution.
 
 =item * L<Mojo::Pg::Transaction>
 
-=item * L<SQL::Abstract::Pg>
-
 =back
 
 =head1 AUTHOR
