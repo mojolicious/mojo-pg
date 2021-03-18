@@ -26,7 +26,7 @@ sub store ($self) {
   my $v = $self->_validation;
   return $self->render(action => 'create', post => {}) if $v->has_error;
 
-  my $id = $self->posts->add($v->output);
+  my $id = $self->posts->add({title => $v->param('title'), body => $v->param('body')});
   $self->redirect_to('show_post', id => $id);
 }
 
@@ -35,7 +35,7 @@ sub update ($self) {
   return $self->render(action => 'edit', post => {}) if $v->has_error;
 
   my $id = $self->param('id');
-  $self->posts->save($id, $v->output);
+  $self->posts->save($id, {title => $v->param('title'), body => $v->param('body')});
   $self->redirect_to('show_post', id => $id);
 }
 
