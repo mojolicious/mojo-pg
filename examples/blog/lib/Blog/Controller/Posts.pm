@@ -43,7 +43,6 @@ sub _validation ($self) {
   my $v = $self->validation;
   $v->required('title', 'not_empty');
   $v->required('body',  'not_empty');
-
   return $v;
 }
 
