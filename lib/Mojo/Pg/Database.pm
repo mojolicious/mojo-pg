@@ -53,6 +53,7 @@ sub listen {
   my $dbh = $self->dbh;
   $dbh->do('LISTEN ' . $dbh->quote_identifier($name)) unless $self->{listen}{$name}++;
   $self->_watch;
+  $self->_notifications;
 
   return $self;
 }
@@ -127,6 +128,7 @@ sub unlisten {
   my $dbh = $self->dbh;
   $dbh->do('UNLISTEN ' . $dbh->quote_identifier($name));
   $name eq '*' ? delete $self->{listen} : delete $self->{listen}{$name};
+  $self->_notifications;
   $self->_unwatch unless $self->{waiting} || $self->is_listening;
 
   return $self;

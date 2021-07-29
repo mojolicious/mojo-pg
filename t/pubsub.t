@@ -179,4 +179,16 @@ subtest 'Reset' => sub {
   };
 };
 
+subtest 'Call listen/unlisten immediately after notify' => sub {
+  my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
+  my @test;
+  $pg->pubsub->listen(pstest => sub { push @test, pop });
+  $pg->db->notify(pstest => 'works');
+  $pg->pubsub->listen(pstest2 => sub { });
+  is_deeply \@test, ['works'], 'right messages';
+  $pg->db->notify(pstest => 'works too');
+  $pg->pubsub->unlisten(pstest3 => sub { });
+  is_deeply \@test, ['works', 'works too'], 'right messages';
+};
+
 done_testing();
