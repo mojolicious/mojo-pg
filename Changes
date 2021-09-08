@@ -1,5 +1,6 @@
 
-4.26  2021-02-21
+4.26  2021-09-08
+  - Fixed a bug in Mojo::Pg::PubSub would sometimes miss notifications. (akarelas)
 
 4.25  2021-02-20
   - Moved SQL::Abstract::Pg into a separate distribution.
