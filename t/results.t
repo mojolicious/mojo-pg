@@ -45,9 +45,9 @@ subtest 'Tables' => sub {
 };
 
 subtest 'Result methods' => sub {
-  is_deeply $db->query('SELECT * FROM results_test')->rows,    2, 'two rows';
-  is_deeply $db->query('SELECT * FROM results_test')->columns, ['id', 'name'], 'right structure';
-  is_deeply $db->query('SELECT * FROM results_test')->array,   [1,    'foo'],  'right structure';
+  is_deeply $db->query('SELECT * FROM results_test')->rows,             2, 'two rows';
+  is_deeply $db->query('SELECT * FROM results_test')->columns,          ['id', 'name'], 'right structure';
+  is_deeply $db->query('SELECT * FROM results_test')->array,            [1,    'foo'],  'right structure';
   is_deeply $db->query('SELECT * FROM results_test')->arrays->to_array, [[1, 'foo'], [2, 'bar']], 'right structure';
   is_deeply $db->query('SELECT * FROM results_test')->hash, {id => 1, name => 'foo'}, 'right structure';
   is_deeply $db->query('SELECT * FROM results_test')->hashes->to_array,
@@ -59,8 +59,8 @@ subtest 'Custom database and results classes' => sub {
   is ref $db, 'Mojo::Pg::Database', 'right class';
   $pg->database_class('MojoPgTest::Database');
   $db = $pg->db;
-  is ref $db, 'MojoPgTest::Database', 'right class';
-  is ref $db->query('SELECT 1'), 'MojoPgTest::Results', 'right class';
+  is ref $db,                    'MojoPgTest::Database', 'right class';
+  is ref $db->query('SELECT 1'), 'MojoPgTest::Results',  'right class';
   is_deeply $db->query('SELECT * from results_test')->array_test, [1, 'foo'], 'right structure';
 };
 
@@ -89,7 +89,7 @@ subtest 'Iterate' => sub {
   my $results = $db->query('SELECT * FROM results_test');
   is_deeply $results->array, [1, 'foo'], 'right structure';
   is_deeply $results->array, [2, 'bar'], 'right structure';
-  is $results->array,        undef, 'no more results';
+  is $results->array, undef, 'no more results';
 };
 
 subtest 'Non-blocking query where not all results have been fetched' => sub {

@@ -43,7 +43,7 @@ subtest 'Non-blocking select' => sub {
     }
   );
   Mojo::IOLoop->start;
-  ok $same, 'same database handles';
+  ok $same,  'same database handles';
   ok !$fail, 'no error';
   is_deeply $result, {one => 1, two => 2, three => 3}, 'right structure';
 };
@@ -86,9 +86,9 @@ subtest 'Connection cache' => sub {
     'same database handles';
   @dbhs = ();
   my $dbh = $pg->max_connections(1)->db->dbh;
-  is $pg->db->dbh,   $dbh, 'same database handle';
+  is $pg->db->dbh,   $dbh,         'same database handle';
   isnt $pg->db->dbh, $pg->db->dbh, 'different database handles';
-  is $pg->db->dbh,   $dbh, 'different database handles';
+  is $pg->db->dbh,   $dbh,         'different database handles';
   $dbh = $pg->db->dbh;
   is $pg->db->dbh, $dbh, 'same database handle';
   $pg->db->disconnect;
@@ -104,7 +104,7 @@ subtest 'Statement cache' => sub {
   undef $db;
   $db = $pg->db;
   my $results = $db->query('SELECT 3 AS three');
-  is $results->sth, $sth, 'same statement handle';
+  is $results->sth,                          $sth, 'same statement handle';
   isnt $db->query('SELECT 3 AS three')->sth, $sth, 'different statement handles';
   $sth = $db->query('SELECT 3 AS three')->sth;
   is $db->query('SELECT 3 AS three')->sth,  $sth, 'same statement handle';
@@ -124,8 +124,8 @@ subtest 'Connection reuse' => sub {
   my $db3 = $pg->db;
   is $db3->dbh, $dbh, 'same database handle';
   $results = $db3->query('SELECT 2');
-  is $results->db->dbh, $dbh, 'same database handle';
-  is $results->array->[0], 2, 'right result';
+  is $results->db->dbh,    $dbh, 'same database handle';
+  is $results->array->[0], 2,    'right result';
 };
 
 subtest 'Dollar only' => sub {
@@ -150,12 +150,12 @@ subtest 'JSON' => sub {
     'right structure';
   is_deeply $db->query('SELECT ?::JSON AS foo', {json => {bar => 'baz'}})->hash, {foo => '{"bar":"baz"}'},
     'right structure';
-  is_deeply $db->query('SELECT ?::JSON AS foo', {json => \1})->expand->hashes->first, {foo => true}, 'right structure';
-  is_deeply $db->query('SELECT ?::JSON AS foo', undef)->expand->hash, {foo => undef}, 'right structure';
+  is_deeply $db->query('SELECT ?::JSON AS foo', {json => \1})->expand->hashes->first, {foo => true},  'right structure';
+  is_deeply $db->query('SELECT ?::JSON AS foo', undef)->expand->hash,                 {foo => undef}, 'right structure';
   is_deeply $db->query('SELECT ?::JSON AS foo', undef)->expand->array, [undef], 'right structure';
   my $results = $db->query('SELECT ?::json', undef);
   is_deeply $results->expand->array, [undef], 'right structure';
-  is_deeply $results->expand->array, undef, 'no more results';
+  is_deeply $results->expand->array, undef,   'no more results';
   is_deeply $db->query('SELECT ?::JSON AS unicode', {json => {'☃' => '♥'}})->expand->hash, {unicode => {'☃' => '♥'}},
     'right structure';
   is_deeply $db->query("SELECT JSON_BUILD_OBJECT('☃', ?::TEXT) AS unicode", '♥')->expand->hash,
@@ -179,13 +179,13 @@ subtest 'Fork-safety' => sub {
     my $dbh2 = $pg->db->dbh;
     isnt $dbh2,      $dbh,     'different database handles';
     is $dbh2,        $current, 'same database handle';
-    is $connections, 1, 'one new connection';
+    is $connections, 1,        'one new connection';
     {
       local $$ = -24;
       isnt $pg->db->dbh, $dbh,     'different database handles';
       isnt $pg->db->dbh, $dbh2,    'different database handles';
       is $pg->db->dbh,   $current, 'same database handle';
-      is $connections, 2, 'two new connections';
+      is $connections,   2,        'two new connections';
     };
   };
   $pg->unsubscribe('connection');
@@ -210,19 +210,19 @@ subtest 'Shared connection cache' => sub {
 
 subtest 'Cache reset' => sub {
   my $dbh = $pg->db->dbh;
-  is $pg->db->dbh, $dbh, 'same database handle';
-  is $pg->db->dbh, $dbh, 'same database handle again';
-  is $pg->db->dbh, $dbh, 'same database handle again';
+  is $pg->db->dbh,          $dbh, 'same database handle';
+  is $pg->db->dbh,          $dbh, 'same database handle again';
+  is $pg->db->dbh,          $dbh, 'same database handle again';
   isnt $pg->reset->db->dbh, $dbh, 'different database handle';
   $dbh = $pg->db->dbh;
-  is $pg->db->dbh, $dbh, 'same database handle';
-  is $pg->db->dbh, $dbh, 'same database handle again';
+  is $pg->db->dbh,          $dbh, 'same database handle';
+  is $pg->db->dbh,          $dbh, 'same database handle again';
   isnt $pg->reset->db->dbh, $dbh, 'different database handle';
 };
 
 subtest 'Notifications' => sub {
   my $db = $pg->db;
-  ok !$db->is_listening, 'not listening';
+  ok !$db->is_listening,                  'not listening';
   ok $db->listen('dbtest')->is_listening, 'listening';
   my $db2 = $pg->db->listen('dbtest');
 
@@ -280,9 +280,9 @@ subtest 'Notifications' => sub {
 
 subtest 'Stop listening for all notifications' => sub {
   my $db = $pg->db;
-  ok !$db->is_listening, 'not listening';
+  ok !$db->is_listening,                                                          'not listening';
   ok $db->listen('dbtest')->listen('dbtest2')->unlisten('dbtest2')->is_listening, 'listening';
-  ok !$db->unlisten('*')->is_listening, 'not listening';
+  ok !$db->unlisten('*')->is_listening,                                           'not listening';
 };
 
 subtest 'Connection close while listening for notifications' => sub {

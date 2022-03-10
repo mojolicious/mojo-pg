@@ -52,7 +52,7 @@ subtest 'JSON' => sub {
   });
   Mojo::IOLoop->start;
   is_deeply \@json, [undef, undef, {msg => '♥works♥'}, [1, 2, 3], true, {msg => 'stop'}], 'right data structures';
-  is_deeply \@raw, ['♥works♥'], 'right messages';
+  is_deeply \@raw,  ['♥works♥'],                                                          'right messages';
 };
 
 subtest 'Unsubscribe' => sub {
@@ -134,7 +134,7 @@ subtest 'Reconnect while listening multiple retries' => sub {
     isnt $dbhs[0], $dbhs[1], 'different database handles';
     is_deeply \@test,  ['works'],     'right messages';
     is_deeply \@test3, ['works too'], 'right messages';
-    is_deeply \@test4, [], 'no messages';
+    is_deeply \@test4, [],            'no messages';
   };
 };
 
