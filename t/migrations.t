@@ -23,16 +23,19 @@ subtest 'Defaults' => sub {
 subtest 'Create migrations table' => sub {
   ok !(grep {/^mojo_migrations_test\.mojo_migrations$/} @{$pg->db->tables}), 'migrations table does not exist';
   is $pg->migrations->migrate->active, 0, 'active version is 0';
+  ok !(grep {/^mojo_migrations_test\.mojo_migrations$/} @{$pg->db->tables}), 'migrations table does not exist';
+  is $pg->migrations->from_string("-- 1 up\n\n")->migrate->active, 1, 'active version is 1';
   ok !!(grep {/^mojo_migrations_test\.mojo_migrations$/} @{$pg->db->tables}), 'migrations table exists';
+  is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
 };
 
 subtest 'Migrations from DATA section' => sub {
-  is $pg->migrations->from_data->latest, 0, 'latest version is 0';
-  is $pg->migrations->from_data(__PACKAGE__)->latest, 0, 'latest version is 0';
-  is $pg->migrations->name('test1')->from_data->latest, 10, 'latest version is 10';
-  is $pg->migrations->name('test2')->from_data->latest, 2,  'latest version is 2';
+  is $pg->migrations->from_data->latest,                                           0,  'latest version is 0';
+  is $pg->migrations->from_data(__PACKAGE__)->latest,                              0,  'latest version is 0';
+  is $pg->migrations->name('test1')->from_data->latest,                            10, 'latest version is 10';
+  is $pg->migrations->name('test2')->from_data->latest,                            2,  'latest version is 2';
   is $pg->migrations->name('migrations')->from_data(__PACKAGE__, 'test1')->latest, 10, 'latest version is 10';
-  is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest, 2, 'latest version is 2';
+  is $pg->migrations->name('test2')->from_data(__PACKAGE__)->latest,               2,  'latest version is 2';
 };
 
 subtest 'Different syntax variations' => sub {
@@ -62,18 +65,18 @@ INSERT INTO migration_test_two VALUES ('works too');
 -- 10 down (not up)
 DELETE FROM migration_test_two WHERE bar = 'works too';
 EOF
-  is $pg->migrations->latest, 10, 'latest version is 10';
-  is $pg->migrations->active, 0,  'active version is 0';
+  is $pg->migrations->latest,          10, 'latest version is 10';
+  is $pg->migrations->active,          0,  'active version is 0';
   is $pg->migrations->migrate->active, 10, 'active version is 10';
   ok !!(grep {/^mojo_migrations_test\.migration_test_one$/} @{$pg->db->tables}), 'first table exists';
   ok !!(grep {/^mojo_migrations_test\.migration_test_two$/} @{$pg->db->tables}), 'second table exists';
   is_deeply $pg->db->query('SELECT * FROM migration_test_one')->hash, {foo => 'works ♥'}, 'right structure';
-  is $pg->migrations->migrate->active, 10, 'active version is 10';
+  is $pg->migrations->migrate->active,                         10,    'active version is 10';
   is $pg->migrations->migrate(1)->active,                      1,     'active version is 1';
   is $pg->db->query('SELECT * FROM migration_test_one')->hash, undef, 'no result';
   is $pg->migrations->migrate(3)->active,                      3,     'active version is 3';
   is $pg->db->query('SELECT * FROM migration_test_two')->hash, undef, 'no result';
-  is $pg->migrations->migrate->active, 10, 'active version is 10';
+  is $pg->migrations->migrate->active,                         10,    'active version is 10';
   is_deeply $pg->db->query('SELECT * FROM migration_test_two')->hash, {bar => 'works too'}, 'right structure';
   is $pg->migrations->migrate(0)->active, 0, 'active version is 0';
 };
@@ -85,10 +88,10 @@ subtest 'Bad and concurrent migrations' => sub {
   is $pg2->migrations->active, 0, 'active version is 0';
   eval { $pg2->migrations->migrate };
   like $@, qr/does_not_exist/, 'right error';
-  is $pg2->migrations->migrate(3)->active, 3, 'active version is 3';
-  is $pg2->migrations->migrate(2)->active, 2, 'active version is 2';
-  is $pg->migrations->active, 0, 'active version is still 0';
-  is $pg->migrations->migrate->active, 10, 'active version is 10';
+  is $pg2->migrations->migrate(3)->active, 3,  'active version is 3';
+  is $pg2->migrations->migrate(2)->active, 2,  'active version is 2';
+  is $pg->migrations->active,              0,  'active version is still 0';
+  is $pg->migrations->migrate->active,     10, 'active version is 10';
   is_deeply $pg2->db->query('select * from migration_test_three')->hashes->to_array,
     [{baz => 'just'}, {baz => 'works ♥'}], 'right structure';
   is $pg->migrations->migrate(0)->active,  0, 'active version is 0';
@@ -110,10 +113,10 @@ EOF
   $pg3->auto_migrate(1)->db;
   is $pg3->migrations->active, 6, 'active version is 6';
   is_deeply $pg3->db->query('SELECT * FROM migration_test_six')->hashes, [{foo => 'works!'}], 'right structure';
-  is $pg3->migrations->migrate(5)->active,                               5, 'active version is 5';
+  is $pg3->migrations->migrate(5)->active, 5, 'active version is 5';
   is_deeply $pg3->db->query('SELECT * FROM migration_test_six')->hashes, [], 'right structure';
-  is $pg3->migrations->migrate(0)->active,                               0, 'active version is 0';
-  is $pg3->migrations->sql_for(0, 5), <<EOF, 'right SQL';
+  is $pg3->migrations->migrate(0)->active, 0,     'active version is 0';
+  is $pg3->migrations->sql_for(0, 5),      <<EOF, 'right SQL';
 -- 5 up
 CREATE TABLE IF NOT EXISTS migration_test_six (foo VARCHAR(255));
 EOF
@@ -137,7 +140,7 @@ subtest 'Migrate automatically with shared connection cache' => sub {
   $pg4->auto_migrate(1)->migrations->name('test1')->from_data;
   $pg5->auto_migrate(1)->migrations->name('test3')->from_data;
   is_deeply $pg5->db->query('SELECT * FROM migration_test_four')->hashes->to_array, [{test => 10}], 'right structure';
-  is_deeply $pg5->db->query('SELECT * FROM migration_test_six')->hashes->to_array, [], 'right structure';
+  is_deeply $pg5->db->query('SELECT * FROM migration_test_six')->hashes->to_array,  [],             'right structure';
 };
 
 subtest 'Unknown version' => sub {
@@ -180,7 +183,7 @@ subtest 'Migration directory' => sub {
   like $@, qr/^Version 55 has no migration/, 'upgrade.sql is not up.sql, so no version';
 
   is $pg->migrations->migrate->active, 99, 'active version is 99';
-  is $pg->migrations->latest, 99, 'latest version is 99';
+  is $pg->migrations->latest,          99, 'latest version is 99';
   ok !!(grep {/^mojo_migrations_test\.migration_test_luft_balloons$/} @{$pg->db->tables}), 'last table exists';
 
   $pg->migrations->name('directory tree')->from_dir(curfile->sibling('migrations', 'tree2'));

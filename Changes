@@ -1,5 +1,7 @@
 
-4.27  2021-09-09
+4.27  2022-03-10
+  - Fixed a race condition in Mojo::Pg::Migrations that could result in two processes trying to create the same
+    migration.
 
 4.26  2021-09-08
   - Fixed a bug in Mojo::Pg::PubSub would sometimes miss notifications. (akarelas)

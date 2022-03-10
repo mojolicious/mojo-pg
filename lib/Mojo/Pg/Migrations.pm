@@ -61,19 +61,26 @@ sub migrate {
 
   # Already the right version (make sure migrations table exists)
   my $db = $self->pg->db;
-  return $self if $self->_active($db, 1) == $target;
+  return $self if $self->_active($db) == $target;
 
   # Lock migrations table and check version again
+  $db->query(
+    'CREATE TABLE IF NOT EXISTS mojo_migrations (
+       name    TEXT PRIMARY KEY,
+       version BIGINT NOT NULL CHECK (version >= 0)
+     )'
+  );
   my $tx = $db->begin;
   $db->query('LOCK TABLE mojo_migrations IN EXCLUSIVE MODE');
-  return $self if (my $active = $self->_active($db, 1)) == $target;
+  return $self if (my $active = $self->_active($db)) == $target;
 
   # Newer version
   croak "Active version $active is greater than the latest version $latest" if $active > $latest;
 
   my $sql = $self->sql_for($active, $target);
   warn "-- Migrate ($active -> $target)\n$sql\n" if DEBUG;
-  $sql .= ';UPDATE mojo_migrations SET version = $1 WHERE name = $2;';
+  $sql .= ';INSERT INTO mojo_migrations (name, version) VALUES ($2, $1)';
+  $sql .= ' ON CONFLICT (name) DO UPDATE SET version = $1;';
   $db->query($sql, $target, $self->name) and $tx->commit;
 
   return $self;
@@ -95,7 +102,7 @@ sub sql_for {
 }
 
 sub _active {
-  my ($self, $db, $create) = @_;
+  my ($self, $db) = @_;
 
   my $name = $self->name;
   my $results;
@@ -104,16 +111,7 @@ sub _active {
     my $sql = 'SELECT version FROM mojo_migrations WHERE name = $1';
     $results = $db->query($sql, $name);
   };
-  if ((my $next = $results->array) || !$create) { return $next->[0] || 0 }
-
-  $db->query(
-    'CREATE TABLE IF NOT EXISTS mojo_migrations (
-       name    TEXT PRIMARY KEY,
-       version BIGINT NOT NULL CHECK (version >= 0)
-     )'
-  ) if $results->sth->err;
-  $db->query('INSERT INTO mojo_migrations VALUES ($1, $2)', $name, 0);
-
+  if (my $next = $results->array) { return $next->[0] || 0 }
   return 0;
 }
 
