@@ -1,4 +1,6 @@
 
+4.28  2022-03-15
+
 4.27  2022-03-10
   - Fixed a race condition in Mojo::Pg::Migrations that could result in two processes trying to create the same
     migration.
