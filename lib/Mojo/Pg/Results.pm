@@ -10,7 +10,7 @@ has [qw(db sth)];
 sub DESTROY {
   my $self = shift;
   return unless my $sth = $self->{sth};
-  $sth->finish unless --$sth->{private_mojo_results};
+  $self->finish unless --$sth->{private_mojo_results};
 }
 
 sub array { ($_[0]->_expand($_[0]->sth->fetchrow_arrayref))[0] }
@@ -23,7 +23,7 @@ sub hash { ($_[0]->_expand($_[0]->sth->fetchrow_hashref))[0] }
 
 sub expand { ++$_[0]{expand} and return $_[0] }
 
-sub finish { shift->sth->finish }
+sub finish { $_[0]->db->_finish_when_safe($_[0]->sth) }
 
 sub hashes { _collect($_[0]->_expand(@{$_[0]->sth->fetchall_arrayref({})})) }
 
