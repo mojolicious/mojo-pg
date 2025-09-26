@@ -107,7 +107,7 @@ sub query {
 
   # Non-blocking
   $self->{waiting} = {cb => $cb, sth => $sth};
-  $self->{finish} = [];
+  $self->{finish}  = [];
   $self->_watch;
 }
 
@@ -135,11 +135,10 @@ sub unlisten {
   return $self;
 }
 
-# See https://github.com/mojolicious/mojo/issues/2276
 sub _finish_when_safe {
   my $self = shift;
   if ($self->{finish}) { push @{$self->{finish}}, @_ }
-  else { $_->finish for @_ }
+  else                 { $_->finish for @_ }
 }
 
 sub _notifications {
