@@ -107,6 +107,7 @@ sub query {
 
   # Non-blocking
   $self->{waiting} = {cb => $cb, sth => $sth};
+  $self->{finish}  = [];
   $self->_watch;
 }
 
@@ -132,6 +133,12 @@ sub unlisten {
   $self->_unwatch unless $self->{waiting} || $self->is_listening;
 
   return $self;
+}
+
+sub _finish_when_safe {
+  my $self = shift;
+  if ($self->{finish}) { push @{$self->{finish}}, @_ }
+  else                 { $_->finish for @_ }
 }
 
 sub _notifications {
@@ -178,6 +185,7 @@ sub _watch {
       my $err    = defined $result ? undef : $dbh->errstr;
 
       $self->$cb($err, $self->results_class->new(db => $self, sth => $sth));
+      $self->_finish_when_safe(@{delete $self->{finish}}) if $self->{finish};
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }
   )->watch($self->{handle}, 1, 0);
