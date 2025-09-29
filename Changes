@@ -1,4 +1,6 @@
 
+4.29  2025-08-30
+
 4.28  2025-08-29
   - Fixed DBD:Pg bug with a workaround (https://github.com/bucardo/dbdpg/issues/105). (TFBW)
 
