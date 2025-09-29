@@ -1,5 +1,6 @@
 
-4.28  2025-08-27
+4.28  2025-08-29
+  - Fixed DBD:Pg bug with a workaround (https://github.com/bucardo/dbdpg/issues/105). (TFBW)
 
 4.27  2022-03-10
   - Fixed a race condition in Mojo::Pg::Migrations that could result in two processes trying to create the same

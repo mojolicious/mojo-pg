@@ -506,6 +506,8 @@ In alphabetical order:
 
 =over 2
 
+Brett Watson
+
 Christopher Eveland
 
 Dan Book
