@@ -528,7 +528,7 @@ William Lindley
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2025, Sebastian Riedel and others.
+Copyright (C) 2014-2026, Sebastian Riedel and others.
 
 This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version
 2.0.

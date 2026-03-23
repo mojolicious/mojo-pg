@@ -97,12 +97,12 @@ sub query {
     }
     $sth->bind_param($i + 1, $param, $attrs);
   }
-  $sth->execute;
+  my $rv = $sth->execute;
 
   # Blocking
   unless ($cb) {
     $self->_notifications;
-    return $self->results_class->new(db => $self, sth => $sth);
+    return $self->results_class->new(db => $self, sth => $sth, rv => $rv);
   }
 
   # Non-blocking
@@ -181,10 +181,10 @@ sub _watch {
       my ($sth, $cb) = @{delete $self->{waiting}}{qw(sth cb)};
 
       # Do not raise exceptions inside the event loop
-      my $result = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
-      my $err    = defined $result ? undef : $dbh->errstr;
+      my $rv  = do { local $dbh->{RaiseError} = 0; $dbh->pg_result };
+      my $err = defined $rv ? undef : $dbh->errstr;
 
-      $self->$cb($err, $self->results_class->new(db => $self, sth => $sth));
+      $self->$cb($err, $self->results_class->new(db => $self, sth => $sth, rv => $rv));
       $self->_finish_when_safe(@{delete $self->{finish}}) if $self->{finish};
       $self->_unwatch unless $self->{waiting} || $self->is_listening;
     }

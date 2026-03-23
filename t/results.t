@@ -52,6 +52,8 @@ subtest 'Result methods' => sub {
   is_deeply $db->query('SELECT * FROM results_test')->hash, {id => 1, name => 'foo'}, 'right structure';
   is_deeply $db->query('SELECT * FROM results_test')->hashes->to_array,
     [{id => 1, name => 'foo'}, {id => 2, name => 'bar'}], 'right structure';
+  ok $db->query('UPDATE results_test SET name = ? WHERE name = ?', 'foo', 'does_not_exist')->rv < 1, 'no rows updated';
+  is $db->query('UPDATE results_test SET name = ? WHERE name = ?', 'bar', 'bar')->rv, 1, 'one row updated';
   is $pg->db->query('SELECT * FROM results_test')->text, "1  foo\n2  bar\n", 'right text';
 };
 

@@ -80,11 +80,28 @@ subtest 'Update' => sub {
     [{id => 1, name => 'yada'}, {id => 2, name => 'baz'}], 'right structure';
 };
 
+subtest 'Non-blocking update' => sub {
+  my $result;
+  my $promise = Mojo::Promise->new;
+  $db->update(
+    'crud_test',
+    {name => 'whatever'},
+    {name => 'baz'},
+    undef,
+    sub {
+      $result = pop->rv;
+      $promise->resolve;
+    }
+  );
+  $promise->wait;
+  is $result, 1, 'one row updated';
+};
+
 subtest 'Delete' => sub {
-  $db->delete('crud_test', {name => 'yada'});
-  is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})->hashes->to_array, [{id => 2, name => 'baz'}],
+  is $db->delete('crud_test', {name => 'yada'})->rv, 1, 'one row deleted';
+  is_deeply $db->select('crud_test', undef, undef, {-asc => 'id'})->hashes->to_array, [{id => 2, name => 'whatever'}],
     'right structure';
-  $db->delete('crud_test');
+  is $db->delete('crud_test')->rv, 1, 'one row deleted';
   is_deeply $db->select('crud_test')->hashes->to_array, [], 'right structure';
 };
 
