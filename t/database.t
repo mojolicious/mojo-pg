@@ -338,4 +338,25 @@ subtest 'CLean up non-blocking query' => sub {
   is $fail, 'Premature connection close', 'right error';
 };
 
+subtest 'Non-blocking query with connection terminated mid-query' => sub {
+  my ($fail, $count);
+  my $db  = $pg->db;
+  my $pid = $db->query('SELECT pg_backend_pid() AS pid')->hash->{pid};
+  $count = 0;
+  $db->query(
+    'SELECT pg_sleep(10)' => sub {
+      my ($db, $err, $results) = @_;
+      $count++;
+      $fail = $err;
+      Mojo::IOLoop->stop;
+    }
+  );
+  Mojo::IOLoop->timer(0.1 => sub { $pg->db->query("SELECT pg_terminate_backend($pid)") });
+  my $timeout = Mojo::IOLoop->timer(5 => sub { Mojo::IOLoop->stop });
+  Mojo::IOLoop->start;
+  Mojo::IOLoop->remove($timeout);
+  is $count, 1, 'callback called exactly once';
+  ok $fail, 'error propagated';
+};
+
 done_testing();
