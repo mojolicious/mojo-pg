@@ -10,6 +10,7 @@ use Mojo::IOLoop;
 use Mojo::JSON qw(true);
 use Mojo::Pg;
 use Mojo::Promise;
+use Mojo::SQL qw(sql);
 use Scalar::Util qw(refaddr);
 
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});
@@ -27,6 +28,11 @@ subtest 'Custom search_path' => sub {
 subtest 'Blocking select' => sub {
   is_deeply $pg->db->query('SELECT 1 AS one, 2 AS two, 3 AS three')->hash, {one => 1, two => 2, three => 3},
     'right structure';
+};
+
+subtest 'Mojo::SQL statement' => sub {
+  my $sql = sql('SELECT ?::INT AS one, ?::INT AS two', 1, 2);
+  is_deeply $pg->db->query($sql)->hash, {one => 1, two => 2}, 'right structure';
 };
 
 subtest 'Non-blocking select' => sub {

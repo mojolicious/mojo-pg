@@ -8,7 +8,8 @@ use Mojo::JSON qw(to_json);
 use Mojo::Pg::Results;
 use Mojo::Pg::Transaction;
 use Mojo::Promise;
-use Mojo::Util qw(monkey_patch);
+use Mojo::Util   qw(monkey_patch);
+use Scalar::Util qw(blessed);
 
 has 'dbh';
 has pg => undef, weak => 1;
@@ -75,8 +76,10 @@ sub pid { shift->dbh->{pg_pid} }
 sub ping { shift->dbh->ping }
 
 sub query {
-  my ($self, $query) = (shift, shift);
-  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
+  my ($self, $query, @args) = @_;
+  my $cb = ref $args[-1] eq 'CODE' ? pop @args : undef;
+
+  ($query, @args) = $query->to_list if (blessed($query) && $query->isa('Mojo::SQL::Statement'));
 
   croak 'Non-blocking query already in progress' if $self->{waiting};
 
@@ -86,8 +89,8 @@ sub query {
   my $sth = $self->dbh->prepare_cached($query, \%attrs, 3);
   local $sth->{HandleError} = sub { $_[0] = shortmess $_[0]; 0 };
 
-  for (my $i = 0; $#_ >= $i; $i++) {
-    my ($param, $attrs) = ($_[$i], {});
+  for (my $i = 0; $#args >= $i; $i++) {
+    my ($param, $attrs) = ($args[$i], {});
     if (ref $param eq 'HASH') {
       if    (exists $param->{-json}) { $param = to_json $param->{-json} }
       elsif (exists $param->{json})  { $param = to_json $param->{json} }
@@ -425,6 +428,7 @@ Check database connection.
   my $results = $db->query('SELECT * FROM foo');
   my $results = $db->query('INSERT INTO foo VALUES (?, ?, ?)', @values);
   my $results = $db->query('SELECT ?::JSON AS foo', {-json => {bar => 'baz'}});
+  my $results = $db->query(sql('SELECT * FROM foo WHERE id = ?', $id));
 
 Execute a blocking L<SQL|http://www.postgresql.org/docs/current/static/sql.html> statement and return a results object
 based on L</"results_class"> (which is usually L<Mojo::Pg::Results>) with the query results. The L<DBD::Pg> statement
@@ -435,6 +439,12 @@ can also append a callback to perform operations non-blocking.
     ...
   });
   Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
+For composable SQL statements with protection from SQL injection attacks, you can also pass a L<Mojo::SQL::Statement>
+object and all bind values will be used automatically.
+
+  use Mojo::SQL qw(sql);
+  $db->query(sql('SELECT ?::INT AS foo', 23));
 
 Hash reference arguments containing a value named C<-json> or C<json> will be encoded to JSON text with
 L<Mojo::JSON/"to_json">. To accomplish the reverse, you can use the method L<Mojo::Pg::Results/"expand">, which

@@ -1,5 +1,7 @@
 
-4.30  2026-03-24
+5.0  2026-05-11
+  - Added support for passing Mojo::SQL statements directly to query and query_p methods in Mojo::Pg::Database.
+  - Updated Perl requirement to 5.20.
 
 4.29  2026-03-23
   - Added rv attribute to Mojo::Pg::Results.
