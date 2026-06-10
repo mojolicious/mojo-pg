@@ -92,4 +92,16 @@ subtest 'Invalid connection string' => sub {
   like $@, qr/Invalid PostgreSQL connection string/, 'right error';
 };
 
+subtest 'Connection string with a user, "file path" as hostname, port' => sub {
+  my $pg = Mojo::Pg->new("postgresql://user:@/var/run/postgresql:5432/db_name");
+  is $pg->dsn, "dbi:Pg:dbname=db_name", "db_name should be 'db_name' instead of 'var'";
+};
+
+subtest 'Connection string with a user, with pass, "file path" as hostname, port' => sub {
+  my $pass = "PASSWORD";
+  my $pg   = Mojo::Pg->new("postgresql://user:$pass@/var/run/postgresql:5432/db_name");
+  is $pg->dsn,      "dbi:Pg:dbname=db_name", "db_name should be 'db_name' instead of 'var'";
+  is $pg->password, $pass,                   "password parsed correctly";
+};
+
 done_testing();
