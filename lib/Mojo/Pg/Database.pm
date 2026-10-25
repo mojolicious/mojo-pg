@@ -339,7 +339,7 @@ Activate C<pg_placeholder_dollaronly> for next L</"query"> call and allow C<?> t
 
 =head2 insert
 
-  my $results = $db->insert($table, \@values || \%fieldvals, \%options);
+  my $results = $db->insert($table, \@values || \%fieldvals || \@fieldvals, \%options);
 
 Generate an C<INSERT> statement with L<Mojo::Pg/"abstract"> (usually an L<SQL::Abstract::Pg> object) and execute it
 with L</"query">. You can also append a callback to perform operations non-blocking.
@@ -379,9 +379,14 @@ Including operations commonly referred to as C<upsert>.
   # "INSERT INTO t (a, b) VALUES ('c', 'd') ON CONFLICT (a, b) DO UPDATE SET a = 'e'"
   $db->insert('t', {a => 'c', b => 'd'}, {on_conflict => [['a', 'b'] => {a => 'e'}]});
 
+And bulk inserts with multiple rows.
+
+  # "INSERT INTO t (a, b) VALUES ('c', 'd'), ('e', DEFAULT) RETURNING id"
+  $db->insert('t', [{a => 'c', b => 'd'}, {a => 'e'}], {returning => 'id'});
+
 =head2 insert_p
 
-  my $promise = $db->insert_p($table, \@values || \%fieldvals, \%options);
+  my $promise = $db->insert_p($table, \@values || \%fieldvals || \@fieldvals, \%options);
 
 Same as L</"insert">, but performs all operations non-blocking and returns a L<Mojo::Promise> object instead of
 accepting a callback.

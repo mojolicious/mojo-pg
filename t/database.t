@@ -10,7 +10,7 @@ use Mojo::IOLoop;
 use Mojo::JSON qw(true);
 use Mojo::Pg;
 use Mojo::Promise;
-use Mojo::SQL qw(sql);
+use Mojo::SQL    qw(sql);
 use Scalar::Util qw(refaddr);
 
 my $pg = Mojo::Pg->new($ENV{TEST_ONLINE});

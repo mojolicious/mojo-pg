@@ -185,6 +185,25 @@ subtest 'Join' => sub {
     [{id => 1, test1 => 'hello', test2 => 'world', test3 => 'hello'}], 'right structure';
 };
 
+subtest 'Bulk insert' => sub {
+  $db->query(
+    "CREATE TABLE IF NOT EXISTS crud_test6 (
+       id   SERIAL PRIMARY KEY,
+       name TEXT UNIQUE,
+       tag  TEXT DEFAULT 'none'
+     )"
+  );
+  my $results = $db->insert('crud_test6', [{name => 'foo', tag => 'a'}, {name => 'bar'}], {returning => '*'});
+  is_deeply $results->hashes->to_array,
+    [{id => 1, name => 'foo', tag => 'a'}, {id => 2, name => 'bar', tag => 'none'}], 'right structure';
+  $results = $db->insert('crud_test6', [{name => 'foo'}, {name => 'baz'}], {on_conflict => undef, returning => 'name'});
+  is_deeply $results->hashes->to_array, [{name => 'baz'}], 'right structure';
+
+  my $result;
+  $db->insert_p('crud_test6', [{name => 'yada'}, {name => 'test'}])->then(sub { $result = shift->rows })->wait;
+  is $result, 2, 'right result';
+};
+
 # Clean up once we are done
 $pg->db->query('DROP SCHEMA mojo_crud_test CASCADE');
 

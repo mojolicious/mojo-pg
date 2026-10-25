@@ -1,5 +1,6 @@
 
-5.01  2026-05-12
+5.01  2026-10-25
+  - Added support for bulk inserts to insert and insert_p methods in Mojo::Pg::Database.
 
 5.0  2026-05-11
   - Added support for passing Mojo::SQL statements directly to query and query_p methods in Mojo::Pg::Database.
