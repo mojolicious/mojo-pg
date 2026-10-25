@@ -1,4 +1,6 @@
 
+5.02  UNRELEASED
+
 5.01  2026-10-25
   - Added support for bulk inserts to insert and insert_p methods in Mojo::Pg::Database.
 
