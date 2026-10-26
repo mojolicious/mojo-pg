@@ -13,7 +13,7 @@ websocket '/channel' => sub ($c) {
 
   # Forward messages from PostgreSQL to the browser
   my $cb = $c->pg->pubsub->listen(mojochat => sub ($pubsub, $message) { $c->send($message) });
-  $c->on(finish => sub ($c) { $c->pg->pubsub->unlisten(mojochat => $cb) });
+  $c->on(finish => sub ($c, $code, $reason = undef) { $c->pg->pubsub->unlisten(mojochat => $cb) });
 };
 
 app->start;
